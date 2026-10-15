@@ -12,6 +12,7 @@ const ICON = {
   retry: '<svg viewBox="0 0 24 24"><path d="M5 12a7 7 0 1 0 2-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M4 3v5h5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   sndOn: '<svg viewBox="0 0 32 32"><path d="M5 12h5l7-6v20l-7-6H5z" fill="#6fd1c8"/><path d="M21 11a6 6 0 0 1 0 10M24 7a11 11 0 0 1 0 18" fill="none" stroke="#FFF3C4" stroke-width="2.4" stroke-linecap="round"/></svg>',
   sndOff: '<svg viewBox="0 0 32 32"><path d="M5 12h5l7-6v20l-7-6H5z" fill="#6fd1c8" opacity=".55"/><path d="M21 12l7 8m0-8l-7 8" stroke="#FFF3C4" stroke-width="2.4" stroke-linecap="round"/></svg>',
+  map: '<svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z" fill="currentColor" opacity=".9"/><path d="M9 4v14M15 6v14" stroke="#1d3157" stroke-width="1.4"/></svg>',
   leaf: '<svg viewBox="0 0 24 24"><path d="M4 20C4 9 11 4 21 4c0 10-5 16-15 16" fill="#7DB05A"/><path d="M5 19c4-5 8-8 12-11" stroke="#4f7d36" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>'
 };
 const ui = {};
@@ -19,7 +20,7 @@ const k = () => W / 390;
 
 /* ---------- HUD ---------- */
 ui.hud = function (bumpWhich) {
-  $('#nightP').innerHTML = `${ICON.moon}<span>${night + 1}</span><span class="sub">/${NIGHTS.length}</span>`;
+  $('#nightP').innerHTML = `${ICON.moon}<span class="sub">LEVEL</span><span>${night + 1}</span>`;
   $('#safeP').innerHTML = `${ICON.turtle(undefined, undefined, ICON.ok)}<span>${safeN}</span><span class="sub">/${total}</span>`;
   $('#lostP').innerHTML = `${ICON.turtle('#E8664A', '#a8432d', ICON.x)}<span>${lostN}</span>`; $('#lostP').classList.toggle('on', lostN > 0);
   $('#binP').innerHTML = `${ICON.bin}<span>${binnedN}</span>`;
@@ -31,8 +32,8 @@ $('#snd').onclick = (e) => { e.stopPropagation(); au(); setMuted(!muted); $('#sn
 let bannerTO = 0;
 ui.night = function () {
   ui.hud(); if (!started) return;
-  const L = NIGHTS[night]; $('#bannerT').className = 'ribbon' + (night === LAST ? ' coral' : '');
-  $('#bannerT').innerHTML = `<small>${night === LAST ? 'FINALE' : 'NIGHT ' + (night + 1) + ' OF ' + NIGHTS.length}</small>${L.name}`;
+  const L = spec; $('#bannerT').className = 'ribbon' + (L.big ? ' coral' : '');
+  $('#bannerT').innerHTML = `<small>${L.big ? 'BIG HATCH · LEVEL ' + (night + 1) : 'LEVEL ' + (night + 1)}</small>${L.name}`;
   $('#banner').classList.add('on'); clearTimeout(bannerTO); bannerTO = setTimeout(() => $('#banner').classList.remove('on'), 2600);
 };
 let capT = 0;
@@ -111,40 +112,75 @@ function overlay() {
   if (zoom < .98) { const a = (1 - zoom) * 1.7; const g = oc.createRadialGradient(W / 2, H / 2, H * .22, W / 2, H / 2, H * .75); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, `rgba(5,10,25,${a})`); oc.fillStyle = g; oc.fillRect(0, 0, W, H); }
 }
 
-/* ---------- end of night ---------- */
-let rewardUsed = false, snap = null;
+/* ---------- progress (saved on the device) ---------- */
+const PROG = (() => { let d = { best: {}, unlocked: 0, done: 0 }; try { d = Object.assign(d, JSON.parse(localStorage.getItem('shellrun.v1') || '{}')); } catch (e) {} return d; })();
+const saveProg = () => { try { localStorage.setItem('shellrun.v1', JSON.stringify(PROG)); } catch (e) {} };
+const starTotal = () => Object.values(PROG.best).reduce((a, b) => a + b, 0);
+
+/* ---------- end of level ---------- */
+let rewardUsed = false, snap = null, lastAd = Date.now(), wins = 0;
+function adBreak(then) {
+  const v = document.createElement('div'); v.className = 'veil';
+  v.innerHTML = `<div class="card" style="margin-top:0"><div class="inner" style="padding-top:20px"><div class="lbl" style="margin-bottom:8px">DEMO AD · a real ad plays here</div><div class="adbox">${ICON.ad}</div><div class="btns"><button class="b-green" id="adgo" disabled>Continue in 3</button></div></div></div>`;
+  $('#ov').appendChild(v); let n = 3; const b = v.querySelector('#adgo');
+  const iv = setInterval(() => { n--; if (n > 0) b.textContent = 'Continue in ' + n; else { clearInterval(iv); b.disabled = false; b.innerHTML = ICON.play + 'Continue'; } }, 1000);
+  b.onclick = () => { v.remove(); lastAd = Date.now(); then(); };
+}
 function endNight() {
-  const L = NIGHTS[night], pct = safeN / total, stars = safeN === total ? 3 : pct >= .8 ? 2 : 1, last = night === LAST, next = NIGHTS[night + 1];
+  const L = spec, pct = safeN / total, pass = safeN >= Math.ceil(total * .7), stars = !pass ? 0 : safeN === total ? 3 : pct >= .8 ? 2 : 1;
   ui.capOff(); hand = null;
-  const left = litter.filter((l) => l.st === 'lie' || l.st === 'drift').length;
   if (safeN === total) sfx.win(); else sfx.safe(0);
-  const savedCrew = T.filter((t) => t.crew && t.safe).length;
-  const dots = Array.from({ length: total }, (_, i) => `<b class="${i < safeN ? (i < Math.min(savedCrew, safeN) ? 'g' : '') : 'x'}"></b>`).join('');
-  const head = safeN === total ? (last ? 'A perfect season!' : 'Every single one!') : safeN >= total - 2 ? 'So close!' : pct >= .5 ? 'Most made it' : 'A hard night';
-  const line = last ? `Season over. ${season.saved} hatchlings reached the sea this week.` : `Tomorrow your ${safeN} lead the way, and ${next.fresh} new hatchlings join them.`;
+  if (pass) { PROG.best[night] = Math.max(PROG.best[night] || 0, stars); PROG.unlocked = Math.max(PROG.unlocked, night + 1); saveProg(); }
+  const dots = Array.from({ length: total }, (_, i) => `<b class="${i < safeN ? '' : 'x'}"></b>`).join('');
+  const head = !pass ? 'Not this time' : safeN === total ? 'Every single one!' : safeN >= total - 2 ? 'So close!' : 'Level complete';
+  const line = pass ? (stars === 3 ? 'A perfect level!' : 'Save them all for 3 stars.') : `Save at least ${Math.ceil(total * .7)} to pass.`;
   const tidyPct = Math.round(tidy() * 100);
   const v = document.createElement('div'); v.className = 'veil';
-  v.innerHTML = `<div class="card"><div class="stars">${[0, 1, 2].map((i) => i < stars ? ICON.star : ICON.starOff).join('')}</div><div class="ribbon ${safeN === total ? '' : 'coral'}">${head}</div><div class="inner">
+  v.innerHTML = `<div class="card"><div class="stars">${[0, 1, 2].map((i) => i < stars ? ICON.star : ICON.starOff).join('')}</div><div class="ribbon ${pass ? '' : 'coral'}">${head}</div><div class="inner">
     <div class="big">${safeN}<span> / ${total}</span></div><div class="lbl">${ICON.turtle(undefined, undefined, ICON.ok)}reached the sea</div>
     <div class="crew">${dots}</div>
     <div class="row">${ICON.bin}<span>${binnedN} binned</span><div class="bar"><i style="width:0%"></i></div><span>${tidyPct}% clean</span></div>
-    ${left && !last ? `<div class="row" style="font-size:13px">${ICON.bin.replace('#2f8be0', '#8a93a8')}<span>${left} left on the sand. ${left > 6 ? '6 of them' : left === 1 ? 'It' : 'They'} will still be there tomorrow.</span></div>` : ''}
     <div class="fact"><b>${line}</b></div>
     <div class="row" style="background:transparent;padding:0 2px">${ICON.leaf}<span class="fact" style="margin:0">${L.fact}</span></div>
     <div class="btns">
-      <button class="b-green" id="next">${ICON.play}${last ? 'New season' : 'Next night'}</button>
+      ${pass ? `<button class="b-green" id="next">${ICON.play}Next level</button>` : ''}
       ${lostN > 0 && !rewardUsed ? `<button class="b-teal" id="bring">${ICON.ad}Bring back ${Math.min(3, lostN)} · watch a video</button>` : ''}
-      <button class="b-navy" id="retry">${ICON.retry}Try again</button>
+      <button class="${pass ? 'b-navy' : 'b-green'}" id="retry">${ICON.retry}${pass ? 'Play again' : 'Try again'}</button>
+      <button class="b-navy" id="maps">${ICON.map}Level map</button>
     </div></div></div>`;
   $('#ov').appendChild(v);
   setTimeout(() => { const b = v.querySelector('.bar i'); if (b) b.style.width = tidyPct + '%'; }, 250);
   v.querySelectorAll('.stars svg').forEach((s, i) => { setTimeout(() => { s.classList.add('show'); if (i < stars) { tone(note(4 + i * 2), .35, 'triangle', .13, 0, 0, .5); buzz(14); } }, 350 + i * 300); });
   const back = Math.min(3, lostN), b = v.querySelector('#bring');
   if (b) b.onclick = () => { b.disabled = true; let n = 3; b.innerHTML = `${ICON.ad}Demo ad · ${n}`; const iv = setInterval(() => { n--; if (n > 0) b.innerHTML = `${ICON.ad}Demo ad · ${n}`; else { clearInterval(iv); rewardUsed = true; safeN += back; lostN -= back; season.saved += back; v.remove(); endNight(); } }, 1000); };
-  v.querySelector('#next').onclick = () => { au(); v.remove(); rewardUsed = false; carry = last ? 0 : Math.min(6, left); if (last) { crew = 0; Object.assign(season, { met: 0, saved: 0, spawned: 0, binned: 0 }); taught = {}; begin(0); } else { crew = safeN; begin(night + 1); } };
-  v.querySelector('#retry').onclick = () => { au(); v.remove(); rewardUsed = false; Object.assign(season, snap.season); carry = snap.carry; crew = snap.crew; begin(night); };
+  const nx = v.querySelector('#next');
+  if (nx) nx.onclick = () => { au(); v.remove(); rewardUsed = false; wins++; const go = () => begin(night + 1); if (night >= 3 && wins % 3 === 0 && Date.now() - lastAd > 60000) adBreak(go); else go(); };
+  v.querySelector('#retry').onclick = () => { au(); v.remove(); rewardUsed = false; Object.assign(season, snap.season); begin(night); };
+  v.querySelector('#maps').onclick = () => { au(); v.remove(); rewardUsed = false; showMap(); };
 }
-function begin(i) { snap = { season: { ...season }, carry, crew }; bin.n = 0; for (const m of bin.pile.children) m.visible = false; startNight(i); }
+function begin(i) { snap = { season: { ...season } }; bin.n = 0; for (const m of bin.pile.children) m.visible = false; startNight(i); }
+
+/* ---------- level map: a winding path, level 1 at the bottom ---------- */
+function showMap() {
+  running = false; const cur = PROG.unlocked, N = Math.max(cur + 10, 24), RH = 96, Wd = 340, Ht = N * RH + 220;
+  const px = (i) => Wd / 2 + Math.sin(i * .95) * 96, py = (i) => Ht - 110 - i * RH;
+  let path = `M${px(0)} ${py(0)}`; for (let i = 1; i < N; i++) { const cx = (px(i - 1) + px(i)) / 2; path += ` Q${px(i - 1)} ${(py(i - 1) + py(i)) / 2} ${cx} ${(py(i - 1) + py(i)) / 2} T${px(i)} ${py(i)}`; }
+  let nodes = '';
+  for (let i = 0; i < N; i++) {
+    const st = i < cur ? 'done' : i === cur ? 'cur' : 'lock', b = PROG.best[i] || 0, big = (i + 1) % 25 === 0;
+    if (i % 10 === 0) nodes += `<div class="chap" style="top:${py(i) + 52}px">${CHAPTERS[(i / 10) % CHAPTERS.length | 0]}</div>`;
+    nodes += `<button class="node ${st}${big ? ' big' : ''}" data-i="${i}" style="left:${px(i) - 31}px;top:${py(i) - 31}px"><span>${st === 'lock' ? '' : i + 1}</span>${st === 'lock' ? '<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="3" fill="#8a93a8"/><path d="M8 10V8a4 4 0 0 1 8 0v2" fill="none" stroke="#8a93a8" stroke-width="2.4"/></svg>' : ''}<em>${st === 'done' ? [0, 1, 2].map((s) => `<i class="${s < b ? 'on' : ''}"></i>`).join('') : ''}</em></button>`;
+  }
+  const v = document.createElement('div'); v.className = 'map';
+  v.innerHTML = `<div class="maptop"><div class="pill">${ICON.star.replace('<svg', '<svg style="width:26px;height:26px"')}<span>${starTotal()}</span></div><div class="maptitle">Shell Run</div><div class="pill">${ICON.moon}<span>${cur + 1}</span></div></div>
+    <div class="scroller"><div class="track" style="width:${Wd}px;height:${Ht}px"><svg width="${Wd}" height="${Ht}" viewBox="0 0 ${Wd} ${Ht}"><path d="${path}" fill="none" stroke="rgba(255,243,196,.28)" stroke-width="10" stroke-linecap="round" stroke-dasharray="1 18"/></svg>${nodes}</div></div>
+    <div class="mapbot"><button class="b-green" id="mplay">${ICON.play}Play level ${cur + 1}</button></div>`;
+  $('#app').appendChild(v);
+  const sc = v.querySelector('.scroller'); sc.scrollTop = Math.max(0, py(cur) - sc.clientHeight * .6);
+  const startAt = (i) => { au(); v.remove(); $('#app').classList.add('playing'); begin(i); running = true; ui.night(); };
+  v.querySelectorAll('.node').forEach((n) => { n.onclick = () => { const i = +n.dataset.i; if (i <= cur) startAt(i); else { n.classList.remove('shake'); void n.offsetWidth; n.classList.add('shake'); sfx.uhoh && sfx.uhoh(); } }; });
+  v.querySelector('#mplay').onclick = () => startAt(cur);
+}
 
 /* ---------- loop + boot ---------- */
 let last = 0, booted = false, started = false, lastRaw = 0;
@@ -165,13 +201,13 @@ self.onHorizon = buildSky;
 resize();
 $('#title').innerHTML = ICON.turtle() + 'Shell Run';
 $('#go').innerHTML = ICON.play + 'Play';
-const n0 = Q.has('n') ? clamp(+Q.get('n') | 0, 0, LAST) : 0;
+const n0 = Q.has('n') ? Math.max(0, +Q.get('n') | 0) : 0;
 begin(n0); running = false;
 requestAnimationFrame(loop);
-$('#go').onclick = () => { au(); $('#start').remove(); $('#app').classList.add('playing'); started = true; running = true; ui.night(); };
+$('#go').onclick = () => { au(); $('#start').remove(); started = true; if (PROG.unlocked === 0 || Q.has('n')) { $('#app').classList.add('playing'); running = true; ui.night(); } else showMap(); };
 self.G = {
-  get T() { return T; }, get litter() { return litter; }, get rocks() { return rocks; }, get crabs() { return crabs; }, get gulls() { return gulls; }, get logs() { return logs; }, get tourists() { return tourists; },
+  get T() { return T; }, get litter() { return litter; }, get balls() { return balls; }, get rocks() { return rocks; }, get crabs() { return crabs; }, get gulls() { return gulls; }, get logs() { return logs; }, get tourists() { return tourists; },
   tap, scr, groundAt, surfaceTap, get running() { return running; }, get night() { return night; }, get safe() { return safeN; }, get lost() { return lostN; }, get total() { return total; }, get binned() { return binnedN; },
   get season() { return season; }, get carry() { return carry; }, get surf() { return surfLog; }, get bin() { return bin; }, get shoreZ() { return SHORE_Z; }, time: () => time,
-  info: () => ({ calls: R.info.render.calls, tris: R.info.render.triangles, geos: R.info.memory.geometries, tex: R.info.memory.textures }), nights: NIGHTS.length
+  info: () => ({ calls: R.info.render.calls, tris: R.info.render.triangles, geos: R.info.memory.geometries, tex: R.info.memory.textures }), levels: Infinity, begin, levelSpec, PROG, get spec() { return spec; }
 };

@@ -147,6 +147,21 @@ function rockGeo(r, mossy) {
   g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); return g;
 }
 
+/* ---- sandcastle: a tidy little blocker that crumbles when tapped ---- */
+GEO.castle = merge([
+  [CY(.42, .5, .34, 8), '#e2c27c', M(0, .17, 0), .1],
+  [CY(.2, .24, .5, 8), '#e8cd8c', M(-.2, .55, .05), .1], [CN(.25, .24, 8), '#d9575a', M(-.2, .92, .05), .05],
+  [CY(.17, .2, .4, 8), '#e8cd8c', M(.22, .5, -.05), .1], [CN(.21, .22, 8), '#3f9bf0', M(.22, .81, -.05), .05],
+  [BX(.18, .12, .04), '#c9a55e', M(0, .3, .42)],
+  [BX(.05, .26, .02), '#f4ead2', M(.22, 1.0, -.05)]
+]);
+/* ---- beach ball: spins across the sand and flips anything it hits ---- */
+GEO.ball = (function () {
+  const g = S(.3, 12, 8).toNonIndexed(); const p = g.attributes.position, col = [], cs = ['#e8664a', '#fbf1d8', '#3f9bf0', '#E0B040', '#7DB05A', '#fbf1d8'];
+  for (let i = 0; i < p.count; i += 3) { const a = Math.atan2(p.getZ(i), p.getX(i)) + Math.PI; _c.set(cs[Math.floor(a / (Math.PI * 2) * 6) % 6]); for (let k = 0; k < 3; k++) col.push(_c.r, _c.g, _c.b); }
+  g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); g.computeVertexNormals(); return g;
+})();
+
 /* ---- nest (sheet 09): sand crater with raised rim, pebbles, sprouts; eggs are instanced ---- */
 GEO.nest = (function () {
   const prof = [[.5, -.07], [.56, .02], [.64, .14], [.74, .2], [.88, .1], [1.02, -.02]].map(([x, y]) => new THREE.Vector2(x, y));

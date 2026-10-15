@@ -70,6 +70,24 @@ button:disabled{opacity:.6}
 #start h1 svg{display:block;margin:0 auto 6px;width:84px;height:84px;filter:drop-shadow(0 4px 0 rgba(0,0,0,.3))}
 #start button{width:100%;max-width:330px;min-height:66px;font-size:24px}
 #load{position:absolute;inset:0;display:grid;place-items:center;color:var(--cream);font-weight:900;z-index:20;background:#12203A;font-size:20px}
+.adbox{height:170px;border-radius:16px;background:linear-gradient(135deg,#2f8be0,#6fd1c8);display:grid;place-items:center;margin:6px 0 12px}.adbox svg{width:72px;height:72px}
+.map{position:absolute;inset:0;z-index:11;display:flex;flex-direction:column;background:linear-gradient(#0b1b3a,#16315e 45%,#1f5a73 80%,#2a7c86)}
+.maptop{display:flex;justify-content:space-between;align-items:center;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 8px;z-index:2}
+.maptitle{color:var(--cream);font-weight:900;font-size:22px;letter-spacing:-.01em}
+.scroller{flex:1;overflow-y:auto;overflow-x:hidden;touch-action:pan-y;-webkit-overflow-scrolling:touch}.scroller *{touch-action:pan-y}
+.track{position:relative;margin:0 auto}.track svg{position:absolute;inset:0}
+.node{position:absolute;width:62px;height:62px;min-height:0;padding:0;border-radius:50%;font-size:24px;display:grid;place-items:center;color:#fff}
+.node span{grid-area:1/1}.node svg{grid-area:1/1;position:static;width:26px;height:26px}
+.node em{position:absolute;left:50%;bottom:-16px;transform:translateX(-50%);display:flex;gap:1px}
+.node em i{width:15px;height:15px;background:#3a4f78;clip-path:polygon(50% 0,62% 36%,100% 38%,70% 60%,80% 100%,50% 76%,20% 100%,30% 60%,0 38%,38% 36%)}.node em i.on{background:var(--gold)}
+.node.done{background:var(--green);box-shadow:0 5px 0 var(--green2),inset 0 2px 0 rgba(255,255,255,.35);color:#16300a}
+.node.cur{background:var(--gold);color:#4a2f00;box-shadow:0 5px 0 #a87b1c,0 0 0 6px rgba(224,176,64,.3);animation:pulse 1.4s infinite}
+.node.lock{background:#2c3d63;box-shadow:0 5px 0 #1a2845;color:#8a93a8}
+.node.big{width:74px;height:74px;margin:-6px 0 0 -6px;background:var(--coral);box-shadow:0 5px 0 #a8432d}.node.big.lock{background:#4a3550}
+.node.shake{animation:shk .3s}
+@keyframes pulse{50%{transform:scale(1.1)}}@keyframes shk{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.chap{position:absolute;left:0;right:0;text-align:center;color:var(--cream);font-weight:900;font-size:14px;letter-spacing:.14em;text-transform:uppercase;opacity:.8}
+.mapbot{padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,rgba(8,14,28,.7))}.mapbot button{width:100%;min-height:62px;font-size:22px}
 @media (prefers-reduced-motion: reduce){.card,.veil,.pill.bump{animation:none}}
 </style>
 </head>

@@ -1,34 +1,63 @@
 /* ===================== GAME: nights, entities, one-tap help ===================== */
-const NIGHTS = [
+/* ---------- levels: 7 hand-made lessons, then an endless seeded generator (same level = same layout, so retries are fair) ---------- */
+const INTRO = [
   { name: 'First night', fresh: 10, nests: 1, litter: 4, tangle: 0, rocks: 2, crabs: 0, gulls: 0, tourists: 0, teach: 'litter', fact: 'Hatchlings head for the brightest horizon. On a natural beach, that is the moonlit sea.' },
   { name: 'Crab beach', fresh: 6, nests: 2, litter: 4, tangle: 0, rocks: 1, crabs: 2, gulls: 0, tourists: 0, teach: 'crab', fact: 'Ghost crabs are one of the main hunters of hatchlings on the sand.' },
   { name: 'Windy night', fresh: 6, nests: 2, litter: 3, tangle: 1, wind: 3, rocks: 1, crabs: 1, gulls: 0, tourists: 0, teach: 'tangle', fact: 'To a sea turtle, a floating plastic bag can look a lot like a jellyfish.' },
   { name: 'Gull cove', fresh: 6, nests: 2, litter: 3, tangle: 1, rocks: 1, crabs: 1, gulls: 1, tourists: 0, teach: 'gull', fact: 'Gulls and other seabirds hunt hatchlings on the sand and in the shallows.' },
   { name: 'Tourist season', fresh: 6, nests: 2, litter: 3, tangle: 1, rocks: 1, crabs: 1, gulls: 1, tourists: 1, teach: 'tourist', fact: 'Bright lights can lead hatchlings away from the sea. Nesting beaches ask visitors to keep lights off.' },
   { name: 'The little stream', fresh: 6, nests: 2, litter: 3, tangle: 1, rocks: 0, crabs: 2, gulls: 1, tourists: 1, stream: true, teach: 'log', fact: 'Only about 1 in 1,000 hatchlings is thought to survive to adulthood. Every one counts.' },
-  { name: 'The Arribada', fresh: 20, nests: 3, litter: 4, tangle: 2, rocks: 1, crabs: 2, gulls: 2, tourists: 1, spawn: .16, teach: 'arribada', fact: 'In an arribada, thousands of olive ridley turtles nest on the same beach over a few nights.' }
+  { name: 'The Arribada', fresh: 20, nests: 3, litter: 4, tangle: 2, rocks: 1, crabs: 2, gulls: 2, tourists: 1, spawn: .16, teach: 'arribada', big: true, fact: 'In an arribada, thousands of olive ridley turtles nest on the same beach over a few nights.' }
 ];
-const LAST = NIGHTS.length - 1;
+const CHAPTERS = ['Moonlit Cove', 'Coral Bay', 'Driftwood Dunes', 'Lantern Beach', 'Silver Shore', 'Pearl Lagoon', 'Starfall Sands', 'Salt Wind Point', 'Dune Gardens', 'Midnight Reef'];
+const LNAMES = ['Low tide', 'Hatch time', 'Silver sands', 'Dune dash', 'Starry shore', 'Foam line', 'Quiet cove', 'Night tide', 'Salt breeze', 'Lantern walk', 'Pearl cove', 'Midnight run', 'Shell steps', 'Moon path', 'Tide pools', 'Sandbar', 'Windy point', 'Reef edge', 'Calm waters', 'Last light'];
+const FACTS = ['Mother turtles return to the beach where they hatched to lay their own eggs.', 'A sea turtle nest holds around 100 eggs.', 'Hatchlings dig out together, usually at night, when the sand is cooler.', 'The temperature of the sand decides whether hatchlings are male or female.', 'Sea turtles have been around since the age of the dinosaurs.', 'Hatchlings swim for about 24 hours without stopping once they reach the water.', 'Leatherback turtles can dive deeper than 1,000 metres.', 'Artificial lights can confuse hatchlings. Keep beach lights off at night.', 'Filling in holes and knocking down sandcastles helps hatchlings reach the sea.', 'Plastic bags and balloons look like jellyfish to a hungry turtle.', 'Green turtles eat seagrass, which keeps seagrass beds healthy.', 'Hawksbill turtles help coral reefs by eating sponges.', 'Hatchlings follow the brightest horizon, which is usually moonlit sea.', 'Turtle footprints on the sand look like tiny tractor tracks.', 'Beach clean-ups really do help nesting turtles.', 'Some turtles travel thousands of kilometres between feeding and nesting beaches.'];
+const _spec = {};
+function srand(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+function withSeed(seed, fn) { const o = Math.random, r = srand(seed); Math.random = r; try { fn(); } finally { Math.random = o; } }
+function levelSpec(i) {
+  if (i < INTRO.length) return INTRO[i];
+  if (_spec[i]) return _spec[i];
+  const r = srand(i * 7919 + 101), k = i - INTRO.length, num = i + 1;
+  const mega = num % 25 === 0, boss = !mega && num % 10 === 0, easy = !mega && !boss && num % 5 === 0;
+  let D = 1.6 + k * .27 + (r() - .5) * 1.4; if (easy) D -= 2.2; if (boss) D += 1.2; D = clamp(D, 1, 11);
+  const S = { name: mega ? 'Big hatch' : boss ? ['Busy night', 'Crowded cove', 'Rush hour', 'Full moon rush'][(num / 10 | 0) % 4] : easy ? 'Easy breezy' : LNAMES[(i * 7) % LNAMES.length], big: mega, fact: FACTS[(i * 5) % FACTS.length] };
+  S.fresh = Math.round(6 + D * .8 + r() * 2); S.spawn = 0;
+  if (mega) { S.fresh = 20 + Math.floor(D); S.spawn = .17; }
+  S.nests = S.fresh <= 7 ? 2 : 3;
+  S.litter = Math.round(3 + D * .5 + r() * 2) - (easy ? 1 : 0); S.tangle = Math.min(4, 1 + Math.floor(D / 2.6) + (r() < .3 ? 1 : 0));
+  S.rocks = r() < .5 ? 1 : (r() < .5 ? 2 : 0);
+  S.castles = i >= 8 && r() < .6 ? 1 + (D > 6 && r() < .5 ? 1 : 0) : 0;
+  S.crabs = Math.min(3, 1 + Math.floor(D / 3)); S.crabSpd = Math.min(1.7, 1 + D * .06);
+  S.gulls = D >= 2.4 ? (D >= 7 && r() < .55 ? 2 : 1) : 0;
+  S.tourists = D >= 3.6 ? (D >= 8 && r() < .45 ? 2 : 1) : 0;
+  S.balls = i >= 10 && r() < .6 ? (D >= 6.5 && r() < .45 ? 2 : 1) : 0;
+  S.wind = i >= 9 && r() < .4 ? 2 + Math.floor(D / 3) : 0;
+  S.stream = i >= 11 && r() < .22;
+  if (!boss && !mega) { const mute = ['gulls', 'tourists', 'balls', 'crabs'][Math.floor(r() * 4)]; if (S[mute] > (mute === 'crabs' ? 1 : 0)) S[mute]--; }
+  S.teach = '';
+  return (_spec[i] = S);
+}
 const BIN_CAP = 6;
 
 /* ---------- state ---------- */
-let night = 0, crew = 0, carry = 0;
+let night = 0, crew = 0, carry = 0, spec = INTRO[0];
 const season = { met: 0, saved: 0, spawned: 0, binned: 0 };
-let T = [], litter = [], rocks = [], crabs = [], gulls = [], tourists = [], logs = [], nests = [];
+let T = [], litter = [], rocks = [], crabs = [], gulls = [], tourists = [], logs = [], nests = [], balls = [];
 let spawnLeft = 0, spawnT = 0, safeN = 0, lostN = 0, total = 0, binnedN = 0, running = false, ended = false, time = 0, nightT = 0, windLeft = 0, windT = 0;
 let taught = {}, hand = null, combo = 0, comboT = 0, comboKind = 'tidy', slow = 1, slowT = 0, freeze = 0, lastOne = false, tidyNow = 0;
 const surfLog = [];
 const nightRoot = new THREE.Group(); scene.add(nightRoot);
 const bin = makeBin(4.5, 3.4);
 const vol = Object.assign(makePerson('vol'), { st: 'idle', x: 8, z: 3.6, walk: 0, t: 0, dir: -1 });
-const crabPool = [makeCrab(), makeCrab(), makeCrab()], gullPool = [makeGull(), makeGull()], touristPool = [makePerson('tourist')];
+const crabPool = [makeCrab(), makeCrab(), makeCrab()], gullPool = [makeGull(), makeGull()], touristPool = [makePerson('tourist'), makePerson('tourist')];
 touristPool.forEach((p) => { p.cone = new THREE.Mesh(GEO.flashCone, flashMat); p.cone.position.set(0, 1.3, .3); p.tilt.add(p.cone); });
 const tidy = () => season.spawned ? season.binned / season.spawned : 0;
 
 function clearNight() {
   while (nightRoot.children.length) { const c = nightRoot.children[0]; nightRoot.remove(c); if (c.userData.own) c.geometry.dispose(); }
   for (const c of crabPool) c.g.visible = false; for (const g of gullPool) { g.g.visible = false; g.sil.visible = false; } for (const p of touristPool) p.g.visible = false;
-  T = []; litter = []; rocks = []; crabs = []; gulls = []; tourists = []; logs = []; nests = [];
+  T = []; litter = []; rocks = []; crabs = []; gulls = []; tourists = []; logs = []; nests = []; balls = [];
 }
 function freeSpot(minD, zmin, zmax, L) {
   for (let tr = 0; tr < 120; tr++) {
@@ -41,15 +70,17 @@ function freeSpot(minD, zmin, zmax, L) {
   return [rnd(-3.5, 3.5), rnd(zmin, zmax)];
 }
 function startNight(i) {
-  clearNight(); night = i; const L = NIGHTS[night]; ended = false;
-  total = crew + L.fresh; season.met += L.fresh; spawnLeft = total; spawnT = .9; safeN = 0; lostN = 0; binnedN = 0; running = true; nightT = 0; lastOne = false; combo = 0; slow = 1; hand = null;
+  clearNight(); night = i; const L = spec = levelSpec(i); ended = false;
+  total = L.fresh; season.met += L.fresh; spawnLeft = total; spawnT = .9; safeN = 0; lostN = 0; binnedN = 0; running = true; nightT = 0; lastOne = false; combo = 0; slow = 1; hand = null;
   windLeft = L.wind || 0; windT = 4; streamG.visible = !!L.stream;
   setTidiness(tidyNow = tidy());
+  withSeed(i * 2654435 + 977, () => {
   const xs = L.nests === 1 ? [0] : L.nests === 2 ? [-2.1, 2.1] : [-3, 0, 3];
   for (const x of xs) { const m = new THREE.Mesh(GEO.nest, MAT); m.position.set(x, groundH(x, NEST_Z), NEST_Z); m.scale.setScalar(1.15); nightRoot.add(m); nests.push({ x, z: NEST_Z, left: 0, wob: 0, eggs: Array.from({ length: 9 }, (_, k) => [Math.cos(k * 2.4) * (k ? .32 : 0) * (1 + (k % 2) * .3), Math.sin(k * 2.4) * (k ? .22 : 0)]) }); }
   for (let k = 0; k < total; k++) nests[k % nests.length].left++;
   for (let k = 0; k < L.rocks; k++) { const [x, z] = freeSpot(2.2, SHORE_Z + 2, NEST_Z - 2.2, L); const r = rnd(.48, .62); const m = new THREE.Mesh(rockGeo(r, Math.random() < .25), MAT); m.userData.own = 1; m.position.set(x, groundH(x, z) + r * .25, z); nightRoot.add(m); rocks.push({ x, z, r, st: 'idle', vx: 0, vy: 0, y: 0, rot: 0, m }); }
-  const nL = L.litter + carry; carry = 0;
+  for (let k = 0; k < (L.castles || 0); k++) { const [x, z] = freeSpot(2.4, SHORE_Z + 2, NEST_Z - 2.4, L); const m = new THREE.Mesh(GEO.castle, MAT); m.scale.setScalar(1.15); m.position.set(x, groundH(x, z), z); m.rotation.y = rnd(-.4, .4); nightRoot.add(m); rocks.push({ x, z, r: .62, st: 'idle', vx: 0, vy: 0, y: 0, rot: 0, m, castle: true, ct: 0 }); }
+  const nL = L.litter;
   for (let k = 0; k < nL; k++) { const tang = k < L.tangle; const [x, z] = freeSpot(1.7, SHORE_Z + 1.6, NEST_Z - 2.4, L); addLitter(tang ? pick(TANGLERS) : pick(BLOCKERS), x, z); }
   // teaching night: put the first piece of trash right in the path of the first hatchling
   if (L.teach === 'litter' && litter[0]) { litter[0].x = rnd(-.4, .4); litter[0].z = NEST_Z - 3.2; }
@@ -57,6 +88,8 @@ function startNight(i) {
   for (let k = 0; k < L.gulls; k++) gulls.push({ st: 'off', t: 5 + k * 4, x: 0, y: 3, z: 0, dir: 1, flap: 0, tgt: null, v: gullPool[k] });
   for (let k = 0; k < L.tourists; k++) tourists.push({ st: 'wait', t: 7 + k * 6, x: 0, z: 0, tx: 0, dir: 1, walk: 0, flashT: 0, stand: 0, bow: 0, v: touristPool[k] });
   if (L.stream) for (let k = 0; k < 3; k++) { const m = new THREE.Mesh(GEO.log, MAT); const w = rnd(1.6, 2.3); m.scale.set(w, 1, 1); nightRoot.add(m); logs.push({ x: -8 + k * 5.5, z: rnd(ST0 + .35, ST1 - .35), w, st: 'float', vx: 0, vz: 0, rot: 0, m }); }
+  for (let k = 0; k < (L.balls || 0); k++) { const m = new THREE.Mesh(GEO.ball, MAT); m.scale.setScalar(MS); m.visible = false; nightRoot.add(m); balls.push({ st: 'wait', t: 6 + k * 4.5, x: 0, z: 0, y: .3, dir: 1, rot: 0, ph: rnd(0, 6), pt: 0, hitCool: 0, m }); }
+  });
   ui.night();
   if (L.teach === 'arribada') { shake = .25; sfx.win(); }
 }
@@ -73,8 +106,8 @@ function spawnTurtle() {
   const live = nests.filter((n) => n.left > 0); const n = live[(Math.random() * live.length) | 0]; n.left--;
   const idx = total - spawnLeft, isCrew = idx < crew;
   let tx = clamp(n.x + rnd(-2.4, 2.4), -3.9, 3.9);
-  if (idx === 0 && NIGHTS[night].teach === 'litter' && litter[0]) tx = litter[0].x;
-  T.push({ x: n.x + rnd(-.25, .25), z: n.z - .25, tx, st: 'walk', flipT: 0, ph: Math.random() * 6, hd: Math.PI, sp: rnd(.85, 1.05) * (NIGHTS[night].teach === 'arribada' ? 1.1 : 1), stuck: 0, block: null, vy: 0, hgt: 0, crew: isCrew, pop: 0, born: 0, hop: 0, lure: 0, lx: 0, lz: 0, sink: 0, gone: 0, printT: 0, step: 1, tang: null, boopT: 0, lostWhy: '', look: 0 });
+  if (idx === 0 && spec.teach === 'litter' && litter[0]) tx = litter[0].x;
+  T.push({ x: n.x + rnd(-.25, .25), z: n.z - .25, tx, st: 'walk', flipT: 0, ph: Math.random() * 6, hd: Math.PI, sp: rnd(.85, 1.05) * (spec.teach === 'arribada' ? 1.1 : 1), stuck: 0, block: null, vy: 0, hgt: 0, crew: isCrew, pop: 0, born: 0, hop: 0, lure: 0, lx: 0, lz: 0, sink: 0, gone: 0, printT: 0, step: 1, tang: null, boopT: 0, lostWhy: '', look: 0 });
   spawnLeft--; n.wob = .4; sfx.hatch(); burst3(n.x, .2, n.z, ['#f4ead2', '#e6cfa0'], 8, { size: .9 });
 }
 
@@ -97,6 +130,7 @@ function tap(px, py) {
     for (const c of crabs) if (c.st === 'walk' || c.st === 'leave') { const s = scr(c.x, .25, c.z); consider(c, s.x, s.y, 50 * k, 'crab'); }
     for (const tr of tourists) if (tr.st === 'enter' || tr.st === 'stand') { const s = scr(tr.x, 1.4, tr.z); consider(tr, s.x, s.y, 72 * k, 'tourist'); const s2 = scr(tr.x, .3, tr.z); consider(tr, s2.x, s2.y, 56 * k, 'tourist'); }
     for (const l of logs) if (l.st === 'float') { const a = scr(l.x - l.w / 2, .1, l.z), b = scr(l.x + l.w / 2, .1, l.z); const u = clamp(((px - a.x) * (b.x - a.x) + (py - a.y) * (b.y - a.y)) / ((b.x - a.x) ** 2 + (b.y - a.y) ** 2 || 1), 0, 1); consider(l, a.x + (b.x - a.x) * u, a.y + (b.y - a.y) * u, 38 * k, 'log'); }
+    for (const b of balls) if (b.st === 'roll') { const s = scr(b.x, b.y, b.z); consider(b, s.x, s.y, 58 * k, 'ball'); }
     for (const l of litter) if (l.st === 'lie' || l.st === 'drift') { const s = scr(l.x, .15, l.z); consider(l, s.x, s.y, 46 * k, 'litter'); }
     for (const r of rocks) if (r.st === 'idle') { const s = scr(r.x, .2, r.z), e = scr(r.x + r.r, .2, r.z); consider(r, s.x, s.y, Math.abs(e.x - s.x) + 30 * k, 'rock'); }
   }
@@ -110,6 +144,8 @@ function tap(px, py) {
   else if (best.kind === 'tourist') { o.st = 'sorry'; o.bow = 0; o.dir = o.x < 0 ? -1 : 1; sfx.hey(); ui.float(o.x, 2.7, o.z, 'Sorry!'); burst3(o.x, 1.6, o.z, ['#fff1c0', '#ffffff'], 10, { g: 3 }); rescue('shoo', null); }
   else if (best.kind === 'log') { o.st = 'push'; o.vx = 9; o.vz = rnd(-.5, .5); sfx.log(); burst3(o.x, .15, o.z, ['#bfe6ff', '#ffffff', '#46b4c6'], 14); }
   else if (best.kind === 'litter') toss(o);
+  else if (best.kind === 'ball') { o.st = 'pop'; o.pt = 0; sfx.boop(); sfx.rock(); burst3(o.x, o.y, o.z, ['#e8664a', '#fbf1d8', '#3f9bf0', '#E0B040'], 20, { g: 3 }); rescue('shoo', null); ui.float(o.x, 1, o.z, 'Pop!'); }
+  else if (best.kind === 'rock' && o.castle) { o.st = 'crumble'; o.ct = 0; sfx.rock(); burst3(o.x, .4, o.z, ['#e2c27c', '#e8cd8c', '#fff1d0', '#c9a55e'], 26, { up: 1.4 }); shake = .16; rescue('tidy', null); ui.float(o.x, 1.2, o.z, 'Smash!'); }
   else if (best.kind === 'rock') { o.st = 'roll'; o.vx = (o.x < 0 ? -1 : 1) * 8.5; o.vy = 3; sfx.rock(); burst3(o.x, .15, o.z, ['#e9d3a6', '#c9ab72', '#fff1d0'], 16); shake = .12; rescue('tidy', null); }
   else if (best.kind === 'boop') { if (o.boopT <= 0) { o.hop = 1; o.boopT = .45; o.look = 1; sfx.boop(); ui.fx('heart', o.x, .7, o.z); } }
   else if (best.kind === 'bin') { bin.sq = 1; bin.lidT = .5; sfx.bin(); }
@@ -153,7 +189,7 @@ function landInBin(l) {
 
 /* ---------- update ---------- */
 function update(dt) {
-  time += dt; nightT += dt; timeU.value += dt; const L = NIGHTS[night];
+  time += dt; nightT += dt; timeU.value += dt; const L = spec;
   if (comboT > 0) comboT -= dt;
   if (running && spawnLeft > 0 && (spawnT -= dt) <= 0) { spawnTurtle(); spawnT = FAST ? .12 : (L.spawn ? rnd(L.spawn * .6, L.spawn * 1.4) : rnd(.38, .62)); }
   for (const n of nests) n.wob = Math.max(0, n.wob - dt);
@@ -206,14 +242,16 @@ function update(dt) {
   }
   // rocks get kicked away
   for (const r of rocks) if (r.st === 'roll') { r.x += r.vx * dt; r.vy -= 14 * dt; r.y = Math.max(0, r.y + r.vy * dt); if (r.y === 0 && r.vy < 0) r.vy = -r.vy * .35; r.rot += r.vx * dt / r.r; if (Math.abs(r.x) > 10) { r.st = 'gone'; r.m.visible = false; } }
-  updateCrabs(dt, L); updateGulls(dt); updateTourists(dt, L); updateLogs(dt, L); updateVolunteer(dt);
+  for (const r of rocks) if (r.st === 'crumble') { r.ct += dt; if (r.ct > .3) { r.st = 'gone'; r.m.visible = false; } }
+  updateBalls(dt, L); updateCrabs(dt, L); updateGulls(dt); updateTourists(dt, L); updateLogs(dt, L); updateVolunteer(dt);
   if (L.stream && !taught.log && logs.some((l) => l.st === 'float' && T.some((t) => t.st === 'walk' && Math.abs(t.z - l.z) < .45 && Math.abs(t.x - l.x) < l.w / 2))) { taught.log = 1; const l = logs.find((l) => l.st === 'float'); hand = { o: l, y: .2, kind: 'log' }; ui.cap('Push the logs away!', 2.6); }
-  if (hand) { const o = hand.o; const done = (hand.kind === 'flip' && o.st !== 'flip') || (hand.kind === 'tangle' && o.st !== 'tangle') || (hand.kind === 'tourist' && o.st !== 'enter' && o.st !== 'stand') || (hand.kind === 'crab' && o.st !== 'walk') || ((hand.kind === 'litter' || hand.kind === 'drift') && o.st !== 'lie' && o.st !== 'drift') || (hand.kind === 'rock' && o.st !== 'idle') || (hand.kind === 'log' && o.st !== 'float'); if (done) { hand = null; ui.capOff(); } }
+  if (hand) { const o = hand.o; const done = (hand.kind === 'flip' && o.st !== 'flip') || (hand.kind === 'tangle' && o.st !== 'tangle') || (hand.kind === 'tourist' && o.st !== 'enter' && o.st !== 'stand') || (hand.kind === 'crab' && o.st !== 'walk') || ((hand.kind === 'litter' || hand.kind === 'drift') && o.st !== 'lie' && o.st !== 'drift') || (hand.kind === 'rock' && o.st !== 'idle') || (hand.kind === 'ball' && o.st !== 'roll') || (hand.kind === 'log' && o.st !== 'float'); if (done) { hand = null; ui.capOff(); } }
   if (running && !ended && spawnLeft === 0 && T.every((t) => ['swim', 'gone', 'lost'].includes(t.st))) { ended = true; running = false; musicMood = 0; setTimeout(endNight, 1200); }
 }
 function teachBlock(blk, t) {
   if (litter.includes(blk) && !taught.litter) { taught.litter = 1; hand = { o: blk, y: .15, kind: 'litter' }; ui.cap('Tap the trash!', 99); }
-  else if (rocks.includes(blk) && !taught.rock) { taught.rock = 1; hand = { o: blk, y: .2, kind: 'rock' }; ui.cap('Kick the rock away!', 99); }
+  else if (blk.castle && !taught.castle) { taught.castle = 1; hand = { o: blk, y: .5, kind: 'rock' }; ui.cap('Smash the sandcastle!', 99); }
+  else if (rocks.includes(blk) && !blk.castle && !taught.rock) { taught.rock = 1; hand = { o: blk, y: .2, kind: 'rock' }; ui.cap('Kick the rock away!', 99); }
 }
 function tangle(t, l) { t.st = 'tangle'; t.flipT = 5.5; t.tang = l; l.st = 'tangle'; l.t = t; sfx.uhoh(); burst3(t.x, .1, t.z, ['#e9d3a6'], 6); if (!taught.tangle) { taught.tangle = 1; hand = { o: t, y: .25, kind: 'tangle' }; ui.cap('Tap to free it!', 99); } }
 function flip(t) { if (t.st === 'flip') return; t.st = 'flip'; t.flipT = 5; sfx.uhoh(); burst3(t.x, .1, t.z, ['#e9d3a6'], 6); if (!taught.flip) { taught.flip = 1; hand = { o: t, y: .25, kind: 'flip' }; ui.cap('Tap to flip it back!', 99); } }
@@ -228,7 +266,7 @@ function loseTurtle(t, why) {
 function updateCrabs(dt, L) {
   for (const c of crabs) {
     c.leg += dt * (c.st === 'flee' ? 40 : 22); c.claw += dt;
-    if (c.st === 'wait') { if (running && (c.t -= dt) <= 0) { const prey = T.filter((t) => t.st === 'walk' && t.z < NEST_Z - 1 && t.z > SHORE_Z + 1.5); if (!prey.length) { c.t = 1; continue; } const p = pick(prey); const left = Math.random() < .5; let z = clamp(p.z - rnd(.5, 2), SHORE_Z + 1.5, NEST_Z - 1.5); if (L.stream && z > ST0 - .5 && z < ST1 + .5) z = ST0 - .8; Object.assign(c, { x: left ? -5.6 : 5.6, z, sp: rnd(1.3, 1.6), st: 'walk', tgt: p, retT: 0 }); c.v.g.visible = true; } continue; }
+    if (c.st === 'wait') { if (running && (c.t -= dt) <= 0) { const prey = T.filter((t) => t.st === 'walk' && t.z < NEST_Z - 1 && t.z > SHORE_Z + 1.5); if (!prey.length) { c.t = 1; continue; } const p = pick(prey); const left = Math.random() < .5; let z = clamp(p.z - rnd(.5, 2), SHORE_Z + 1.5, NEST_Z - 1.5); if (L.stream && z > ST0 - .5 && z < ST1 + .5) z = ST0 - .8; Object.assign(c, { x: left ? -5.6 : 5.6, z, sp: rnd(1.3, 1.6) * (L.crabSpd || 1), st: 'walk', tgt: p, retT: 0 }); c.v.g.visible = true; } continue; }
     if (c.st === 'walk') {
       if (!taught.crab && Math.abs(c.x) < 4.3) { taught.crab = 1; hand = { o: c, y: .3, kind: 'crab' }; ui.cap('Shoo the crab!', 99); }
       if ((c.retT -= dt) <= 0) { c.retT = .5; let bd = 1e9, b = null; for (const t of T) if (t.st === 'walk') { const d = d2(c.x, c.z, t.x, t.z); if (d < bd) { bd = d; b = t; } } c.tgt = b; }
@@ -236,6 +274,22 @@ function updateCrabs(dt, L) {
       const dx = t.x - c.x, dz = t.z - c.z, d = Math.hypot(dx, dz) || 1; c.vx = dx / d * c.sp; c.vz = dz / d * c.sp; c.x += c.vx * dt; c.z += c.vz * dt;
       if (d < .5) { flip(t); c.st = 'leave'; c.dir = c.x < 0 ? -1 : 1; c.tgt = null; }
     } else { const sp = c.st === 'flee' ? 8 : 2.2; c.vx = c.dir * sp; c.vz = 0; c.x += c.vx * dt; if (Math.abs(c.x) > 6.2) { c.st = 'wait'; c.t = rnd(2.5, 4.5); c.v.g.visible = false; } }
+  }
+}
+function updateBalls(dt, L) {
+  for (const b of balls) {
+    if (b.st === 'wait') {
+      if (running && (b.t -= dt) <= 0) {
+        if (!T.some((t) => t.st === 'walk')) { b.t = 1; continue; }
+        const left = Math.random() < .5; let z; do { z = rnd(SHORE_Z + 2.2, NEST_Z - 2); } while (L.stream && z > ST0 - .8 && z < ST1 + .8);
+        Object.assign(b, { st: 'roll', x: left ? -6.2 : 6.2, z, dir: left ? 1 : -1, y: .3, rot: 0, hitCool: 0 }); b.m.visible = true;
+        if (!taught.ball) { taught.ball = 1; hand = { o: b, y: .4, kind: 'ball' }; ui.cap('Pop the beach ball!', 99); }
+      }
+    } else if (b.st === 'roll') {
+      b.x += b.dir * 2.4 * dt; b.rot += dt * 7 * b.dir; b.y = .3 + Math.abs(Math.sin(time * 5 + b.ph)) * .32; b.hitCool -= dt;
+      if (b.hitCool <= 0) for (const t of T) if (t.st === 'walk' && t.born > .4 && d2(t.x, t.z, b.x, b.z) < .5) { flip(t); b.hitCool = .8; burst3(t.x, .4, t.z, ['#e8664a', '#fbf1d8', '#3f9bf0'], 10); ui.float(t.x, .9, t.z, 'Bonk!'); shake = .1; break; }
+      if (Math.abs(b.x) > 6.6) { b.st = 'wait'; b.t = rnd(4, 7); b.m.visible = false; }
+    } else if (b.st === 'pop') { b.pt += dt; if (b.pt > .25) { b.st = 'wait'; b.t = rnd(5, 8); b.m.visible = false; } }
   }
 }
 function updateGulls(dt) {
@@ -336,7 +390,8 @@ function sync() {
     l.m.position.set(l.x, y, l.z); l.m.rotation.set(l.st === 'fly' || l.st === 'drift' ? l.rot * .7 : 0, l.rot, 0);
     if (l.st !== 'fly') shadowAt(l.x, l.z, .26);
   }
-  for (const r of rocks) if (r.st !== 'gone') { r.m.position.set(r.x, groundH(r.x, r.z) + r.r * .25 + r.y, r.z); r.m.rotation.z = -r.rot; shadowAt(r.x, r.z, r.r * 1.1); }
+  for (const r of rocks) if (r.st !== 'gone') { r.m.position.set(r.x, groundH(r.x, r.z) + (r.castle ? 0 : r.r * .25) + r.y, r.z); if (r.castle) { r.m.scale.setScalar(1.15 * Math.max(.01, 1 - r.ct / .3)); } else r.m.rotation.z = -r.rot; shadowAt(r.x, r.z, r.r * 1.1); }
+  for (const b of balls) if (b.st !== 'wait') { b.m.position.set(b.x, groundH(b.x, b.z) + b.y, b.z); b.m.rotation.set(b.rot * .6, 0, b.rot); b.m.scale.setScalar(MS * (b.st === 'pop' ? Math.max(.01, 1 - b.pt / .25) : 1)); if (b.st === 'roll') shadowAt(b.x, b.z, .32); }
   for (const c of crabs) {
     if (c.st === 'wait') continue; const v = c.v; const y = groundH(c.x, c.z);
     v.g.position.set(c.x, y + Math.abs(Math.sin(c.leg)) * .03, c.z);
