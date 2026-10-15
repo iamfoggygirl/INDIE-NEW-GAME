@@ -5,8 +5,8 @@ const ICON = {
   ok: '<circle cx="25" cy="8" r="6" fill="#FFF3C4"/><path d="M22 8l2 2 4-4" fill="none" stroke="#3E6B3A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
   x: '<circle cx="25" cy="8" r="6" fill="#FFF3C4"/><path d="M22.5 5.5l5 5m0-5l-5 5" stroke="#D93A3A" stroke-width="2.2" stroke-linecap="round"/>',
   bin: '<svg viewBox="0 0 32 32"><rect x="7" y="5" width="18" height="4" rx="2" fill="#5fb0f5"/><rect x="13" y="2.5" width="6" height="3" rx="1.5" fill="#5fb0f5"/><path d="M8 10h16l-1.6 18H9.6z" fill="#2f8be0"/><g fill="none" stroke="#FFF3C4" stroke-width="1.8" stroke-linecap="round"><path d="M14 15.5l2-2.5 2 2.5"/><path d="M19.5 19.5l.8 2.7-3 .3"/><path d="M12.5 22.5l-1.3-2.4 2.6-1.2"/></g></svg>',
-  star: '<svg viewBox="0 0 32 32"><path d="M16 2.5l4.1 8.6 9.4 1.2-6.9 6.5 1.8 9.3L16 23.6l-8.4 4.5 1.8-9.3-6.9-6.5 9.4-1.2z" fill="#E0B040" stroke="#a87b1c" stroke-width="1.6" stroke-linejoin="round"/><path d="M11 12.5l3-.4" stroke="#fff3c4" stroke-width="1.6" stroke-linecap="round"/></svg>',
-  starOff: '<svg viewBox="0 0 32 32"><path d="M16 2.5l4.1 8.6 9.4 1.2-6.9 6.5 1.8 9.3L16 23.6l-8.4 4.5 1.8-9.3-6.9-6.5 9.4-1.2z" fill="#3a4f78" stroke="#22355a" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+  star: '<svg viewBox="0 0 32 32"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe680"/><stop offset=".55" stop-color="#ffc928"/><stop offset="1" stop-color="#f59a00"/></linearGradient></defs><path d="M16 2.8l4 8.3 9.1 1.2-6.6 6.3 1.7 9-8.2-4.4-8.2 4.4 1.7-9-6.6-6.3 9.1-1.2z" fill="url(#sg)" stroke="#16243b" stroke-width="2.3" stroke-linejoin="round"/><path d="M11.5 12.6l2.6-.4 1.2-2.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" fill="none" opacity=".85"/></svg>',
+  starOff: '<svg viewBox="0 0 32 32"><path d="M16 2.8l4 8.3 9.1 1.2-6.6 6.3 1.7 9-8.2-4.4-8.2 4.4 1.7-9-6.6-6.3 9.1-1.2z" fill="#2a3f66" stroke="#16243b" stroke-width="2.3" stroke-linejoin="round"/><path d="M16 8.5l2.3 4.7 5.2.7-3.8 3.6 1 5.1L16 20.1l-4.7 2.5 1-5.1-3.8-3.6 5.2-.7z" fill="#22355a"/></svg>',
   play: '<svg viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>',
   ad: '<svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4" fill="#2f8be0"/><path d="M10 9v6l5-3z" fill="#FFF3C4"/></svg>',
   retry: '<svg viewBox="0 0 24 24"><path d="M5 12a7 7 0 1 0 2-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M4 3v5h5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -22,6 +22,13 @@ const ICON = {
   flame: '<svg viewBox="0 0 24 24"><path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-4 3-6 1 2 2 2 2 2 1-2 1-5 1-8z" fill="#E8664A"/><path d="M12 12c2 2 3 3 3 5a3 3 0 0 1-6 0c0-2 2-3 3-5z" fill="#FFD166"/></svg>',
   heart: '<svg viewBox="0 0 24 24"><path d="M12 21C5 15.5 2.5 12 2.5 8.2A5 5 0 0 1 12 6a5 5 0 0 1 9.5 2.2C21.5 12 19 15.5 12 21z" fill="#E8664A" stroke="#a8432d" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.5 8.5a2.6 2.6 0 0 1 2.4-2" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".7"/></svg>',
   heartX: '<svg viewBox="0 0 24 24"><path d="M12 21C5 15.5 2.5 12 2.5 8.2A5 5 0 0 1 12 6a5 5 0 0 1 9.5 2.2C21.5 12 19 15.5 12 21z" fill="#ffffff" fill-opacity=".16" stroke="#ffffff" stroke-opacity=".4" stroke-width="1.4" stroke-linejoin="round" stroke-dasharray="2.5 2"/></svg>',
+  vib: '<svg viewBox="0 0 24 24"><rect x="7.5" y="3" width="9" height="18" rx="2.5" fill="#6fd1c8" stroke="#16243b" stroke-width="1.6"/><path d="M4 8v8M20 8v8M1.8 10v4M22.2 10v4" stroke="#FFF3C4" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  crown: '<svg viewBox="0 0 36 28"><path d="M3 24L5 7l8 8 5-12 5 12 8-8 2 17z" fill="#ffd23f" stroke="#16243b" stroke-width="2.4" stroke-linejoin="round"/><circle cx="18" cy="18" r="2.6" fill="#e5533a" stroke="#16243b" stroke-width="1.4"/></svg>',
+  pin: '<svg viewBox="0 0 24 24"><path d="M12 22s7-7.2 7-12.4A7 7 0 0 0 5 9.6C5 14.8 12 22 12 22z" fill="#ff8a6b" stroke="#16243b" stroke-width="2"/><circle cx="12" cy="9.6" r="2.6" fill="#fff4d6"/></svg>',
+  gear: '<svg viewBox="0 0 32 32"><path d="M13.5 3h5l.8 3.6 2.6 1.1 3.1-2 3.5 3.5-2 3.1 1.1 2.6 3.6.8v5l-3.6.8-1.1 2.6 2 3.1-3.5 3.5-3.1-2-2.6 1.1-.8 3.6h-5l-.8-3.6-2.6-1.1-3.1 2-3.5-3.5 2-3.1-1.1-2.6L2 18.5v-5l3.6-.8 1.1-2.6-2-3.1 3.5-3.5 3.1 2 2.6-1.1z" fill="#FFF3C4"/><circle cx="16" cy="16" r="4.4" fill="#24406b"/></svg>',
+  crew: '<svg viewBox="0 0 32 32"><path d="M16 4c5 0 9 4 9 9 0 6-4 11-9 15-5-4-9-9-9-15 0-5 4-9 9-9z" fill="#fff3c4"/><path d="M16 9l3 2v4l-3 2-3-2v-4z" fill="#e5533a"/></svg>',
+  heartS: '<svg viewBox="0 0 24 24"><path d="M12 21C5 15.5 2.5 12 2.5 8.2A5 5 0 0 1 12 6a5 5 0 0 1 9.5 2.2C21.5 12 19 15.5 12 21z" fill="#E8664A" stroke="#16243b" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+  leafB: '<svg viewBox="0 0 24 24"><path d="M4 20C4 9 11 4 21 4c0 10-5 16-15 16" fill="#fff4d6"/><path d="M5 19c4-5 8-8 12-11" stroke="#3f8a2c" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>',
   leaf: '<svg viewBox="0 0 24 24"><path d="M4 20C4 9 11 4 21 4c0 10-5 16-15 16" fill="#7DB05A"/><path d="M5 19c4-5 8-8 12-11" stroke="#4f7d36" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>'
 };
 const ui = {};
@@ -141,6 +148,14 @@ const PROG = (() => { let d = { best: {}, unlocked: 0, done: 0, facts: {}, boost
 const saveProg = () => { try { localStorage.setItem('shellrun.v1', JSON.stringify(PROG)); } catch (e) {} };
 const starTotal = () => Object.values(PROG.best).reduce((a, b) => a + b, 0);
 
+/* ---------- modal state: the HUD steps aside whenever a panel is open ---------- */
+const syncModal = () => $('#app').classList.toggle('modal', !!document.querySelector('.veil,.map'));
+new MutationObserver(syncModal).observe($('#app'), { childList: true, subtree: true });
+const countUp = (el, to, ms) => { const t0 = performance.now(); const step = (t) => { const u = Math.min(1, (t - t0) / ms), v = Math.round(to * (1 - Math.pow(1 - u, 3))); if (el.textContent !== String(v)) { el.textContent = v; if (v) tone(note(2 + (v % 7)), .04, 'triangle', .025); } if (u < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); };
+const chapterOf = (i) => CHAPTERS[(i / 10 | 0) % CHAPTERS.length];
+const panel = (ribbon, body, cls = '') => `<div class="card ${cls}"><div class="ribbon ${cls.includes('fail') ? 'coral' : ''}">${ribbon}</div><div class="inner">${body}</div></div>`;
+const fieldNote = (txt, head = 'Field note') => txt ? `<div class="note"><div class="badge">${ICON.leafB}</div><div><small>${head}</small><p>${txt}</p></div></div>` : '';
+
 /* ---------- end of level ---------- */
 let rewardUsed = false, snap = null, lastAd = Date.now(), wins = 0;
 function adBreak(then) {
@@ -151,33 +166,40 @@ function adBreak(then) {
   b.onclick = () => { v.remove(); lastAd = Date.now(); then(); };
 }
 function endNight() {
-  const L = spec, pct = safeN / total, pass = safeN >= Math.ceil(total * .7), stars = !pass ? 0 : safeN === total ? 3 : pct >= .8 ? 2 : 1;
+  const L = spec, need = Math.ceil(total * .7), pass = safeN >= need, stars = !pass ? 0 : safeN === total ? 3 : safeN / total >= .8 ? 2 : 1;
   ui.capOff(); hand = null; powerKind = null; ui.power();
   if (safeN === total) { sfx.win(); for (let i = 0; i < 7; i++) setTimeout(() => { burst3((Math.random() - .5) * 7, .6, SHORE_Z + .6 + Math.random() * 2, ['#ffd166', '#ffffff', '#8fd19e', '#6fd1c8', '#E8664A'], 26, { g: 2.2, up: 2.3, size: 1.1 }); tone(note(i * 2 + 4), .5, 'triangle', .1, 0, 0, .5); buzz(14); shake = .14; }, i * 150); } else sfx.safe(0);
   if (pass) { PROG.best[night] = Math.max(PROG.best[night] || 0, stars); PROG.unlocked = Math.max(PROG.unlocked, night + 1); }
   saveProg();
-  const dots = Array.from({ length: total }, (_, i) => `<b class="${i < safeN ? '' : 'x'}"></b>`).join('');
-  const head = !pass ? 'Not this time' : safeN === total ? 'Every single one!' : safeN >= total - 2 ? 'So close!' : 'Level complete';
-  const line = pass ? (stars === 3 ? 'A perfect level!' : 'Save them all for 3 stars.') : `Save at least ${Math.ceil(total * .7)} to pass.`;
-  const tidyPct = Math.round(tidy() * 100);
+  const head = !pass ? 'Not this time' : safeN === total ? 'Perfect rescue!' : safeN >= total - 2 ? 'So close!' : 'Level complete!';
+  const tidyPct = Math.round(tidy() * 100), back = Math.min(3, lostN), canBring = lostN > 0 && !rewardUsed;
+  const nextI = night + 1, nextCh = Math.ceil(nextI / 10) * 10 || 10, toCh = nextCh - nextI;
+  const goal = pass ? (nextI % 10 === 0 ? `${ICON.pin}New beach unlocked: <b>${chapterOf(nextI)}</b>` : `${ICON.star}<b>${starTotal()}</b> stars · ${toCh} level${toCh > 1 ? 's' : ''} to <b>${chapterOf(nextCh).split(' · ')[0]}</b>`)
+    : `${ICON.turtle()}Save <b>${need}</b> of ${total} to pass`;
+  const fact = FACTCARD[levelFacts[levelFacts.length - 1]] || L.fact;
+  const hearts = '';
+  const btns = pass
+    ? `<button class="b-green hero pop-in" id="next" style="animation-delay:.65s">${ICON.play}Next level</button>
+       ${canBring && stars < 3 ? `<button class="b-teal" id="bring">${ICON.ad}Bring back ${back} · video</button>` : ''}
+       <div class="duo"><button class="b-navy" id="retry">${ICON.retry}Play again</button><button class="b-navy" id="maps">${ICON.map}Map</button></div>`
+    : `<button class="b-green hero pop-in" id="retry" style="animation-delay:.5s">${ICON.retry}Try again</button>
+       ${canBring ? `<button class="b-teal" id="bring">${ICON.ad}Bring back ${back} · video</button>` : ''}
+       <div class="duo" style="grid-template-columns:1fr"><button class="b-navy" id="maps">${ICON.map}Level map</button></div>`;
   const v = document.createElement('div'); v.className = 'veil';
-  v.innerHTML = `<div class="card"><div class="stars">${[0, 1, 2].map((i) => i < stars ? ICON.star : ICON.starOff).join('')}</div><div class="ribbon ${pass ? '' : 'coral'}">${head}</div><div class="inner">
-    <div class="big">${safeN}<span> / ${total}</span></div><div class="lbl">${ICON.turtle(undefined, undefined, ICON.ok)}reached the sea</div>
-    <div class="crew">${dots}</div>
-    <div class="row">${ICON.bin}<span>${binnedN} binned</span><div class="bar"><i style="width:0%"></i></div><span>${tidyPct}% clean</span></div>
-    <div class="fact"><b>${line}</b></div>
-    ${levelFacts.length ? factRow(FACTCARD[levelFacts[levelFacts.length - 1]]) : ''}
-    <div class="row" style="background:transparent;padding:0 2px">${ICON.leaf}<span class="fact" style="margin:0">${L.fact}</span></div>
-    <div class="btns">
-      ${pass ? `<button class="b-green" id="next">${ICON.play}Next level</button>` : ''}
-      ${lostN > 0 && !rewardUsed ? `<button class="b-teal" id="bring">${ICON.ad}Bring back ${Math.min(3, lostN)} · watch a video</button>` : ''}
-      <button class="${pass ? 'b-navy' : 'b-green'}" id="retry">${ICON.retry}${pass ? 'Play again' : 'Try again'}</button>
-      <button class="b-navy" id="maps">${ICON.map}Level map</button>
-    </div></div></div>`;
+  v.innerHTML = `<div class="card ${pass ? '' : 'fail'}"><div class="stars"><div class="glow"></div>${[0, 1, 2].map((i) => i < stars ? ICON.star : ICON.starOff).join('')}</div><div class="ribbon ${pass ? '' : 'coral'}">${head}</div><div class="inner">
+    <div class="res"><div class="tu">${ICON.turtle()}</div><div><div class="big"><b>0</b><span> / ${total}</span></div><div class="lbl">made it to the sea</div></div></div>
+    ${hearts}
+    <div class="srow"><div class="stat">${ICON.bin}<span>${binnedN}</span><div class="bar"><i style="width:0%"></i></div><span>${tidyPct}%</span></div></div>
+    <div class="goal">${goal}</div>
+    ${fieldNote(fact)}
+    <div class="btns">${btns}</div></div></div>`;
   $('#ov').appendChild(v);
-  setTimeout(() => { const b = v.querySelector('.bar i'); if (b) b.style.width = tidyPct + '%'; }, 250);
-  v.querySelectorAll('.stars svg').forEach((s, i) => { setTimeout(() => { s.classList.add('show'); if (i < stars) { tone(note(4 + i * 2), .35, 'triangle', .13, 0, 0, .5); buzz(14); } }, 350 + i * 300); });
-  const back = Math.min(3, lostN), b = v.querySelector('#bring');
+  const card = v.querySelector('.card');
+  countUp(v.querySelector('.big b'), safeN, 600);
+  setTimeout(() => { const b = v.querySelector('.bar i'); if (b) b.style.width = tidyPct + '%'; }, 380);
+  v.querySelectorAll('.stars svg').forEach((s, i) => { setTimeout(() => { s.classList.add('show'); if (i < stars) { tone(note(4 + i * 2), .35, 'triangle', .13, 0, 0, .5); buzz(14 + i * 6); if (i === 2) v.querySelector('.stars').classList.add('lit'); } }, 260 + i * 210); });
+  card.addEventListener('pointerdown', () => card.classList.add('skip'), { once: true });
+  const b = v.querySelector('#bring');
   if (b) b.onclick = () => { b.disabled = true; let n = 3; b.innerHTML = `${ICON.ad}Demo ad · ${n}`; const iv = setInterval(() => { n--; if (n > 0) b.innerHTML = `${ICON.ad}Demo ad · ${n}`; else { clearInterval(iv); rewardUsed = true; safeN += back; lostN -= back; season.saved += back; v.remove(); endNight(); } }, 1000); };
   const nx = v.querySelector('#next');
   if (nx) nx.onclick = () => { au(); v.remove(); rewardUsed = false; wins++; const go = () => begin(night + 1); if (!PROG.noAds && night >= 3 && wins % 3 === 0 && Date.now() - lastAd > 60000) adBreak(go); else go(); };
@@ -186,27 +208,51 @@ function endNight() {
 }
 function begin(i) { snap = { season: { ...season } }; bin.n = 0; for (const m of bin.pile.children) m.visible = false; startNight(i); }
 
-/* ---------- level map: a winding path, level 1 at the bottom ---------- */
+/* ---------- level map: a sand trail up the coast, level 1 at the bottom ---------- */
 function showMap() {
-  running = false; const cur = PROG.unlocked, N = Math.max(cur + 10, 24), RH = 96, Wd = 340, Ht = N * RH + 220;
-  const px = (i) => Wd / 2 + Math.sin(i * .95) * 96, py = (i) => Ht - 110 - i * RH;
-  let path = `M${px(0)} ${py(0)}`; for (let i = 1; i < N; i++) { const cx = (px(i - 1) + px(i)) / 2; path += ` Q${px(i - 1)} ${(py(i - 1) + py(i)) / 2} ${cx} ${(py(i - 1) + py(i)) / 2} T${px(i)} ${py(i)}`; }
+  running = false; const cur = PROG.unlocked, N = Math.max(cur + 10, 24), RH = 104, Wd = 340, Ht = N * RH + 260;
+  const px = (i) => Wd / 2 + Math.sin(i * .95) * 92, py = (i) => Ht - 120 - i * RH;
+  let path = `M${px(0)} ${py(0) + 60}L${px(0)} ${py(0)}`; for (let i = 1; i < N; i++) { const cx = (px(i - 1) + px(i)) / 2; path += ` Q${px(i - 1)} ${(py(i - 1) + py(i)) / 2} ${cx} ${(py(i - 1) + py(i)) / 2} T${px(i)} ${py(i)}`; }
   let nodes = '';
+  const lockI = '<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="3" fill="#a9b8d6" stroke="#16243b" stroke-width="1.8"/><path d="M8 10V8a4 4 0 0 1 8 0v2" fill="none" stroke="#a9b8d6" stroke-width="2.6"/></svg>';
   for (let i = 0; i < N; i++) {
-    const st = i < cur ? 'done' : i === cur ? 'cur' : 'lock', b = PROG.best[i] || 0, big = (i + 1) % 25 === 0;
-    if (i % 10 === 0) nodes += `<div class="chap" style="top:${py(i) + 52}px">${CHAPTERS[(i / 10) % CHAPTERS.length | 0]}</div>`;
-    nodes += `<button class="node ${st}${big ? ' big' : ''}" data-i="${i}" style="left:${px(i) - 31}px;top:${py(i) - 31}px"><span>${st === 'lock' ? '' : i + 1}</span>${st === 'lock' ? '<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="3" fill="#8a93a8"/><path d="M8 10V8a4 4 0 0 1 8 0v2" fill="none" stroke="#8a93a8" stroke-width="2.4"/></svg>' : ''}<em>${st === 'done' ? [0, 1, 2].map((s) => `<i class="${s < b ? 'on' : ''}"></i>`).join('') : ''}</em></button>`;
+    const st = i < cur ? 'done' : i === cur ? 'cur' : 'lock', b = PROG.best[i] || 0, big = (i + 1) % 25 === 0, boss = !big && (i + 1) % 10 === 0;
+    if (i % 10 === 0) nodes += `<div class="chap" style="top:${py(i) + 56}px"><small>Chapter ${i / 10 + 1}</small>${chapterOf(i)}</div>`;
+    nodes += `<button class="node ${st}${big ? ' big boss' : boss ? ' boss' : ''}" data-i="${i}" style="left:${px(i) - 32}px;top:${py(i) - 32}px">${st === 'lock' ? lockI : `<span>${i + 1}</span>`}${(big || boss) && st !== 'cur' ? `<i class="crown">${ICON.crown}</i>` : ''}${st === 'cur' ? `<i class="me">${ICON.turtle()}</i>` : ''}<em>${st === 'done' ? [0, 1, 2].map((s) => `<i class="${s < b ? 'on' : ''}"></i>`).join('') : ''}</em></button>`;
   }
   const v = document.createElement('div'); v.className = 'map';
-  v.innerHTML = `<div class="maptop"><div class="pill">${ICON.star.replace('<svg', '<svg style="width:26px;height:26px"')}<span>${starTotal()}</span></div><div class="maptitle">Shell Run</div><div class="pill">${ICON.moon}<span>${cur + 1}</span></div></div>
-    <div class="scroller"><div class="track" style="width:${Wd}px;height:${Ht}px"><svg width="${Wd}" height="${Ht}" viewBox="0 0 ${Wd} ${Ht}"><path d="${path}" fill="none" stroke="rgba(255,243,196,.28)" stroke-width="10" stroke-linecap="round" stroke-dasharray="1 18"/></svg>${nodes}</div></div>
-    <div class="mapbot"><button class="b-navy" id="mshop" aria-label="Shop">${ICON.shop}</button><button class="b-green" id="mplay">${ICON.play}Play level ${cur + 1}</button></div>`;
+  v.innerHTML = `<div class="maptop"><div class="pill">${ICON.star.replace('<svg', '<svg style="width:26px;height:26px"')}<span>${starTotal()}</span></div><div class="maptitle">Shell Run</div><button class="iconbtn" id="mhome" aria-label="Home">${ICON.gear}</button></div>
+    <div class="scroller"><div class="track" style="width:${Wd}px;height:${Ht}px"><svg width="${Wd}" height="${Ht}" viewBox="0 0 ${Wd} ${Ht}"><path d="${path}" fill="none" stroke="#16243b" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/><path d="${path}" fill="none" stroke="#e9cf98" stroke-width="33" stroke-linecap="round" stroke-linejoin="round"/><path d="${path}" fill="none" stroke="#d4b276" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 16" transform="translate(-7 0)"/><path d="${path}" fill="none" stroke="#d4b276" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 16" stroke-dashoffset="9" transform="translate(7 0)"/></svg>${nodes}</div></div>
+    <div class="mapbot"><button class="b-gold sq" id="mshop" aria-label="Shop">${ICON.shop}</button><button class="b-green hero" id="mplay">${ICON.play}Level ${cur + 1}</button><button class="b-coral sq" id="mcrew" aria-label="Crew">${ICON.turtle('#fff4d6', '#e8a08e')}</button></div>`;
   $('#app').appendChild(v);
-  const sc = v.querySelector('.scroller'); sc.scrollTop = Math.max(0, py(cur) - sc.clientHeight * .6);
+  const sc = v.querySelector('.scroller'); sc.scrollTop = Math.max(0, py(cur) - sc.clientHeight * .58);
   const startAt = (i) => { au(); v.remove(); $('#app').classList.add('playing'); begin(i); running = true; ui.night(); };
-  v.querySelectorAll('.node').forEach((n) => { n.onclick = () => { const i = +n.dataset.i; if (i <= cur) startAt(i); else { n.classList.remove('shake'); void n.offsetWidth; n.classList.add('shake'); sfx.uhoh && sfx.uhoh(); } }; });
+  v.querySelectorAll('.node').forEach((n) => { n.onclick = () => { const i = +n.dataset.i; if (i <= cur) startAt(i); else { n.classList.remove('shake'); void n.offsetWidth; n.classList.add('shake'); sfx.uhoh && sfx.uhoh(); buzz(20); } }; });
   v.querySelector('#mplay').onclick = () => startAt(cur);
   v.querySelector('#mshop').onclick = () => { au(); showShop(); };
+  v.querySelector('#mcrew').onclick = () => { au(); showCrew(); };
+  v.querySelector('#mhome').onclick = () => { au(); showSettings(); };
+}
+/* ---------- crew (coming soon) + settings ---------- */
+function showCrew() {
+  const v = document.createElement('div'); v.className = 'veil'; v.style.zIndex = 14;
+  const tints = [['#7DB05A', '#3E6B3A'], ['#6fd1c8', '#2b7d78'], ['#E0B040', '#8a6514'], ['#E8664A', '#93301d'], ['#9b7be0', '#4b3592'], ['#f2f2f2', '#8a8a8a']];
+  v.innerHTML = panel('Crew', `<div class="lbl">Shell skins for your hatchlings</div><div class="crewgrid">${tints.map(([c, s]) => `<div>${ICON.turtle(c, s)}</div>`).join('')}</div>
+    <div class="goal" style="display:block;text-align:center"><b>Coming soon.</b> Earn skins with stars and rescues.</div><div class="btns"><button class="b-green hero" id="cx">Got it</button></div>`);
+  $('#app').appendChild(v); v.querySelector('#cx').onclick = () => { au(); v.remove(); };
+}
+function showSettings() {
+  const v = document.createElement('div'); v.className = 'veil'; v.style.zIndex = 14;
+  const draw = () => {
+    v.innerHTML = panel('Settings', `<div class="tog"><button class="b-teal ${muted ? 'off' : ''}" id="st1">${muted ? ICON.sndOff : ICON.sndOn}${muted ? 'Sound off' : 'Sound on'}</button><button class="b-teal ${hapOn ? '' : 'off'}" id="st2">${ICON.vib}${hapOn ? 'Buzz on' : 'Buzz off'}</button></div>
+      <div class="goal">${ICON.star}<b>${starTotal()}</b> stars · <b>${PROG.saved}</b> turtles guided home</div>
+      ${fieldNote('Facts in Shell Run come from sea turtle conservation groups such as Leave No Trace and the State of the World\'s Sea Turtles.', 'About')}
+      <div class="btns"><button class="b-green hero" id="sx">Done</button></div>`);
+    v.querySelector('#st1').onclick = () => { au(); setMuted(!muted); $('#snd').innerHTML = muted ? ICON.sndOff : ICON.sndOn; draw(); };
+    v.querySelector('#st2').onclick = () => { setHaptics(!hapOn); if (hapOn) buzz(30); draw(); };
+    v.querySelector('#sx').onclick = () => { au(); v.remove(); };
+  };
+  draw(); $('#app').appendChild(v);
 }
 
 /* ---------- pause ---------- */
@@ -214,23 +260,23 @@ $('#pauseB').innerHTML = ICON.pause;
 ui.pause = function () {
   if (paused || !running || ended || attract || !started) return;
   paused = true; const v = document.createElement('div'); v.className = 'veil';
-  v.innerHTML = `<div class="card"><div class="ribbon">Paused</div><div class="inner">
-    <div class="lbl" style="margin-bottom:6px">Level ${night + 1} · ${spec.name}</div>
-    <div class="fact"><b>Save ${Math.ceil(total * .7)} of ${total} to pass. ${safeN} home so far.</b></div>
-    ${factRow(FACTCARD[levelFacts[levelFacts.length - 1]] || FACTCARD[Object.keys(FACTCARD)[(night * 3) % Object.keys(FACTCARD).length]])}
-    <div class="row" style="background:transparent;padding:0 2px">${ICON.leaf}<span class="fact" style="margin:0">You can't steer the turtles. The obstacles are man-made, so we can remove them.</span></div>
-    <div class="btns"><button class="b-green" id="pr">${ICON.play}Resume</button>
-    <button class="b-navy" id="prs">${ICON.retry}Restart level</button>
-    <button class="b-navy" id="pm">${ICON.map}Level map</button>
-    <div class="tog"><button class="b-navy" id="pt1"></button><button class="b-navy" id="pt2"></button></div></div></div></div>`;
-  $('#ov').appendChild(v);
-  const lab = () => { v.querySelector('#pt1').innerHTML = (muted ? ICON.sndOff : ICON.sndOn) + (muted ? 'Sound off' : 'Sound on'); v.querySelector('#pt2').innerHTML = '<span style="font-size:20px">📳</span>' + (hapOn ? 'Buzz on' : 'Buzz off'); }; lab();
-  const close = () => { v.remove(); paused = false; };
-  v.querySelector('#pr').onclick = () => { au(); close(); };
-  v.querySelector('#prs').onclick = () => { au(); close(); Object.assign(season, snap.season); begin(night); };
-  v.querySelector('#pm').onclick = () => { au(); close(); running = false; powerKind = null; ui.power(); showMap(); };
-  v.querySelector('#pt1').onclick = () => { au(); setMuted(!muted); $('#snd').innerHTML = muted ? ICON.sndOff : ICON.sndOn; lab(); };
-  v.querySelector('#pt2').onclick = () => { setHaptics(!hapOn); if (hapOn) buzz(30); lab(); };
+  const need = Math.ceil(total * .7);
+  const draw = () => {
+    v.innerHTML = panel('Paused', `<div class="lbl">Level ${night + 1} · ${spec.name}</div>
+      <div class="prog"><div class="bar"><i style="width:${Math.round(safeN / total * 100)}%"></i></div><b>${safeN} / ${total}</b></div>
+      <div class="goal">Save <b>${need}</b> to pass · <b>${Math.max(0, allowedLoss() - lostN)}</b> heart${allowedLoss() - lostN === 1 ? '' : 's'} left</div>
+      ${fieldNote(FACTCARD[levelFacts[levelFacts.length - 1]] || 'You can\'t steer the turtles. The obstacles are man-made, so we can remove them.', levelFacts.length ? 'Turtle fact' : 'Remember')}
+      <div class="btns"><button class="b-green hero" id="pr">${ICON.play}Resume</button>
+      <div class="duo"><button class="b-navy" id="prs">${ICON.retry}Restart</button><button class="b-navy" id="pm">${ICON.map}Map</button></div>
+      <div class="tog"><button class="b-teal ${muted ? 'off' : ''}" id="pt1">${muted ? ICON.sndOff : ICON.sndOn}${muted ? 'Sound off' : 'Sound on'}</button><button class="b-teal ${hapOn ? '' : 'off'}" id="pt2">${ICON.vib}${hapOn ? 'Buzz on' : 'Buzz off'}</button></div></div>`);
+    const close = () => { v.remove(); paused = false; };
+    v.querySelector('#pr').onclick = () => { au(); close(); };
+    v.querySelector('#prs').onclick = () => { au(); close(); Object.assign(season, snap.season); begin(night); };
+    v.querySelector('#pm').onclick = () => { au(); close(); running = false; powerKind = null; ui.power(); showMap(); };
+    v.querySelector('#pt1').onclick = () => { au(); setMuted(!muted); $('#snd').innerHTML = muted ? ICON.sndOff : ICON.sndOn; draw(); };
+    v.querySelector('#pt2').onclick = () => { setHaptics(!hapOn); if (hapOn) buzz(30); draw(); };
+  };
+  draw(); $('#ov').appendChild(v);
 };
 $('#pauseB').onclick = (e) => { e.stopPropagation(); au(); ui.pause(); };
 document.addEventListener('visibilitychange', () => { if (document.hidden) ui.pause(); });
@@ -268,16 +314,15 @@ const factRow = (txt) => `<div class="row" style="background:transparent;padding
 function showShop() {
   const v = document.createElement('div'); v.className = 'veil'; v.style.zIndex = 14;
   const draw = () => {
-    const rowH = (id, ic, t, sub, btn, off) => `<div class="row shop">${ic}<div style="flex:1"><b>${t}</b><span style="font-size:12px;opacity:.75;font-weight:700">${sub}</span></div><button class="b-green sm" id="${id}" ${off ? 'disabled' : ''}>${btn}</button></div>`;
-    v.innerHTML = `<div class="card"><div class="ribbon">Shop</div><div class="inner">
-      <div class="lbl" style="margin-bottom:8px">Your boosts: <b>${PROG.boosts}</b></div>
-      ${rowH('b0', ICON.ad, 'Free boost', 'Watch a short video', 'Watch', false)}
-      ${rowH('b1', ICON.clean, '5 boosts', 'Use any time in a level', '$0.99', false)}
-      ${rowH('b2', ICON.surge, '20 boosts', 'Best value', '$2.99', false)}
-      ${rowH('b3', ICON.ad, 'No more level ads', 'Video boosts stay optional', PROG.noAds ? 'Owned' : '$2.99', PROG.noAds)}
-      <div class="fact" style="font-size:12px;opacity:.75">Demo store. No real money is charged yet.</div>
-      <div class="btns"><button class="b-navy" id="bc">Back</button></div></div></div>`;
-    v.querySelector('#bc').onclick = () => v.remove();
+    const offer = (id, ic, bg, t, sub, btn, cls, off, best) => `<div class="offer"><div class="ic" style="background:${bg}">${ic}</div><div style="flex:1;min-width:0"><b>${t}${best ? '<i class="best">BEST VALUE</i>' : ''}</b><span>${sub}</span></div><button class="${cls}" id="${id}" ${off ? 'disabled' : ''}>${btn}</button></div>`;
+    v.innerHTML = panel('Shop', `<div class="lbl">Your boosts: <b style="color:var(--txt)">${PROG.boosts}</b></div>
+      ${offer('b0', ICON.ad, 'linear-gradient(#63e1d5,#1a95a8)', 'Free boost', 'Watch a short video', 'Watch', 'b-teal', false)}
+      ${offer('b1', ICON.clean, 'linear-gradient(#3a5a8e,#1d3558)', '5 boosts', 'Use any time in a level', '$0.99', 'b-gold', false)}
+      ${offer('b2', ICON.surge, 'linear-gradient(#3a5a8e,#1d3558)', '20 boosts', 'Clean, surge or ranger', '$2.99', 'b-gold', false, true)}
+      ${offer('b3', ICON.ad, 'linear-gradient(#ff9c7d,#dc4f34)', 'No level ads', 'Videos stay optional', PROG.noAds ? 'Owned' : '$2.99', 'b-gold', PROG.noAds)}
+      <div class="demo">DEMO STORE · NO REAL CHARGES</div>
+      <div class="btns"><button class="b-navy" id="bc">Back</button></div>`);
+    v.querySelector('#bc').onclick = () => { au(); v.remove(); };
     const add = (n) => { PROG.boosts += n; saveProg(); sfx.win(); buzz([20, 30, 20]); draw(); };
     v.querySelector('#b1').onclick = () => add(5); v.querySelector('#b2').onclick = () => add(20);
     v.querySelector('#b3').onclick = () => { PROG.noAds = true; saveProg(); sfx.win(); draw(); };
@@ -304,7 +349,9 @@ function loop(ts) {
 self.onHorizon = buildSky;
 resize();
 $('#title').innerHTML = ICON.turtle() + 'Shell Run';
-$('#go').innerHTML = ICON.play + (PROG.unlocked ? 'Continue · Level ' + (PROG.unlocked + 1) : 'Play');
+$('#go').innerHTML = ICON.play + (PROG.unlocked ? 'Continue' : 'Play');
+$('#where').innerHTML = `${ICON.pin}${chapterOf(PROG.unlocked).split(' · ')[0]} · Level ${PROG.unlocked + 1}`;
+$('#hmap i').innerHTML = ICON.map.replace('currentColor', '#fff4d6'); $('#hcrew i').innerHTML = ICON.turtle('#fff4d6', '#e8a08e'); $('#hshop i').innerHTML = ICON.shop; $('#gear').innerHTML = ICON.gear;
 (function title() {
   const today = new Date().toDateString(), y = new Date(Date.now() - 864e5).toDateString();
   if (PROG.lastDay !== today) { PROG.streak = PROG.lastDay === y ? PROG.streak + 1 : 1; PROG.lastDay = today; PROG.boosts += 1; PROG.gift = 1; saveProg(); } else PROG.gift = 0;
@@ -313,8 +360,14 @@ $('#go').innerHTML = ICON.play + (PROG.unlocked ? 'Continue · Level ' + (PROG.u
 const n0 = Q.has('n') ? Math.max(0, +Q.get('n') | 0) : 0;
 if (Q.has('n')) { begin(n0); running = false; } else { attract = true; begin(-1); running = true; }
 requestAnimationFrame(loop);
-$('#go').onclick = () => { au(); buzz([12, 40, 18]); $('#start').classList.add('out'); setTimeout(() => $('#start').remove(), 500); started = true; const was = attract; attract = false; Object.assign(season, { met: 0, saved: 0, spawned: 0, binned: 0 }); if (PROG.unlocked === 0 || Q.has('n')) { $('#app').classList.add('playing'); if (was) begin(Q.has('n') ? n0 : 0); running = true; ui.night(); } else { if (was) running = false; showMap(); } };
+function enter(toMap) { au(); buzz([12, 40, 18]); $('#start').classList.add('out'); setTimeout(() => $('#start').remove(), 500); started = true; const was = attract; attract = false; Object.assign(season, { met: 0, saved: 0, spawned: 0, binned: 0 }); if (!toMap && (PROG.unlocked === 0 || Q.has('n'))) { $('#app').classList.add('playing'); if (was) begin(Q.has('n') ? n0 : 0); running = true; ui.night(); } else { if (was) running = false; showMap(); } }
+$('#go').onclick = () => enter(false);
+$('#hmap').onclick = () => enter(true);
+$('#hcrew').onclick = () => { au(); showCrew(); };
+$('#hshop').onclick = () => { au(); showShop(); };
+$('#gear').onclick = () => { au(); showSettings(); };
 self.G = {
+  forceEnd: (s, l) => { safeN = s; lostN = l; running = false; ended = true; endNight(); }, showCrew: () => showCrew(), showSettings: () => showSettings(), pause: () => ui.pause(),
   dolGo: () => { dol.next = 0; },
   get T() { return T; }, get litter() { return litter; }, get balls() { return balls; }, get rocks() { return rocks; }, get crabs() { return crabs; }, get gulls() { return gulls; }, get logs() { return logs; }, get tourists() { return tourists; },
   tap, scr, groundAt, surfaceTap, get running() { return running; }, get night() { return night; }, get safe() { return safeN; }, get lost() { return lostN; }, get total() { return total; }, get binned() { return binnedN; },
