@@ -11,4 +11,5 @@ fs.writeFileSync(path.join(__dirname, 'dist', 'index.html'), html);
 const style = html.match(/<style>[\s\S]*?<\/style>/)[0];
 const body = html.match(/<body>([\s\S]*)<\/body>/)[1];
 fs.writeFileSync(path.join(__dirname, 'dist', 'artifact.html'), '<title>Shell Run</title>\n' + style + '\n' + body);
+for (const f of fs.existsSync(path.join(__dirname, 'static')) ? fs.readdirSync(path.join(__dirname, 'static')) : []) fs.copyFileSync(path.join(__dirname, 'static', f), path.join(__dirname, 'dist', f));
 console.log('built dist/index.html', (html.length / 1024).toFixed(0) + ' KB');
