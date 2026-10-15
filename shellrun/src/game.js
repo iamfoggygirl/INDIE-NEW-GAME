@@ -247,7 +247,7 @@ function landInBin(l) {
   if (!taught.binned) { taught.binned = 1; ui.cap('Into the bin. Keep the path clear!', 2.4); buzz([10, 30, 14]); }
   sfx.clunk(bin.n); burst3(bin.x, 1.35, bin.z, ['#4FA3D9', '#ffffff', '#bfe8e0'], 8, { size: .7 });
   ui.fx('recycle', bin.x, 1.6, bin.z); ui.hud();
-  const pile = bin.pile.children; for (let i = 0; i < pile.length; i++) pile[i].visible = false;   // items disappear into the bin; a visible pile looked like the trash had come back out
+  const pile = bin.pile.children; for (let i = 0; i < pile.length; i++) pile[i].visible = i < Math.min(bin.n, pile.length);
   if (bin.n >= BIN_CAP - 1 && vol.st === 'idle') { vol.st = 'enter'; vol.x = 8.5; vol.z = bin.z + .8; vol.g.visible = true; }
 }
 
@@ -527,7 +527,7 @@ function sync() {
   for (const l of logs) { l.m.position.set(l.x, groundH(0, l.z) + .16 + Math.sin(time * 2 + l.x) * .03, l.z); l.m.rotation.set(0, l.rot, 0); }
   // bin: squash on every catch, lid flaps
   if (bin.sq > 0) bin.sq = Math.max(0, bin.sq - .05); const sq = Math.sin(bin.sq * Math.PI) * .18; bin.g.scale.set(1.25 * (1 + sq), 1.25 * (1 - sq), 1.25 * (1 + sq));
-  if (bin.lidT > 0) bin.lidT = Math.max(0, bin.lidT - .016); bin.lid.rotation.x = -Math.sin(Math.min(1, bin.lidT / .45) * Math.PI) * 1.2;
+  if (bin.lidT > 0) bin.lidT = Math.max(0, bin.lidT - .016); const want = (bin.lidT > 0 || litter.some((l) => l.st === 'fly')) ? 1 : 0; bin.open += (want - bin.open) * .3; bin.lid.rotation.x = -bin.open * 2.0; bin.pile.visible = bin.open > .12;
   shadowAt(bin.x, bin.z, .75);
   shadows.end();
   if (streamG.visible) streamTex.offset.x -= .0025;

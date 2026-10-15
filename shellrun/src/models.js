@@ -184,8 +184,9 @@ const eggs = new Batch(GEO.egg, MAT, 48);
 
 /* ---- recycling bin (sheet 10) ---- */
 GEO.bin = merge([
-  [CY(.42, .35, .9, 4), '#2f8be0', M(0, .45, 0, 1, 1, 1, 0, Math.PI / 4, 0), .05],
-  [CY(.45, .45, .07, 4), '#3f9bf0', M(0, .9, 0, 1, 1, 1, 0, Math.PI / 4, 0), .05],
+  [new THREE.CylinderGeometry(.42, .35, .9, 4, 1, true), '#2f8be0', M(0, .45, 0, 1, 1, 1, 0, Math.PI / 4, 0), .05],
+  [BX(.66, .07, .1), '#3f9bf0', M(0, .9, .28), .05], [BX(.66, .07, .1), '#3f9bf0', M(0, .9, -.28), .05], [BX(.1, .07, .46), '#3f9bf0', M(.28, .9, 0), .05], [BX(.1, .07, .46), '#3f9bf0', M(-.28, .9, 0), .05],
+  [BX(.5, .03, .5), '#14202e', M(0, .56, 0)],
   [CY(.12, .12, .07, 10), '#1d2533', M(.32, .1, -.24, 1, 1, 1, 0, 0, Math.PI / 2)], [CY(.12, .12, .07, 10), '#1d2533', M(-.32, .1, -.24, 1, 1, 1, 0, 0, Math.PI / 2)]
 ]);
 GEO.binLid = merge([[BX(.64, .07, .64), '#3f9bf0', M(0, 0, .32), .05], [BX(.2, .05, .06), '#2f7bd0', M(0, .05, .62)]]);
@@ -197,9 +198,9 @@ function makeBin(x, z) {
   const g = new THREE.Group(), body = new THREE.Mesh(GEO.bin, MAT), lid = new THREE.Mesh(GEO.binLid, MAT); lid.position.set(0, .94, -.32);
   const logo = new THREE.Mesh(new THREE.PlaneGeometry(.42, .42), curved(new THREE.MeshLambertMaterial({ map: recycleTex, transparent: true }), 'logo')); logo.position.set(0, .48, .315); logo.rotation.x = -.08;
   const pile = new THREE.Group(); const kinds = ['bottle', 'can', 'bag', 'cup', 'line', 'flipflop', 'bottle', 'can'];
-  kinds.forEach((k, i) => { const m = new THREE.Mesh(GEO.litter[k], MAT); m.scale.setScalar(.85); m.position.set(rnd(-.15, .15), .62 + i * .045, rnd(-.12, .12)); m.rotation.set(rnd(0, 6), rnd(0, 6), 0); m.visible = false; pile.add(m); });
+  kinds.forEach((k, i) => { const m = new THREE.Mesh(GEO.litter[k], MAT); m.scale.setScalar(.85); m.position.set(rnd(-.12, .12), .66 + i * .035, rnd(-.1, .1)); m.rotation.set(rnd(0, 6), rnd(0, 6), 0); m.visible = false; pile.add(m); });
   g.add(body, lid, logo, pile); g.position.set(x, groundH(x, z), z); g.rotation.y = -.35; g.scale.setScalar(1.25); scene.add(g);
-  return { g, lid, pile, x, z, n: 0, sq: 0, lidT: 0 };
+  return { g, lid, pile, x, z, n: 0, sq: 0, lidT: 0, open: 0 };
 }
 
 /* ---- a dolphin that leaps through the sea now and then (ocean-life easter egg) ---- */
