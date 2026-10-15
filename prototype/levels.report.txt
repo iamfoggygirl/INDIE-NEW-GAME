@@ -1,0 +1,20 @@
+L 1 First seed    twist=tap      crows=0 moves=2 goal= 1 par=1 slack=1 randomWin=100% rocks=0 fences=0 gold=0
+L 2 Empty plot    twist=harvest  crows=0 moves=3 goal= 5 par=1 slack=2 randomWin= 48% rocks=0 fences=0 gold=0
+L 3 Barn chain    twist=extra    crows=0 moves=5 goal= 6 par=3 slack=2 randomWin= 23% rocks=0 fences=0 gold=0
+L 4 Meadow        twist=plain    crows=0 moves=4 goal= 6 par=2 slack=2 randomWin=  9% rocks=0 fences=0 gold=0
+L 5 Crows wake    twist=crows    crows=1 moves=4 goal= 5 par=2 slack=2 randomWin= 15% rocks=0 fences=0 gold=0
+L 6 First rock    twist=rocks    crows=1 moves=5 goal= 6 par=3 slack=2 randomWin= 15% rocks=1 fences=0 gold=0
+L 7 Stone path    twist=rocks    crows=1 moves=5 goal= 3 par=3 slack=2 randomWin= 57% rocks=2 fences=0 gold=0
+L 8 Breather      twist=plain    crows=1 moves=5 goal= 3 par=2 slack=3 randomWin= 75% rocks=1 fences=0 gold=0
+L 9 Sharp crows   twist=smart    crows=2 moves=5 goal= 4 par=3 slack=2 randomWin=  9% rocks=0 fences=0 gold=0
+L10 Hedge row     twist=smart    crows=2 moves=6 goal= 6 par=3 slack=3 randomWin= 11% rocks=1 fences=0 gold=0
+L11 The fence     twist=fence    crows=1 moves=5 goal= 9 par=4 slack=1 randomWin= 13% rocks=0 fences=1 gold=0
+L12 Gate keeper   twist=fence    crows=2 moves=6 goal= 6 par=5 slack=1 randomWin=  5% rocks=0 fences=1 gold=0
+L13 Gold plot     twist=gold     crows=1 moves=5 goal= 8 par=4 slack=1 randomWin=  9% rocks=0 fences=0 gold=1
+L14 Golden hour   twist=gold     crows=2 moves=6 goal= 8 par=4 slack=2 randomWin=  5% rocks=1 fences=0 gold=1
+L15 Locked gold   twist=mix      crows=2 moves=6 goal= 6 par=4 slack=2 randomWin=  5% rocks=0 fences=1 gold=1
+L16 Breather II   twist=plain    crows=1 moves=5 goal= 3 par=2 slack=3 randomWin= 51% rocks=1 fences=0 gold=1
+L17 Stone & gold  twist=mix      crows=2 moves=6 goal= 5 par=4 slack=2 randomWin= 25% rocks=2 fences=0 gold=1
+L18 Gatehouse     twist=mix      crows=3 moves=6 goal= 6 par=5 slack=1 randomWin=  5% rocks=1 fences=1 gold=0
+L19 Crow council  twist=smart    crows=3 moves=6 goal= 6 par=4 slack=2 randomWin=  4% rocks=1 fences=0 gold=1
+L20 Last light    twist=mix      crows=3 moves=7 goal= 9 par=6 slack=1 randomWin=  4% rocks=1 fences=1 gold=1

@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#ffe7b8">
+<title>Harvest Sow</title>
+<style>
+:root{
+  --sky1:#ffe9bd;--sky2:#d6ecd8;--cream:#fff6e4;--ink:#3b2a1d;--ink2:#7a604a;
+  --soil:#6b4226;--soil2:#8f5d36;--seed:#f7c948;--seed2:#d99a2b;
+  --crow:#2a2c4a;--crow2:#4d507f;--barn:#c8553d;--barn2:#9e3d2b;--leaf:#6aa84f;--coin:#ffd24a;--good:#4caf7a;--warn:#e0703a;
+  --r:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+html,body{margin:0;height:100%;background:#2b2118;color:var(--ink);font-family:ui-rounded,"SF Pro Rounded","Nunito","Baloo 2",system-ui,-apple-system,"Segoe UI",sans-serif;overflow:hidden;overscroll-behavior:none}
+#app{position:relative;margin:0 auto;height:100dvh;max-width:480px;overflow:hidden;background:linear-gradient(var(--sky1),var(--sky2))}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.hidden{display:none!important}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+button:active{transform:scale(.96)}
+.pill{background:var(--cream);border-radius:999px;padding:12px 20px;min-height:48px;font-weight:800;box-shadow:0 3px 0 rgba(0,0,0,.14),0 8px 18px rgba(80,50,20,.18)}
+.pill.primary{background:linear-gradient(#ffc94d,#f2a21f);color:#4a2c08;font-size:20px;min-height:56px;padding:14px 30px;box-shadow:0 4px 0 #b9760f,0 10px 22px rgba(120,70,10,.3)}
+.pill.ghost{background:rgba(255,246,228,.7);box-shadow:none;font-weight:700}
+/* ---------- field ---------- */
+.hud{display:flex;align-items:center;gap:10px;padding:12px 14px 6px}
+.icon{width:46px;height:46px;border-radius:50%;background:var(--cream);box-shadow:0 3px 0 rgba(0,0,0,.14);display:grid;place-items:center;flex:none}
+.goal{flex:1;background:var(--cream);border-radius:999px;padding:6px 14px 8px;box-shadow:0 3px 0 rgba(0,0,0,.14);min-width:0}
+.goal .row{display:flex;align-items:center;gap:8px;font-weight:900;font-size:19px}
+.goal .row svg{width:22px;height:22px}
+.gbar{height:9px;background:#ead7b5;border-radius:9px;margin-top:3px;overflow:hidden}
+.gbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd24a,#f29c1f);border-radius:9px;transition:width .25s}
+.gbar.full i{box-shadow:0 0 12px #ffcf3a}
+.moves{display:flex;gap:4px;align-items:center;background:var(--cream);border-radius:999px;padding:0 12px;height:46px;box-shadow:0 3px 0 rgba(0,0,0,.14);flex:none}
+.moves b{font-size:13px;margin-right:2px;color:var(--ink2)}
+.pip{width:11px;height:11px;border-radius:50%;background:var(--seed);box-shadow:inset 0 -2px 0 var(--seed2);transition:transform .2s,opacity .2s}
+.pip.off{background:#e2d2b5;box-shadow:none;transform:scale(.7)}
+#stage{position:relative;flex:1;min-height:0;display:grid;place-items:center;perspective:1100px;padding:4px 10px}
+#board{position:relative;width:100%;height:100%;max-height:640px;transform:rotateX(11deg);transform-origin:50% 60%}
+.tray{position:absolute;inset:2% 3%;border-radius:34px;background:
+  radial-gradient(120% 90% at 50% 0%,rgba(255,255,255,.18),transparent 55%),
+  repeating-linear-gradient(95deg,#a8703f 0 14px,#9b6637 14px 17px,#b07846 17px 31px);
+  box-shadow:0 14px 0 #6c4122,0 26px 34px rgba(60,30,10,.38),inset 0 0 0 5px #c8915b,inset 0 0 0 9px #7c4c28}
+.lane{position:absolute;left:12%;right:12%;top:8%;bottom:8%;border-radius:30px;background:linear-gradient(90deg,rgba(70,160,90,.22),rgba(70,160,90,.04) 40%,rgba(40,40,80,.04) 60%,rgba(40,40,90,.26));pointer-events:none}
+.slot{position:absolute;transform:translate(-50%,-50%);display:grid;place-items:center}
+.mound{position:relative;width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 38% 30%,#a8714a,var(--soil) 62%,#4b2c16);box-shadow:inset 0 -5px 0 rgba(0,0,0,.28),0 5px 0 #4a2a14,0 9px 12px rgba(0,0,0,.28);transition:transform .12s}
+.crow-plot .mound{background:radial-gradient(circle at 38% 30%,#6b6d9d,var(--crow2) 55%,#1f2038);box-shadow:inset 0 -5px 0 rgba(0,0,0,.35),0 5px 0 #17182c,0 9px 12px rgba(0,0,0,.35)}
+.seeds{position:absolute;inset:0;pointer-events:none}
+.sd{position:absolute;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3b0,var(--seed) 45%,var(--seed2));box-shadow:0 2px 0 rgba(0,0,0,.28)}
+.crow-plot .sd{background:radial-gradient(circle at 35% 30%,#fff3b0,#f0c850 45%,#c9902a)}
+.cnt{position:absolute;right:-4px;bottom:-5px;min-width:22px;height:22px;border-radius:11px;background:var(--cream);font-weight:900;font-size:13px;display:grid;place-items:center;box-shadow:0 2px 0 rgba(0,0,0,.2);color:var(--ink);padding:0 4px}
+.crow-plot .cnt{background:#d9dbf5}
+.slot.legal{cursor:pointer}
+.slot.legal .mound{box-shadow:inset 0 -5px 0 rgba(0,0,0,.28),0 5px 0 #4a2a14,0 9px 12px rgba(0,0,0,.28),0 0 0 3px rgba(255,236,150,.0)}
+.slot.breathe .mound{animation:breathe 1.4s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.07)}}
+.slot.hint .mound{animation:hintp .9s ease-in-out infinite;box-shadow:inset 0 -5px 0 rgba(0,0,0,.28),0 5px 0 #4a2a14,0 0 0 4px #ffe58a,0 0 24px 8px rgba(255,214,90,.75)}
+@keyframes hintp{50%{transform:scale(1.1)}}
+.slot.lift .mound{transform:scale(1.18) translateY(-6px)}
+.slot.pulse .mound{animation:pulse .26s ease-out}
+@keyframes pulse{0%{transform:scale(.86,.8)}55%{transform:scale(1.12,1.1)}100%{transform:scale(1)}}
+.slot.shake{animation:shake .3s}
+@keyframes shake{25%{translate:-5px 0}75%{translate:5px 0}}
+.slot.gold .mound{box-shadow:inset 0 -5px 0 rgba(0,0,0,.28),0 5px 0 #4a2a14,0 0 0 4px #ffd24a,0 0 18px 4px rgba(255,200,60,.6)}
+.gold-tag{position:absolute;top:-10px;left:-8px;font-size:11px;font-weight:900;background:#ffd24a;color:#6a4300;border-radius:8px;padding:1px 5px;box-shadow:0 2px 0 #b98400}
+.rock{position:absolute;inset:-4%}
+.fence{position:absolute;inset:-6%;border-radius:50%;display:grid;place-items:center;background:repeating-linear-gradient(90deg,rgba(122,78,40,.95) 0 8px,rgba(0,0,0,0) 8px 14px);border:3px solid #5c3818;color:#fff;font-weight:900}
+.fence span{background:#5c3818;border-radius:10px;padding:1px 7px;font-size:13px}
+.barn{position:absolute;transform:translate(-50%,-50%);display:grid;place-items:center}
+.barn .bx{position:relative;width:100%;height:100%;border-radius:20px;background:linear-gradient(#d86a50,var(--barn) 55%,var(--barn2));box-shadow:inset 0 -6px 0 rgba(0,0,0,.25),0 6px 0 #6e2a1c,0 12px 16px rgba(0,0,0,.3);display:grid;place-items:center;transition:transform .12s}
+.barn.crowb .bx{background:linear-gradient(#5b5e92,var(--crow2) 55%,var(--crow));box-shadow:inset 0 -6px 0 rgba(0,0,0,.3),0 6px 0 #14152a,0 12px 16px rgba(0,0,0,.35)}
+.barn .bx:before{content:"";position:absolute;left:10%;right:10%;top:-9px;height:16px;background:inherit;clip-path:polygon(0 100%,50% 0,100% 100%);filter:brightness(.88)}
+.barn .num{font-size:30px;font-weight:900;color:#fff6e4;text-shadow:0 3px 0 rgba(0,0,0,.28);line-height:1}
+.barn .lbl{position:absolute;bottom:3px;font-size:10px;font-weight:800;letter-spacing:.08em;color:rgba(255,246,228,.8)}
+.barn.pop .bx{animation:pulse .3s ease-out}
+.barn.extra .bx:after{content:"";position:absolute;inset:-8px;border-radius:26px;border:4px solid #ffe58a;animation:ring .7s ease-out forwards}
+@keyframes ring{from{opacity:1;transform:scale(.9)}to{opacity:0;transform:scale(1.35)}}
+.flyseed{position:absolute;left:0;top:0;border-radius:50%;pointer-events:none;background:radial-gradient(circle at 35% 30%,#fff3b0,var(--seed) 45%,var(--seed2));box-shadow:0 3px 0 rgba(0,0,0,.25);z-index:20}
+.float{position:absolute;transform:translate(-50%,-50%);font-weight:900;font-size:26px;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.35),0 0 12px rgba(255,200,60,.9);pointer-events:none;z-index:30;white-space:nowrap}
+.float.bad{color:#ffd0c8;text-shadow:0 3px 0 rgba(90,10,10,.55)}
+#crow{position:absolute;width:64px;height:64px;transform:translate(-50%,-62%);transition:left .3s cubic-bezier(.3,1.4,.5,1),top .3s cubic-bezier(.3,1.4,.5,1);pointer-events:none;z-index:15}
+#crow.hop{animation:hop .3s}
+@keyframes hop{50%{translate:0 -14px}}
+#hand{position:absolute;width:64px;height:72px;pointer-events:none;z-index:25;transform:translate(-30%,-8%);animation:handbob .9s ease-in-out infinite}
+@keyframes handbob{50%{translate:0 -10px}}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60}
+.dock{display:flex;align-items:center;justify-content:center;gap:10px;min-height:76px;padding:6px 14px 14px}
+#caption{position:absolute;left:0;right:0;top:78px;text-align:center;font-size:26px;font-weight:900;color:var(--cream);text-shadow:0 3px 0 rgba(60,30,10,.55),0 0 18px rgba(60,30,10,.4);pointer-events:none;z-index:40;opacity:0;transition:opacity .3s}
+#caption.on{opacity:1}
+/* ---------- overlays ---------- */
+.veil{position:absolute;inset:0;background:rgba(40,25,10,.48);display:grid;place-items:center;z-index:50;padding:20px;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.card{background:var(--cream);border-radius:28px;padding:22px 20px 20px;width:100%;max-width:340px;text-align:center;box-shadow:0 8px 0 rgba(0,0,0,.14),0 24px 50px rgba(30,15,0,.4);animation:cardin .35s cubic-bezier(.2,1.5,.4,1)}
+@keyframes cardin{from{transform:scale(.8) translateY(20px);opacity:0}}
+.card h2{margin:0 0 4px;font-size:30px;line-height:1.05}
+.card p{margin:6px 0 14px;color:var(--ink2);font-weight:700}
+.card .btns{display:flex;flex-direction:column;gap:10px;align-items:stretch}
+.stars{display:flex;justify-content:center;gap:6px;margin:6px 0 4px}
+.stars svg{width:54px;height:54px;transform:scale(0)}
+.stars svg.on{animation:starin .5s cubic-bezier(.2,1.8,.4,1) forwards}
+@keyframes starin{from{transform:scale(0) rotate(-40deg)}to{transform:scale(1) rotate(0)}}
+.stars svg.dim{transform:scale(1);opacity:.35;filter:grayscale(1)}
+.bar{height:12px;background:#ead7b5;border-radius:8px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#ffd24a,#f29c1f)}
+.toast{position:absolute;left:50%;top:84px;transform:translateX(-50%);background:rgba(59,42,29,.92);color:var(--cream);border-radius:999px;padding:10px 18px;font-weight:800;z-index:55;animation:toast 2.2s forwards;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis}
+@keyframes toast{0%{opacity:0;translate:0 -10px}10%,85%{opacity:1;translate:0 0}100%{opacity:0}}
+/* ---------- valley ---------- */
+#valley{background:linear-gradient(#ffe0a6 0%,#ffeccd 28%,#d3ebd6 29%)}
+.vhud{display:flex;align-items:center;gap:10px;padding:12px 14px 4px;z-index:3}
+.coins{display:flex;align-items:center;gap:8px;background:var(--cream);border-radius:999px;padding:6px 16px 6px 8px;font-weight:900;font-size:22px;box-shadow:0 3px 0 rgba(0,0,0,.14)}
+.coin{width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff2a8,var(--coin) 50%,#d99a14);box-shadow:inset 0 -3px 0 rgba(0,0,0,.2),0 2px 0 rgba(0,0,0,.2);display:inline-block}
+.coins.bump{animation:pulse .25s}
+.streak{margin-left:auto;background:var(--cream);border-radius:999px;padding:8px 12px;font-weight:900;box-shadow:0 3px 0 rgba(0,0,0,.14)}
+#scene{position:relative;flex:1;min-height:0;overflow:hidden}
+.sun{position:absolute;right:12%;top:3%;width:64px;height:64px;border-radius:50%;background:radial-gradient(circle,#fff6c4,#ffd86a 60%,#ffc23d);box-shadow:0 0 50px 18px rgba(255,214,90,.5)}
+.hill{position:absolute;border-radius:50%}
+.h1{left:-30%;right:-10%;top:26%;height:70%;background:#a7d3a1}
+.h2{left:20%;right:-40%;top:38%;height:70%;background:#8fc78a}
+.h3{left:-20%;right:-20%;top:56%;height:80%;background:#79b874}
+.path{position:absolute;left:34%;top:62%;width:34%;height:46%;background:#e9cf9d;border-radius:46% 54% 30% 70%/30% 30% 70% 70%;transform:rotate(-6deg)}
+.b{position:absolute;transform:translate(-50%,-100%);transition:filter .3s}
+.b svg{display:block;width:100%;height:auto;overflow:visible}
+.b.new{animation:buildin .7s cubic-bezier(.2,1.6,.4,1)}
+@keyframes buildin{from{transform:translate(-50%,-100%) scale(0);}}
+.b.ghost svg{filter:brightness(0) opacity(.28)}
+.b.ghost{cursor:pointer}
+.tag{position:absolute;left:50%;top:-8px;transform:translateX(-50%);background:var(--cream);border-radius:999px;font-weight:900;font-size:14px;padding:3px 9px;white-space:nowrap;box-shadow:0 2px 0 rgba(0,0,0,.18);display:flex;gap:5px;align-items:center}
+.tag .coin{width:16px;height:16px}
+#stall{position:absolute;left:70%;top:97%;width:40%;transform:translate(-50%,-100%)}
+#stall svg{display:block;width:100%}
+#stall.glow{animation:hintp 1s infinite}
+#basketN{position:absolute;left:50%;top:-34px;transform:translateX(-50%);background:var(--cream);border-radius:999px;font-weight:900;padding:3px 12px;box-shadow:0 2px 0 rgba(0,0,0,.2);white-space:nowrap}
+#pipwrap{position:absolute;left:18%;top:96%;width:14%;transform:translateY(-100%);transition:left 6s linear}
+#pipwrap svg{width:100%;display:block}
+#pipbub{position:absolute;left:50%;top:-34px;transform:translateX(-50%);background:var(--cream);border-radius:999px;font-weight:900;padding:3px 10px;white-space:nowrap;box-shadow:0 2px 0 rgba(0,0,0,.2);display:flex;gap:4px;align-items:center;animation:handbob 1.2s infinite}
+.vdock{padding:10px 14px 16px;display:flex;flex-direction:column;gap:10px;z-index:3}
+.nextb{background:var(--cream);border-radius:20px;padding:10px 14px;box-shadow:0 3px 0 rgba(0,0,0,.14);display:flex;align-items:center;gap:12px;text-align:left}
+.nextb .nm{font-weight:900}
+.nextb .bar{margin:4px 0 0}
+.nextb .go{flex:none}
+.sellrow{display:flex;gap:8px}
+/* settings + debug */
+.set{display:flex;justify-content:space-between;align-items:center;padding:10px 0;font-weight:800;border-bottom:1px solid #ead7b5}
+.tog{width:52px;height:30px;border-radius:15px;background:#d9c7a6;position:relative;transition:.2s}
+.tog:after{content:"";position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 2px 0 rgba(0,0,0,.2)}
+.tog.on{background:var(--good)}.tog.on:after{left:25px}
+pre.log{max-height:240px;overflow:auto;text-align:left;font-size:11px;background:#2b2118;color:#cfe;border-radius:12px;padding:8px;user-select:text;-webkit-user-select:text}
+.ad{background:#fff;color:#222}
+.ad .fake{height:120px;border-radius:14px;background:repeating-linear-gradient(45deg,#e4e4e4 0 12px,#f1f1f1 12px 24px);display:grid;place-items:center;font-weight:900;color:#888;margin:8px 0}
+.adx{position:absolute;right:10px;top:10px;width:36px;height:36px;border-radius:50%;background:#00000022;font-weight:900;font-size:18px}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- ======== FIELD ======== -->
+  <section id="field" class="screen hidden">
+    <header class="hud">
+      <button class="icon" id="btnHome" aria-label="Valley"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M3 12 12 4l9 8v8h-6v-5H9v5H3z" fill="#c8553d"/></svg></button>
+      <div class="goal" id="goalBox">
+        <div class="row"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="13" rx="8" ry="9" fill="#f7c948"/><ellipse cx="9" cy="9" rx="2.5" ry="3" fill="#fff3b0"/></svg><span><span id="goalCur">0</span> / <span id="goalNum">0</span></span></div>
+        <div class="gbar" id="gbar"><i id="gfill"></i></div>
+      </div>
+      <div class="moves" id="moves" aria-label="Moves left"></div>
+    </header>
+    <div id="stage"><div id="board"></div></div>
+    <div id="caption"></div>
+    <footer class="dock">
+      <button class="pill ghost hidden" id="btnUndo">↶ Undo</button>
+      <button class="pill hidden" id="btnHint">Show a move</button>
+    </footer>
+  </section>
+
+  <!-- ======== VALLEY ======== -->
+  <section id="valley" class="screen hidden">
+    <header class="vhud">
+      <div class="coins" id="coinBox"><span class="coin" id="coinIcon"></span><span id="coinN">0</span></div>
+      <div class="streak hidden" id="streak"></div>
+      <button class="icon" id="btnSettings" aria-label="Settings" style="margin-left:auto"><svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="#7a604a" stroke-width="2.4"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1" stroke="#7a604a" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+    </header>
+    <div id="scene">
+      <div class="sun"></div><div class="hill h1"></div><div class="hill h2"></div><div class="hill h3"></div><div class="path"></div>
+      <div id="builds"></div>
+      <div id="stall"><div id="basketN"></div></div>
+      <div id="pipwrap" class="hidden"><div id="pipbub" class="hidden"></div></div>
+    </div>
+    <div class="vdock">
+      <div class="sellrow">
+        <button class="pill primary hidden" id="btnSell" style="flex:1"></button>
+        <button class="pill hidden" id="btnSell2" style="flex:none"></button>
+      </div>
+      <div class="nextb hidden" id="nextB"><div style="flex:1;min-width:0"><div class="nm" id="nextNm"></div><div class="bar"><i id="nextFill"></i></div></div><button class="pill go" id="nextGo">Build</button></div>
+      <button class="pill primary" id="btnPlay">Play</button>
+    </div>
+  </section>
+
+  <canvas id="fx"></canvas>
+  <div id="overlay"></div>
+</div>
+
+<script>/* Harvest Sow rules engine. Pure functions, no DOM. Shared by the browser game and the Node level tools.
+ *
+ * Slots (14): 0-5 your plots, 6 your barn, 7-12 the crows' plots, 13 crows' barn.
+ * Sowing runs 0 -> 13 -> 0 (counter-clockwise on screen). You skip the crows' barn, they skip yours.
+ * Rules (Kalah-style, chosen for clarity; swap for Ayo captures later behind one function):
+ *   - Last seed in YOUR barn            -> extra move
+ *   - Last seed in an EMPTY plot of yours, opposite plot has seeds -> harvest both into your barn
+ *   - Rocks are skipped by sowing. Fences lock a plot of yours until your barn reaches `unlock`.
+ *   - Gold plot: a harvest touching it pays +2 bonus.
+ *   - Goal: barn >= lv.goal within lv.moves of your sows.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.Sow = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  const P_BARN = 6, C_BARN = 13;
+  const barnOf = (who) => (who === 0 ? P_BARN : C_BARN);
+  const owns = (who, slot) => (who === 0 ? slot >= 0 && slot <= 5 : slot >= 7 && slot <= 12);
+
+  function makeState(lv) {
+    const s = new Array(14).fill(0);
+    for (let i = 0; i < 6; i++) { s[i] = lv.seeds[i]; s[7 + i] = lv.seeds[6 + i]; }
+    return { s, turn: 0, used: 0, status: 'play' };
+  }
+  const clone = (st) => ({ s: st.s.slice(), turn: st.turn, used: st.used, status: st.status });
+
+  function isLocked(lv, st, slot) {
+    if (!lv.fences) return false;
+    for (const f of lv.fences) if (f.slot === slot && st.s[P_BARN] < f.unlock) return true;
+    return false;
+  }
+
+  function legalMoves(lv, st, who) {
+    const out = [];
+    const base = who === 0 ? 0 : 7;
+    for (let k = 0; k < 6; k++) {
+      const slot = base + k;
+      if (st.s[slot] > 0 && !(lv.rocks && lv.rocks.includes(slot)) && !(who === 0 && isLocked(lv, st, slot))) out.push(slot);
+    }
+    return out;
+  }
+
+  function sweep(n) {
+    for (let i = 0; i < 6; i++) { n.s[P_BARN] += n.s[i]; n.s[i] = 0; }
+    for (let i = 7; i < 13; i++) { n.s[C_BARN] += n.s[i]; n.s[i] = 0; }
+  }
+
+  // Apply one sow. Returns { state, events }. opts.noLimit ignores the move budget (used by AI search).
+  function applyMove(lv, st, slot, opts) {
+    opts = opts || {};
+    const ev = [];
+    const n = clone(st);
+    const who = n.turn;
+    const rocks = lv.rocks || [];
+    const gold = lv.gold || [];
+    let seeds = n.s[slot];
+    n.s[slot] = 0;
+    ev.push({ t: 'lift', slot, n: seeds, who });
+    const skip = who === 0 ? C_BARN : P_BARN;
+    let pos = slot;
+    while (seeds > 0) {
+      pos = (pos + 1) % 14;
+      if (pos === skip || rocks.includes(pos)) continue;
+      n.s[pos]++; seeds--;
+      ev.push({ t: 'drop', slot: pos, who });
+    }
+    const last = pos;
+    let extra = false;
+    if (last === barnOf(who)) {
+      extra = true; ev.push({ t: 'extra', who });
+    } else if (owns(who, last) && n.s[last] === 1) {
+      const opp = 12 - last;
+      if (n.s[opp] > 0) {
+        const bonus = gold.includes(last) || gold.includes(opp) ? 2 : 0;
+        const amount = n.s[opp] + 1;
+        n.s[opp] = 0; n.s[last] = 0; n.s[barnOf(who)] += amount + bonus;
+        ev.push({ t: 'harvest', who, from: last, opp, amount, bonus });
+      }
+    }
+    if (who === 0) n.used++;
+    if (who === 0 && n.s[P_BARN] >= lv.goal) { n.status = 'won'; return { state: n, events: ev }; }
+    if (!extra) n.turn = 1 - who;
+    if (legalMoves(lv, n, n.turn).length === 0) {
+      sweep(n); ev.push({ t: 'sweep' });
+      n.status = n.s[P_BARN] >= lv.goal ? 'won' : 'lost';
+    } else if (who === 0 && !opts.noLimit && n.used >= lv.moves) {
+      n.status = 'lost';
+    }
+    return { state: n, events: ev };
+  }
+
+  // ---- Crows AI ----------------------------------------------------------------------------
+  function evalState(st) {
+    if (st.status === 'won') return -1000;
+    if (st.status === 'lost') return 1000;
+    let cp = 0, pp = 0;
+    for (let i = 0; i < 6; i++) { pp += st.s[i]; cp += st.s[7 + i]; }
+    return st.s[C_BARN] - 1.5 * st.s[P_BARN] + 0.1 * (cp - pp);
+  }
+  function search(lv, st, depth) {
+    if (st.status !== 'play' || depth === 0) return evalState(st);
+    const moves = legalMoves(lv, st, st.turn);
+    if (!moves.length) return evalState(st);
+    let best = st.turn === 1 ? -Infinity : Infinity;
+    for (const m of moves) {
+      const v = search(lv, applyMove(lv, st, m, { noLimit: true }).state, depth - 1);
+      if (st.turn === 1 ? v > best : v < best) best = v;
+    }
+    return best;
+  }
+  // depth 0: lowest plot (harmless, predictable). depth 1: greedy. 2-3: looks ahead. Ties -> lowest slot.
+  function chooseCrow(lv, st, depth) {
+    const moves = legalMoves(lv, st, 1);
+    if (depth <= 0) return moves[0];
+    let bestM = moves[0], bestV = -Infinity;
+    for (const m of moves) {
+      const v = search(lv, applyMove(lv, st, m, { noLimit: true }).state, depth - 1);
+      if (v > bestV + 1e-9) { bestV = v; bestM = m; }
+    }
+    return bestM;
+  }
+  // Run the crows' whole turn (they may chain extra moves). Returns { state, turns:[{slot,events}] }.
+  function crowsTurn(lv, st) {
+    let cur = st; const turns = [];
+    while (cur.status === 'play' && cur.turn === 1) {
+      const m = chooseCrow(lv, cur, lv.crowDepth || 0);
+      const r = applyMove(lv, cur, m, { noLimit: true });
+      turns.push({ slot: m, events: r.events });
+      cur = r.state;
+    }
+    return { state: cur, turns };
+  }
+  // One full player move plus the crows' reply (what the solver explores).
+  function step(lv, st, slot) {
+    const r = applyMove(lv, st, slot);
+    if (r.state.status === 'play' && r.state.turn === 1) return crowsTurn(lv, r.state).state;
+    return r.state;
+  }
+
+  // ---- Solver ------------------------------------------------------------------------------
+  const key = (st, left) => st.s.join(',') + '|' + st.turn + '|' + left;
+  // Iterative deepening: shortest winning line from st (or null). Proves solvability.
+  function solve(lv, st, opts) {
+    opts = opts || {};
+    const maxLeft = Math.min(opts.maxMoves || lv.moves - st.used, lv.moves - st.used);
+    const cap = opts.nodeCap || 400000;
+    let nodes = 0, capped = false;
+    for (let d = 1; d <= maxLeft; d++) {
+      const dead = new Set();
+      const dfs = (s, left) => {
+        if (s.status === 'won') return [];
+        if (s.status !== 'play' || left === 0) return null;
+        if (++nodes > cap) { capped = true; return null; }
+        const k = key(s, left);
+        if (dead.has(k)) return null;
+        for (const m of legalMoves(lv, s, 0)) {
+          const r = dfs(step(lv, s, m), left - 1);
+          if (r) return [m].concat(r);
+          if (capped) return null;
+        }
+        dead.add(k);
+        return null;
+      };
+      const line = dfs(st, d);
+      if (line) return { line, moves: line.length, nodes };
+      if (capped) return { line: null, capped: true, nodes };
+    }
+    return { line: null, nodes };
+  }
+  // Best barn reachable within `left` more moves (memoised). Used to set fair goals.
+  function maxBarn(lv, st, left, memo) {
+    memo = memo || new Map();
+    if (st.status === 'won') return st.s[P_BARN];
+    if (st.status !== 'play' || left === 0) return st.s[P_BARN];
+    const k = key(st, left);
+    if (memo.has(k)) return memo.get(k);
+    let best = st.s[P_BARN];
+    for (const m of legalMoves(lv, st, 0)) {
+      const v = maxBarn(lv, step(lv, st, m), left - 1, memo);
+      if (v > best) best = v;
+    }
+    memo.set(k, best);
+    return best;
+  }
+  // Fraction of random-play rollouts that win. Low = hard. Deterministic with a seeded rng.
+  function randomWinRate(lv, rng, trials) {
+    let wins = 0;
+    for (let t = 0; t < trials; t++) {
+      let st = makeState(lv);
+      while (st.status === 'play') {
+        const mv = legalMoves(lv, st, 0);
+        if (!mv.length) break;
+        st = step(lv, st, mv[Math.floor(rng() * mv.length)]);
+      }
+      if (st.status === 'won') wins++;
+    }
+    return wins / trials;
+  }
+
+  return { P_BARN, C_BARN, barnOf, owns, makeState, clone, isLocked, legalMoves, applyMove,
+    chooseCrow, crowsTurn, step, solve, maxBarn, randomWinRate };
+});
+</script>
+<script>/* generated by tools/gen-levels.js - do not edit by hand */
+(function(r){r.LEVELS=[{"rocks":[],"fences":[],"gold":[],"name":"First seed","twist":"tap","crowDepth":0,"goal":1,"moves":2,"seeds":[0,0,0,0,0,1,1,0,2,0,1,1],"par":1,"line":[5],"slack":1,"winRate":1,"id":1},{"rocks":[],"fences":[],"gold":[],"name":"Empty plot","twist":"harvest","crowDepth":0,"goal":5,"moves":3,"seeds":[0,2,0,0,1,0,4,0,0,2,0,1],"par":1,"line":[4],"slack":2,"winRate":0.48,"id":2},{"rocks":[],"fences":[],"gold":[],"name":"Barn chain","twist":"extra","crowDepth":0,"goal":6,"moves":5,"seeds":[0,0,4,0,1,0,0,3,0,2,0,0],"par":3,"line":[2,4,3],"slack":2,"winRate":0.227,"id":3},{"name":"Meadow","twist":"plain","crowDepth":0,"moves":4,"seeds":[5,2,4,5,4,4,5,1,2,1,4,4],"rocks":[],"fences":[],"gold":[],"goal":6,"par":2,"line":[3,1],"slack":2,"winRate":0.093,"tries":2,"id":4},{"name":"Crows wake","twist":"crows","crowDepth":1,"moves":4,"seeds":[5,1,3,2,4,5,3,4,3,5,3,3],"rocks":[],"fences":[],"gold":[],"goal":5,"par":2,"line":[2,1],"slack":2,"winRate":0.153,"tries":4,"id":5},{"name":"First rock","twist":"rocks","crowDepth":1,"moves":5,"seeds":[2,2,4,3,5,3,2,4,0,3,5,5],"rocks":[9],"fences":[],"gold":[],"goal":6,"par":3,"line":[0,1,0],"slack":2,"winRate":0.153,"tries":4,"id":6},{"name":"Stone path","twist":"rocks","crowDepth":1,"moves":5,"seeds":[1,0,0,1,5,5,5,4,5,4,2,2],"rocks":[2,1],"fences":[],"gold":[],"goal":3,"par":3,"line":[4,5,0],"slack":2,"winRate":0.573,"tries":6,"id":7},{"name":"Breather","twist":"plain","crowDepth":1,"moves":5,"seeds":[1,5,1,5,0,3,5,4,4,4,3,2],"rocks":[4],"fences":[],"gold":[],"goal":3,"par":2,"line":[3,2],"slack":3,"winRate":0.753,"tries":12,"id":8},{"name":"Sharp crows","twist":"smart","crowDepth":2,"moves":5,"seeds":[3,1,5,1,1,4,5,3,3,3,3,4],"rocks":[],"fences":[],"gold":[],"goal":4,"par":3,"line":[2,4,0],"slack":2,"winRate":0.087,"tries":28,"id":9},{"name":"Hedge row","twist":"smart","crowDepth":2,"moves":6,"seeds":[1,4,4,3,3,2,4,3,2,3,5,0],"rocks":[12],"fences":[],"gold":[],"goal":6,"par":3,"line":[0,1,0],"slack":3,"winRate":0.107,"tries":7,"id":10},{"name":"The fence","twist":"fence","crowDepth":1,"moves":5,"seeds":[3,4,3,1,5,2,4,3,3,5,5,4],"rocks":[],"fences":[{"slot":1,"unlock":2}],"gold":[],"goal":9,"par":4,"line":[3,4,5,0],"slack":1,"winRate":0.133,"tries":10,"id":11},{"name":"Gate keeper","twist":"fence","crowDepth":2,"moves":6,"seeds":[1,1,3,4,1,5,4,5,3,3,1,5],"rocks":[],"fences":[{"slot":4,"unlock":2}],"gold":[],"goal":6,"par":5,"line":[1,2,3,4,0],"slack":1,"winRate":0.053,"tries":3,"id":12},{"name":"Gold plot","twist":"gold","crowDepth":1,"moves":5,"seeds":[2,3,1,2,3,5,2,3,5,5,3,2],"rocks":[],"fences":[],"gold":[2],"goal":8,"par":4,"line":[0,1,2,0],"slack":1,"winRate":0.093,"tries":61,"id":13},{"name":"Golden hour","twist":"gold","crowDepth":2,"moves":6,"seeds":[1,3,4,2,5,3,4,4,1,0,5,5],"rocks":[10],"fences":[],"gold":[4],"goal":8,"par":4,"line":[1,3,3,0],"slack":2,"winRate":0.047,"tries":9,"id":14},{"name":"Locked gold","twist":"mix","crowDepth":2,"moves":6,"seeds":[5,1,3,3,1,5,3,1,1,5,4,3],"rocks":[],"fences":[{"slot":2,"unlock":2}],"gold":[5],"goal":6,"par":4,"line":[0,5,4,1],"slack":2,"winRate":0.047,"tries":15,"id":15},{"name":"Breather II","twist":"plain","crowDepth":1,"moves":5,"seeds":[4,1,5,1,1,2,1,2,4,0,5,3],"rocks":[10],"fences":[],"gold":[1],"goal":3,"par":2,"line":[4,3],"slack":3,"winRate":0.513,"tries":2,"id":16},{"name":"Stone & gold","twist":"mix","crowDepth":2,"moves":6,"seeds":[0,3,3,2,5,2,4,0,5,1,2,4],"rocks":[8,0],"fences":[],"gold":[1],"goal":5,"par":4,"line":[1,2,1,3],"slack":2,"winRate":0.253,"tries":8,"id":17},{"name":"Gatehouse","twist":"mix","crowDepth":3,"moves":6,"seeds":[1,0,3,4,3,4,5,5,5,4,1,2],"rocks":[1],"fences":[{"slot":3,"unlock":2}],"gold":[],"goal":6,"par":5,"line":[5,2,5,3,0],"slack":1,"winRate":0.047,"tries":60,"id":18},{"name":"Crow council","twist":"smart","crowDepth":3,"moves":6,"seeds":[1,3,0,3,4,4,1,5,1,4,4,3],"rocks":[2],"fences":[],"gold":[1],"goal":6,"par":4,"line":[0,5,1,0],"slack":2,"winRate":0.04,"tries":16,"id":19},{"name":"Last light","twist":"mix","crowDepth":3,"moves":7,"seeds":[0,2,1,2,5,5,5,3,3,3,4,3],"rocks":[0],"fences":[{"slot":3,"unlock":2}],"gold":[2],"goal":9,"par":6,"line":[1,1,4,1,1,1],"slack":1,"winRate":0.04,"tries":14,"id":20}];if(typeof module==="object")module.exports=r.LEVELS;})(typeof self!=="undefined"?self:this);
+</script>
+<script>
+"use strict";
+const E = Sow, LEVELS = self.LEVELS;
+const Q = new URLSearchParams(location.search);
+const FAST = Q.has('fast');            // shrink ad/time gates for testing
+const DEBUG = Q.has('debug');
+const AD_GATE_MS = FAST ? 20000 : 180000;
+const $ = (s) => document.querySelector(s);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+/* ============================ SAVE ============================ */
+const KEY = 'harvest-sow-proto-v1';
+const defSave = () => ({ level: 0, stars: [], coins: 10, basket: 0, built: ['cottage'], helper: { hired: false, last: 0, boostUntil: 0 },
+  ftue: {}, settings: { sound: true, haptics: true, reduce: matchMedia('(prefers-reduced-motion: reduce)').matches }, daily: { last: '', streak: 0 }, sessions: 0, firstOpen: Date.now(), log: [] });
+let save;
+try { save = Object.assign(defSave(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { save = defSave(); }
+if (Q.has('reset')) { save = defSave(); }
+const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) {} };
+save.sessions++; persist();
+
+/* ============================ ANALYTICS (local; same event names we will send to a real SDK) ============================ */
+const T0 = performance.now();
+const sinceOpen = () => Math.round(performance.now() - T0);
+const marks = {};
+function track(name, props) {
+  const row = { t: sinceOpen(), n: name, p: props || {} };
+  if (!(name in marks)) marks[name] = row.t;
+  save.log.push(row); if (save.log.length > 400) save.log.shift(); persist();
+  if (DEBUG) console.log('[evt]', row.t, name, JSON.stringify(row.p));
+}
+track('app_open', { session: save.sessions });
+
+/* ============================ AUDIO + HAPTICS ============================ */
+const Audio_ = {
+  ctx: null,
+  init() { if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return; } try { this.ctx = new (self.AudioContext || self.webkitAudioContext)(); } catch (e) {} },
+  tone(f, d, type = 'sine', v = 0.16, slideTo, delay = 0) {
+    if (!save.settings.sound || !this.ctx) return; const c = this.ctx, t = c.currentTime + delay;
+    const o = c.createOscillator(), g = c.createGain(); o.type = type; o.frequency.setValueAtTime(f, t);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + d);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g).connect(c.destination); o.start(t); o.stop(t + d + 0.02);
+  },
+  noise(d, v = 0.12, f0 = 900, delay = 0) {
+    if (!save.settings.sound || !this.ctx) return; const c = this.ctx, t = c.currentTime + delay;
+    const b = c.createBuffer(1, c.sampleRate * d, c.sampleRate), a = b.getChannelData(0); for (let i = 0; i < a.length; i++) a[i] = (Math.random() * 2 - 1) * (1 - i / a.length);
+    const s = c.createBufferSource(); s.buffer = b; const fl = c.createBiquadFilter(); fl.type = 'bandpass'; fl.frequency.value = f0; const g = c.createGain(); g.gain.value = v;
+    s.connect(fl).connect(g).connect(c.destination); s.start(t);
+  }
+};
+const SCALE = [0, 2, 4, 7, 9];                      // major pentatonic: any run of sowing sounds like music
+const note = (i, base = 261.63) => base * Math.pow(2, (SCALE[i % 5] + 12 * Math.floor(i / 5)) / 12);
+const sfx = {
+  lift() { Audio_.tone(196, .12, 'sine', .14, 330); Audio_.noise(.08, .05, 600); },
+  drop(i) { const f = note(clamp(i, 0, 14)); Audio_.tone(f, .16, 'sine', .17); Audio_.tone(f * 2, .08, 'triangle', .05); },
+  barn() { Audio_.tone(523, .5, 'sine', .15); Audio_.tone(1046, .4, 'sine', .07); Audio_.tone(784, .45, 'triangle', .06, 0, .05); },
+  extra() { [0, 2, 4, 7].forEach((n, i) => Audio_.tone(note(n + 5), .14, 'triangle', .13, 0, i * .06)); },
+  harvest() { [0, 1, 2, 3, 5].forEach((n, i) => Audio_.tone(note(n + 5), .26, 'sine', .15, 0, i * .07)); Audio_.noise(.15, .09, 2200, .02); },
+  steal() { Audio_.tone(330, .25, 'sawtooth', .1, 110); },
+  caw() { Audio_.tone(620, .22, 'sawtooth', .07, 340); Audio_.noise(.2, .06, 1400); },
+  no() { Audio_.tone(150, .12, 'square', .06); },
+  coin(i) { Audio_.tone(note(i + 6, 392), .16, 'triangle', .13); Audio_.tone(note(i + 6, 392) * 1.5, .1, 'sine', .05); },
+  ui() { Audio_.tone(520, .06, 'triangle', .08); },
+  win() { [0, 2, 4, 5, 7, 9].forEach((n, i) => Audio_.tone(note(n + 5), .4, 'sine', .14, 0, i * .09)); },
+  star(i) { Audio_.tone(note(4 + i * 2, 392), .35, 'triangle', .16); },
+  fail() { Audio_.tone(392, .35, 'sine', .11, 330); Audio_.tone(330, .5, 'sine', .1, 262, .2); },
+  build() { Audio_.noise(.25, .12, 300); [0, 2, 4, 7, 9].forEach((n, i) => Audio_.tone(note(n + 5), .3, 'triangle', .13, 0, .1 + i * .07)); }
+};
+const buzz = (p) => { if (save.settings.haptics && navigator.vibrate) try { navigator.vibrate(p); } catch (e) {} };
+
+/* ============================ FX (particles) ============================ */
+const fx = $('#fx'), fctx = fx.getContext('2d'); let parts = [], fxRun = false;
+function fxSize() { const d = devicePixelRatio || 1; fx.width = innerWidth * d; fx.height = innerHeight * d; fctx.setTransform(d, 0, 0, d, 0, 0); }
+addEventListener('resize', fxSize); fxSize();
+function burst(x, y, o = {}) {
+  const n = save.settings.reduce ? Math.ceil((o.n || 18) / 3) : (o.n || 18), cols = o.colors || ['#ffd24a', '#fff3b0', '#f29c1f'];
+  for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, s = (o.speed || 5) * (0.4 + Math.random());
+    parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - (o.up || 2), g: o.g ?? 0.22, life: 1, dec: 0.012 + Math.random() * 0.018, r: (o.size || 5) * (0.6 + Math.random() * 0.8), c: cols[(Math.random() * cols.length) | 0], shape: o.shape || 'c', rot: Math.random() * 6, vr: (Math.random() - .5) * .3 }); }
+  if (!fxRun) { fxRun = true; requestAnimationFrame(fxLoop); }
+}
+function petals(n = 60) {
+  if (save.settings.reduce) n = 14;
+  for (let i = 0; i < n; i++) parts.push({ x: Math.random() * innerWidth, y: -20 - Math.random() * 200, vx: (Math.random() - .5) * 2, vy: 2 + Math.random() * 3, g: .03, life: 1, dec: .004 + Math.random() * .004, r: 5 + Math.random() * 5, c: ['#ffd24a', '#ff8a65', '#9be37a', '#ffb4c8', '#8fd3ff'][(Math.random() * 5) | 0], shape: 'p', rot: Math.random() * 6, vr: (Math.random() - .5) * .3 });
+  if (!fxRun) { fxRun = true; requestAnimationFrame(fxLoop); }
+}
+function fxLoop() {
+  fctx.clearRect(0, 0, innerWidth, innerHeight);
+  parts = parts.filter((p) => p.life > 0);
+  for (const p of parts) { p.x += p.vx; p.y += p.vy; p.vy += p.g; p.life -= p.dec; p.rot += p.vr; fctx.globalAlpha = clamp(p.life * 1.5, 0, 1); fctx.fillStyle = p.c;
+    if (p.shape === 'p') { fctx.save(); fctx.translate(p.x, p.y); fctx.rotate(p.rot); fctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r); fctx.restore(); }
+    else { fctx.beginPath(); fctx.arc(p.x, p.y, p.r, 0, 6.3); fctx.fill(); } }
+  fctx.globalAlpha = 1;
+  if (parts.length) requestAnimationFrame(fxLoop); else fxRun = false;
+}
+
+/* ============================ ART (original flat SVG, drawn in code) ============================ */
+const ART = {
+  star: (c = '#ffc93c') => `<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.1 6.6.9-4.8 4.6 1.2 6.6L12 17.4l-5.9 3.3 1.2-6.6L2.5 9.5l6.6-.9z" fill="${c}" stroke="#b9760f" stroke-width="1.4" stroke-linejoin="round"/></svg>`,
+  crow: `<svg viewBox="0 0 64 64"><ellipse cx="30" cy="40" rx="20" ry="14" fill="#2a2c4a"/><circle cx="46" cy="26" r="10" fill="#34375c"/><path d="M55 25l9 3-9 4z" fill="#f0a23c"/><circle cx="48" cy="24" r="2.6" fill="#fff"/><circle cx="49" cy="24" r="1.2" fill="#111"/><path d="M12 38c-6 0-10 6-10 6s8 2 14 0z" fill="#1f2038"/><path d="M22 36c8-10 20-6 22 4-8 4-18 2-22-4z" fill="#4d507f"/><path d="M26 52l-2 8M34 53l0 8" stroke="#f0a23c" stroke-width="3" stroke-linecap="round"/></svg>`,
+  hand: `<svg viewBox="0 0 64 72"><circle cx="22" cy="14" r="13" fill="none" stroke="#fff" stroke-width="4" opacity=".9"><animate attributeName="r" values="6;18" dur=".9s" repeatCount="indefinite"/><animate attributeName="opacity" values=".9;0" dur=".9s" repeatCount="indefinite"/></circle><path d="M18 10c0-4 6-4 6 0v22l4-3c3-2 6 1 4 4l-4 14c-1 4-4 6-8 6-6 0-10-4-10-9V30c0-3 5-3 5 0z" fill="#fff" stroke="#3b2a1d" stroke-width="3" stroke-linejoin="round" transform="translate(4 8)"/></svg>`,
+  cottage: `<svg viewBox="0 0 90 80"><polygon points="6,38 45,6 84,38" fill="#c8553d"/><polygon points="6,38 45,6 45,12 14,38" fill="#a8412d"/><rect x="13" y="38" width="64" height="36" rx="4" fill="#f2d7a8"/><rect x="38" y="48" width="16" height="26" rx="3" fill="#8f5d36"/><rect x="19" y="45" width="12" height="12" rx="2" fill="#9fd3e6"/><rect x="60" y="45" width="12" height="12" rx="2" fill="#9fd3e6"/><rect x="58" y="12" width="9" height="16" fill="#8f5d36"/></svg>`,
+  well: `<svg viewBox="0 0 70 70"><rect x="10" y="30" width="50" height="34" rx="6" fill="#b9b2a3"/><rect x="10" y="30" width="50" height="8" rx="4" fill="#d3ccbc"/><rect x="14" y="8" width="4" height="26" fill="#8f5d36"/><rect x="52" y="8" width="4" height="26" fill="#8f5d36"/><polygon points="8,12 35,0 62,12" fill="#c8553d"/><rect x="33" y="14" width="4" height="14" fill="#5c3818"/><rect x="29" y="26" width="12" height="9" rx="2" fill="#8f5d36"/></svg>`,
+  flowers: `<svg viewBox="0 0 80 40"><rect x="2" y="26" width="76" height="12" rx="6" fill="#8f5d36"/><g stroke="#4f8a3f" stroke-width="3" stroke-linecap="round"><path d="M14 26v-10M30 26v-14M46 26v-12M62 26v-10"/></g><circle cx="14" cy="14" r="6" fill="#ff8aa8"/><circle cx="30" cy="9" r="6" fill="#ffd24a"/><circle cx="46" cy="12" r="6" fill="#ff8aa8"/><circle cx="62" cy="14" r="6" fill="#8fd3ff"/></svg>`,
+  windmill: `<svg viewBox="0 0 90 110"><polygon points="28,106 62,106 54,38 36,38" fill="#f2d7a8"/><polygon points="32,38 58,38 45,18" fill="#c8553d"/><rect x="40" y="82" width="10" height="24" rx="3" fill="#8f5d36"/><g style="transform-origin:45px 36px;animation:spin 6s linear infinite"><path d="M45 36L40 0 50 0zM45 36l36 -5 0 10zM45 36l5 36 -10 0zM45 36l-36 5 0 -10z" fill="#fff6e4" stroke="#8f5d36" stroke-width="2" stroke-linejoin="round"/></g><circle cx="45" cy="36" r="5" fill="#8f5d36"/></svg>`,
+  scarecrow: `<svg viewBox="0 0 70 100"><rect x="32" y="26" width="6" height="70" fill="#8f5d36"/><rect x="6" y="40" width="58" height="6" rx="3" fill="#8f5d36"/><rect x="22" y="34" width="26" height="30" rx="5" fill="#5b86c9"/><circle cx="35" cy="22" r="11" fill="#f1cf94"/><ellipse cx="35" cy="14" rx="20" ry="4" fill="#d9a441"/><path d="M24 14c0-14 22-14 22 0z" fill="#d9a441"/><circle cx="31" cy="22" r="1.8" fill="#222"/><circle cx="39" cy="22" r="1.8" fill="#222"/></svg>`,
+  tree: `<svg viewBox="0 0 80 100"><rect x="34" y="56" width="12" height="42" rx="4" fill="#8f5d36"/><circle cx="40" cy="38" r="28" fill="#5a9c4a"/><circle cx="24" cy="48" r="18" fill="#6aa84f"/><circle cx="56" cy="46" r="18" fill="#6aa84f"/><circle cx="34" cy="30" r="5" fill="#ff8a65"/><circle cx="50" cy="40" r="5" fill="#ff8a65"/></svg>`,
+  stall: `<svg viewBox="0 0 120 100"><rect x="10" y="40" width="6" height="58" fill="#8f5d36"/><rect x="104" y="40" width="6" height="58" fill="#8f5d36"/><path d="M0 40l10-30h100l10 30z" fill="#fff6e4"/><path d="M10 10h20l-4 30H0zM50 10h20l-2 30H46zM90 10h20l10 30H92z" fill="#c8553d"/><rect x="6" y="64" width="108" height="22" rx="4" fill="#a8703f"/><rect x="6" y="64" width="108" height="6" rx="3" fill="#c8915b"/><ellipse cx="34" cy="62" rx="14" ry="6" fill="#f7c948"/><ellipse cx="62" cy="62" rx="12" ry="5" fill="#ff8a65"/><ellipse cx="88" cy="62" rx="12" ry="5" fill="#9be37a"/></svg>`,
+  pip: `<svg viewBox="0 0 50 80"><ellipse cx="25" cy="76" rx="14" ry="3" fill="rgba(0,0,0,.18)"/><rect x="14" y="36" width="22" height="30" rx="7" fill="#5b86c9"/><rect x="10" y="38" width="8" height="20" rx="4" fill="#f1cf94"/><rect x="32" y="38" width="8" height="20" rx="4" fill="#f1cf94"/><rect x="16" y="64" width="7" height="12" rx="3" fill="#6b4226"/><rect x="27" y="64" width="7" height="12" rx="3" fill="#6b4226"/><circle cx="25" cy="26" r="11" fill="#f1cf94"/><ellipse cx="25" cy="19" rx="19" ry="4" fill="#e3b04b"/><path d="M15 19c0-12 20-12 20 0z" fill="#e3b04b"/><circle cx="21" cy="27" r="1.6" fill="#222"/><circle cx="29" cy="27" r="1.6" fill="#222"/><path d="M21 32q4 3 8 0" stroke="#a24b2a" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>`,
+  rock: `<svg viewBox="0 0 64 64"><path d="M6 50c-2-14 8-34 24-36 18-2 30 14 28 34-6 6-46 8-52 2z" fill="#9c9a94"/><path d="M14 26c4-8 12-12 20-10-8 2-14 8-16 16z" fill="#c4c2bb"/><path d="M22 52c14 2 28 0 34-6l2 4c-8 8-32 8-36 2z" fill="#7a7872"/></svg>`,
+  lock: `<svg width="16" height="16" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="12" rx="3" fill="#ffd24a"/><path d="M8 10V7a4 4 0 018 0v3" stroke="#ffd24a" stroke-width="3" fill="none"/></svg>`
+};
+const styleEl = document.createElement('style'); styleEl.textContent = '@keyframes spin{to{transform:rotate(360deg)}}'; document.head.appendChild(styleEl);
+
+/* ============================ SCREENS ============================ */
+function show(name) { for (const s of ['field', 'valley']) $('#' + s).classList.toggle('hidden', s !== name); }
+function toast(t) { document.querySelectorAll('.toast').forEach((x) => x.remove()); const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; $('#app').appendChild(d); setTimeout(() => d.remove(), 2300); }
+function veil(html, cls = '') { const v = document.createElement('div'); v.className = 'veil ' + cls; v.innerHTML = html; $('#overlay').appendChild(v); return v; }
+function clearVeils() { $('#overlay').innerHTML = ''; }
+
+/* ============================ FIELD ============================ */
+let cur = 0, lv, st, view, busy = false, undoSt = null, undoUsed = false, reviveUsed = false, idleT = 0, hintSlot = -1, lvT0 = 0, freeHintUsed = false, geom = {};
+const board = $('#board');
+
+function slotPos(slot) {
+  const W = board.clientWidth, H = board.clientHeight;
+  const colL = W * 0.285, colR = W * 0.715, top = H * 0.205, bot = H * 0.795, step = (bot - top) / 5;
+  if (slot <= 5) return { x: colL, y: top + step * slot };
+  if (slot === 6) return { x: W / 2, y: H * 0.925 };
+  if (slot <= 12) return { x: colR, y: bot - step * (slot - 7) };
+  return { x: W / 2, y: H * 0.075 };
+}
+function buildBoard() {
+  board.innerHTML = '<div class="tray"></div><div class="lane"></div>';
+  for (let s = 0; s < 14; s++) {
+    const el = document.createElement('div'); el.id = 's' + s;
+    if (s === 6 || s === 13) { el.className = 'barn' + (s === 13 ? ' crowb' : ''); el.innerHTML = '<div class="bx"><span class="num">0</span><span class="lbl">' + (s === 6 ? 'BARN' : 'CROWS') + '</span></div>'; }
+    else {
+      el.className = 'slot' + (s >= 7 ? ' crow-plot' : '');
+      const rock = lv.rocks.includes(s);
+      el.innerHTML = rock ? '<div class="rock">' + ART.rock + '</div>' : '<div class="mound"><div class="seeds"></div><span class="cnt hidden"></span></div>';
+      if (!rock && lv.gold.includes(s)) { el.classList.add('gold'); el.querySelector('.mound').insertAdjacentHTML('beforeend', '<span class="gold-tag">+2</span>'); }
+      const f = lv.fences.find((q) => q.slot === s);
+      if (f) { el.insertAdjacentHTML('beforeend', '<div class="fence" data-f="' + s + '"><span>' + ART.lock + ' ' + f.unlock + '</span></div>'); }
+      if (!rock) el.addEventListener('pointerdown', (e) => { e.preventDefault(); onTap(s); });
+    }
+    board.appendChild(el);
+  }
+  board.insertAdjacentHTML('beforeend', '<div id="crow">' + ART.crow + '</div><div id="hand" class="hidden">' + ART.hand + '</div>');
+  layout();
+}
+function layout() {
+  if (!lv) return;
+  const W = board.clientWidth, H = board.clientHeight, step = (H * 0.59) / 5;
+  const R = Math.min(step * 0.88, W * 0.30); geom.R = R;
+  for (let s = 0; s < 14; s++) {
+    const el = $('#s' + s); if (!el) continue; const p = slotPos(s);
+    el.style.left = p.x + 'px'; el.style.top = p.y + 'px';
+    if (s === 6 || s === 13) { el.style.width = W * 0.46 + 'px'; el.style.height = H * 0.105 + 'px'; }
+    else { el.style.width = el.style.height = R + 'px'; }
+  }
+  const c = $('#crow'); if (c && !c.dataset.at) { const p = slotPos(13); c.style.left = p.x + W * 0.28 + 'px'; c.style.top = p.y + 'px'; }
+  renderAll();
+}
+const PHI = 2.399963;
+function drawSlot(s) {
+  const el = $('#s' + s); if (!el) return; const n = view[s];
+  if (s === 6 || s === 13) { el.querySelector('.num').textContent = n; return; }
+  if (lv.rocks.includes(s)) return;
+  const R = geom.R || 60, box = el.querySelector('.seeds'), cap = 14, k = Math.min(n, cap);
+  const d = clamp(0.21 * R - k * 0.006 * R, 0.12 * R, 0.2 * R), sp = d * 0.82; let h = '';
+  for (let i = 0; i < k; i++) { const r = sp * Math.sqrt(i + 0.5), a = i * PHI; h += '<i class="sd" style="width:' + d + 'px;height:' + d + 'px;left:' + (R / 2 + Math.cos(a) * r - d / 2) + 'px;top:' + (R / 2 + Math.sin(a) * r - d / 2) + 'px"></i>'; }
+  box.innerHTML = h;
+  const cn = el.querySelector('.cnt'); cn.textContent = n; cn.classList.toggle('hidden', n === 0);
+}
+function renderAll() {
+  if (!view) return;
+  for (let s = 0; s < 14; s++) drawSlot(s);
+  for (const f of lv.fences) { const fe = board.querySelector('[data-f="' + f.slot + '"]'); if (fe) fe.classList.toggle('hidden', view[6] >= f.unlock); }
+  hud();
+  const legal = st.status === 'play' && st.turn === 0 && !busy ? E.legalMoves(lv, st, 0) : [];
+  for (let s = 0; s <= 5; s++) { const el = $('#s' + s); if (el) el.classList.toggle('legal', legal.includes(s)); }
+}
+function hud() {
+  $('#goalCur').textContent = Math.min(view[6], lv.goal); $('#goalNum').textContent = lv.goal;
+  $('#gfill').style.width = clamp(view[6] / lv.goal, 0, 1) * 100 + '%'; $('#gbar').classList.toggle('full', view[6] >= lv.goal);
+  const left = clamp(lv.moves - (st ? st.used : 0) - (busy && st.turn === 0 ? 0 : 0), 0, 99);
+  setPips(left);
+}
+let pipLeft = -1;
+function setPips(left) {
+  if (left === pipLeft) return; pipLeft = left;
+  $('#moves').innerHTML = '<b>' + left + '</b>' + Array.from({ length: lv.moves + 2 }, (_, i) => i < left ? '<span class="pip"></span>' : (i < lv.moves ? '<span class="pip off"></span>' : '')).join('');
+}
+function pulse(s, cls = 'pulse') { const el = $('#s' + s); if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(() => el.classList.remove(cls), 320); }
+function pageXY(s) { const r = $('#s' + s).getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
+function floatText(s, txt, bad) { const p = slotPos(s), d = document.createElement('div'); d.className = 'float' + (bad ? ' bad' : ''); d.textContent = txt; d.style.left = p.x + 'px'; d.style.top = p.y + 'px'; board.appendChild(d);
+  d.animate([{ transform: 'translate(-50%,-50%) scale(.5)', opacity: 0 }, { transform: 'translate(-50%,-90%) scale(1.15)', opacity: 1, offset: .25 }, { transform: 'translate(-50%,-190%) scale(1)', opacity: 0 }], { duration: 950, easing: 'ease-out' }).onfinish = () => d.remove(); }
+function shakeScreen(mag = 5) { if (save.settings.reduce) return; board.animate([{ translate: '0 0' }, { translate: `${mag}px ${-mag}px` }, { translate: `${-mag}px ${mag / 2}px` }, { translate: '0 0' }], { duration: 220 }); }
+function fly(a, b, dur, size) {
+  const pa = slotPos(a), pb = slotPos(b), d = document.createElement('i'); d.className = 'flyseed'; const sz = size || Math.max(9, (geom.R || 60) * 0.22); d.style.width = d.style.height = sz + 'px'; board.appendChild(d);
+  const mx = (pa.x + pb.x) / 2, my = (pa.y + pb.y) / 2 - 26 - Math.hypot(pa.x - pb.x, pa.y - pb.y) * 0.12;
+  const tf = (p, sc) => `translate(${p.x - sz / 2}px,${p.y - sz / 2}px) scale(${sc})`;
+  return new Promise((res) => { const an = d.animate([{ transform: tf(pa, 0.9) }, { transform: tf({ x: mx, y: my }, 1.25), offset: .5 }, { transform: tf(pb, 1) }], { duration: dur, easing: 'ease-in-out' }); an.onfinish = () => { d.remove(); res(); }; });
+}
+function crowTo(slot) { const c = $('#crow'), p = slotPos(slot); c.dataset.at = slot; c.style.left = p.x + 'px'; c.style.top = (p.y - geom.R * 0.1) + 'px'; c.classList.remove('hop'); void c.offsetWidth; c.classList.add('hop'); }
+
+async function playEvents(evs) {
+  let prev = -1, step = 0; const fast = evs.filter((e) => e.t === 'drop').length > 8;
+  for (const e of evs) {
+    if (e.t === 'lift') {
+      view[e.slot] = 0; drawSlot(e.slot); pulse(e.slot, 'lift'); sfx.lift(); buzz(8); prev = e.slot; step = 0;
+      if (e.who === 0) setPips(clamp(lv.moves - st.used - 1, 0, 99));
+      await sleep(save.settings.reduce ? 40 : 110);
+    } else if (e.t === 'drop') {
+      const dur = fast ? 80 : 125; await fly(prev, e.slot, dur);
+      view[e.slot]++; drawSlot(e.slot); prev = e.slot;
+      if (e.slot === 6 || e.slot === 13) { const b = $('#s' + e.slot); b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); sfx.barn(); buzz(14); if (e.slot === 6) { hud(); } burst(pageXY(e.slot).x, pageXY(e.slot).y, { n: 10, speed: 3.5, size: 4 }); }
+      else { pulse(e.slot); sfx.drop(step++); }
+    } else if (e.t === 'extra') {
+      const b = $('#s' + (e.who === 0 ? 6 : 13)); b.classList.remove('extra'); void b.offsetWidth; b.classList.add('extra'); sfx.extra(); buzz([10, 30, 16]);
+      floatText(e.who === 0 ? 6 : 13, e.who === 0 ? 'Again!' : 'Crow again', e.who !== 0); await sleep(300);
+    } else if (e.t === 'harvest') {
+      const bs = e.who === 0 ? 6 : 13; pulse(e.from); pulse(e.opp); await sleep(120);
+      const p1 = pageXY(e.from), p2 = pageXY(e.opp);
+      burst(p2.x, p2.y, { n: 22, speed: 5, size: 5, colors: e.who === 0 ? ['#ffd24a', '#fff3b0', '#f29c1f'] : ['#8a8dd6', '#d9dbf5', '#3a3d6c'] });
+      view[e.opp] = 0; view[e.from] = 0; drawSlot(e.opp); drawSlot(e.from);
+      const n = Math.min(e.amount, 8); const fl = []; for (let i = 0; i < n; i++) fl.push(fly(i % 2 ? e.opp : e.from, bs, 260 + i * 25)); await Promise.all(fl);
+      view[bs] += e.amount + e.bonus; drawSlot(bs); const b = $('#s' + bs); b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
+      if (e.who === 0) { sfx.harvest(); buzz([20, 40, 30]); shakeScreen(5); floatText(bs, '+' + (e.amount + e.bonus), false); if (e.bonus) setTimeout(() => floatText(e.opp, 'Gold +2', false), 250); track('harvest', { amount: e.amount }); hud(); }
+      else { sfx.steal(); buzz(30); floatText(bs, 'Crow stole ' + e.amount, true); }
+      burst(pageXY(bs).x, pageXY(bs).y, { n: 20, speed: 5 }); await sleep(260);
+    } else if (e.t === 'sweep') { await sleep(150); }
+  }
+}
+
+function startLevel(i, opts = {}) {
+  cur = clamp(i, 0, LEVELS.length - 1); lv = LEVELS[cur]; st = E.makeState(lv); view = st.s.slice(); busy = false; undoSt = null; undoUsed = false; reviveUsed = false; freeHintUsed = false; pipLeft = -1; lvT0 = performance.now();
+  clearVeils(); show('field'); buildBoard();
+  $('#btnUndo').classList.add('hidden'); $('#btnHint').classList.add('hidden'); setCaption('');
+  track('level_start', { id: lv.id, retry: !!opts.retry });
+  const tw = { tap: 'Tap the glowing plot', harvest: 'End in an empty plot', extra: 'End in your barn', rocks: 'Rocks block seeds', fence: 'Fences open later', gold: 'Gold pays +2', smart: 'Crows are clever', crows: 'Crows play back' };
+  if (lv.id <= 3 || (!save.ftue['tw_' + lv.twist] && tw[lv.twist] && lv.twist !== 'plain')) { setCaption(tw[lv.twist] || ''); save.ftue['tw_' + lv.twist] = 1; persist(); setTimeout(() => setCaption(''), lv.id <= 3 ? 99999 : 2600); }
+  armHelp();
+}
+function setCaption(t) { const c = $('#caption'); c.textContent = t; c.classList.toggle('on', !!t); }
+
+/* ---- hints + idle ---- */
+function clearHint() { clearTimeout(idleT); hintSlot = -1; board.querySelectorAll('.hint,.breathe').forEach((e) => e.classList.remove('hint', 'breathe')); const h = $('#hand'); if (h) h.classList.add('hidden'); $('#btnHint').classList.add('hidden'); }
+function bestMove() { const sol = E.solve(lv, st, { nodeCap: 200000 }); return sol.line ? sol.line[0] : -1; }
+function pointHand(slot) {
+  hintSlot = slot; const el = $('#s' + slot); if (!el) return; el.classList.add('hint'); const h = $('#hand'), p = slotPos(slot);
+  h.classList.remove('hidden'); h.style.left = p.x + 'px'; h.style.top = p.y + 'px';
+}
+function armHelp() {
+  clearHint(); if (st.status !== 'play') return;
+  const tutorial = lv.id <= 3;
+  if (tutorial) { const m = bestMove(); if (m >= 0) setTimeout(() => { if (!busy) pointHand(m); }, lv.id === 1 ? 700 : 500); }
+  idleT = setTimeout(() => {                       // after 7s idle: legal plots breathe (signifier), after 18s: offer help
+    if (busy) return; E.legalMoves(lv, st, 0).forEach((s) => $('#s' + s).classList.add('breathe'));
+    idleT = setTimeout(() => { if (busy || st.status !== 'play' || tutorial) return; offerHint(); }, 11000);
+  }, 7000);
+  $('#btnUndo').classList.toggle('hidden', !(undoSt && !undoUsed && lv.id > 3));
+}
+function offerHint() {
+  const free = cur < 10 && !freeHintUsed; const b = $('#btnHint');
+  if (!free && !Ads.canOfferRewarded()) return;
+  b.textContent = free ? 'Show a move' : 'Show a move · watch a short video'; b.classList.remove('hidden');
+  track('hint_offer', { free });
+  b.onclick = () => { const go = () => { const m = bestMove(); if (m >= 0) { pointHand(m); freeHintUsed = true; b.classList.add('hidden'); } }; free ? go() : Ads.rewarded('hint', 'a free hint', go); };
+}
+
+/* ---- the move ---- */
+let firstTapDone = false;
+async function onTap(slot) {
+  if (busy || st.status !== 'play' || st.turn !== 0) return;
+  Audio_.init();
+  if (!E.legalMoves(lv, st, 0).includes(slot)) { const el = $('#s' + slot); el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); sfx.no(); buzz(20);
+    const f = lv.fences.find((q) => q.slot === slot); if (f && view[6] < f.unlock) toast('Fence opens at ' + f.unlock + ' in the barn'); return; }
+  busy = true; clearHint(); setCaption('');
+  if (!firstTapDone) { firstTapDone = true; track('first_tap'); }
+  undoSt = E.clone(st);
+  const r = E.applyMove(lv, st, slot);
+  await playEvents(r.events);
+  const before = st; st = r.state;
+  if (st.status === 'play' && st.turn === 1) {
+    await sleep(save.settings.reduce ? 60 : 240);
+    const c = E.crowsTurn(lv, st);
+    for (const t of c.turns) {
+      crowTo(t.slot); sfx.caw(); await sleep(340);
+      await playEvents(t.events);
+      await sleep(120);
+    }
+    st = c.state; crowTo(13);
+  }
+  view = st.s.slice(); renderAll(); hud();
+  after();
+}
+function after() {
+  busy = false; renderAll();
+  if (st.status === 'won') return onWin();
+  if (st.status === 'lost') return onLose();
+  const sol = E.solve(lv, st, { nodeCap: 120000 });
+  if (!sol.line && !sol.capped) return onDeadEnd();
+  armHelp();
+}
+
+/* ---- results ---- */
+const stars_for = (used, par) => (used <= par ? 3 : used <= par + 1 ? 2 : 1);
+async function onWin() {
+  busy = true; clearHint(); $('#btnUndo').classList.add('hidden');
+  const used = st.used, stars = stars_for(used, lv.par), lucky = Math.random() < 0.15 && lv.id > 3;
+  const base = view[6] + (stars === 3 ? 2 : 0), crops = lucky ? base * 2 : base;
+  save.stars[cur] = Math.max(save.stars[cur] || 0, stars); save.level = Math.max(save.level, cur + 1); save.basket += crops; persist();
+  track('level_win', { id: lv.id, used, par: lv.par, stars, secs: Math.round((performance.now() - lvT0) / 1000), lucky });
+  sfx.win(); buzz([30, 50, 30, 50, 60]); petals(); shakeScreen(3);
+  const gb = $('#goalBox'); gb.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.12)' }, { transform: 'scale(1)' }], { duration: 400 });
+  if (cur < 3) {                                    // tutorial levels: no card, keep momentum
+    setCaption(cur === 0 ? 'Harvest!' : cur === 1 ? 'Nice!' : 'Brilliant!'); await sleep(cur === 2 ? 1400 : 1000); setCaption('');
+    if (cur === 2) return openValley({ ceremony: 'sale' });
+    return startLevel(cur + 1);
+  }
+  await sleep(500);
+  const next = cur + 1 < LEVELS.length;
+  const v = veil(`<div class="card"><h2>${lucky ? 'Lucky harvest!' : stars === 3 ? 'Perfect field!' : 'Field harvested'}</h2>
+    <div class="stars">${[0, 1, 2].map((i) => `<span>${ART.star(i < stars ? '#ffc93c' : '#d9c7a6')}</span>`).join('')}</div>
+    <p>${lucky ? '<b>Double crops!</b> ' : ''}+${crops} crops to the basket${stars === 3 ? ' (perfect bonus included)' : ''}</p>
+    <div class="btns"><button class="pill primary" id="rNext">${next ? 'Next field' : 'To the valley'}</button><button class="pill ghost" id="rMarket">Take crops to market (${save.basket})</button></div></div>`);
+  v.querySelectorAll('.stars svg').forEach((s, i) => { if (i < stars) setTimeout(() => { s.classList.add('on'); sfx.star(i); buzz(14); const r = s.getBoundingClientRect(); burst(r.left + 27, r.top + 27, { n: 10, speed: 4 }); }, 250 + i * 260); else s.classList.add('dim'); });
+  $('#rNext').onclick = async () => { sfx.ui(); if (!next) return openValley({}); await Ads.maybeInterstitial(cur + 1); startLevel(cur + 1); };
+  $('#rMarket').onclick = () => { sfx.ui(); openValley({}); };
+}
+function onLose() {
+  busy = true; clearHint(); sfx.fail(); buzz(40);
+  const short = lv.goal - view[6], used = st.used >= lv.moves;
+  track('level_fail', { id: lv.id, short, secs: Math.round((performance.now() - lvT0) / 1000) });
+  const near = short <= 2;
+  const canRevive = used && !reviveUsed && cur >= 3 && Ads.canOfferRewarded();
+  const v = veil(`<div class="card"><h2>${near ? 'So close!' : 'Not this time'}</h2>
+    <p>${used ? 'Out of moves' : 'The field ran dry'} · ${short} short of the goal</p>
+    <div class="bar"><i style="width:${clamp(view[6] / lv.goal, 0, 1) * 100}%"></i></div>
+    <div class="btns"><button class="pill primary" id="rRetry">Try again</button>${canRevive ? '<button class="pill ghost" id="rRevive">+2 moves · watch a short video</button>' : ''}</div></div>`);
+  $('#rRetry').onclick = () => { sfx.ui(); startLevel(cur, { retry: true }); };
+  if (canRevive) $('#rRevive').onclick = () => Ads.rewarded('revive', '2 extra moves', () => { reviveUsed = true; clearVeils(); lv = Object.assign({}, lv, { moves: lv.moves + 2 }); LEVELS_RUNTIME(); st = E.clone(st); st.status = 'play'; st.turn = 0; busy = false; pipLeft = -1; renderAll(); armHelp(); });
+}
+function LEVELS_RUNTIME() { /* lv is a per-run copy while revived; engine reads lv.moves directly */ }
+function onDeadEnd() {
+  busy = true; clearHint(); track('dead_end', { id: lv.id });
+  const v = veil(`<div class="card"><h2>Dead end</h2><p>This field can’t reach the goal from here.</p><div class="btns">${undoSt && !undoUsed ? '<button class="pill primary" id="rUndo">Undo that move</button>' : ''}<button class="pill ${undoSt && !undoUsed ? 'ghost' : 'primary'}" id="rRetry">Replant</button></div></div>`);
+  if (undoSt && !undoUsed) $('#rUndo').onclick = () => { doUndo(); clearVeils(); };
+  $('#rRetry').onclick = () => { sfx.ui(); startLevel(cur, { retry: true }); };
+}
+function doUndo() { if (!undoSt || undoUsed) return; undoUsed = true; st = undoSt; undoSt = null; view = st.s.slice(); busy = false; pipLeft = -1; track('undo', { id: lv.id }); sfx.ui(); renderAll(); armHelp(); }
+$('#btnUndo').onclick = () => doUndo();
+$('#btnHome').onclick = () => { sfx.ui(); openValley({}); };
+addEventListener('resize', () => { if (!$('#field').classList.contains('hidden')) layout(); });
+
+/* ============================ ADS (demo mocks; same placement names we will wire to the mediation SDK) ============================ */
+const Ads = {
+  rewardedShown: 0, CAP: 4, lastInter: 0, interstitialsShown: 0,
+  ready() { return performance.now() > AD_GATE_MS && save.ftue.helper; },     // never in first 3 min, never before the FTUE is done
+  canOfferRewarded() { return this.ready() && this.rewardedShown < this.CAP; },
+  rewarded(placement, rewardText, grant) {
+    track('rewarded_offer', { placement });
+    const v = veil(`<div class="card ad"><h2>Watch a short video?</h2><p style="color:#555">You get <b>${rewardText}</b>. Closing early gives nothing, and costs nothing.</p>
+      <div class="fake" id="adBox">Demo ad</div><div class="btns"><button class="pill primary" id="adGo">Watch</button><button class="pill ghost" id="adNo">No thanks</button></div></div>`);
+    $('#adNo').onclick = () => { v.remove(); track('rewarded_decline', { placement }); };
+    $('#adGo').onclick = () => {
+      let n = 3; const box = $('#adBox'), go = $('#adGo'); go.disabled = true; box.textContent = 'Demo ad · ' + n + 's';
+      const iv = setInterval(() => { n--; if (n > 0) box.textContent = 'Demo ad · ' + n + 's'; else { clearInterval(iv); v.remove(); this.rewardedShown++; track('rewarded_watch', { placement }); grant(); toast('Reward: ' + rewardText); } }, 1000);
+      $('#adNo').textContent = 'Close (no reward)'; $('#adNo').onclick = () => { clearInterval(iv); v.remove(); track('rewarded_abort', { placement }); };
+    };
+  },
+  async maybeInterstitial(nextIdx) {                // between levels only, from level 6, every 3rd level, >=2 min apart, never in first 3 min
+    if (nextIdx < 5 || !this.ready() || (nextIdx % 3) !== 0 || performance.now() - this.lastInter < (FAST ? 5000 : 120000)) return;
+    this.lastInter = performance.now(); this.interstitialsShown++; track('interstitial_show', { before: nextIdx + 1 });
+    return new Promise((res) => { const v = veil(`<div class="card ad"><div style="font-size:12px;color:#888;font-weight:800">AD · DEMO</div><div class="fake">Demo interstitial</div><button class="pill ghost" id="adX" disabled>Continue in 2…</button></div>`);
+      let n = 2; const b = $('#adX'); const iv = setInterval(() => { n--; if (n > 0) b.textContent = 'Continue in ' + n + '…'; else { clearInterval(iv); b.disabled = false; b.textContent = 'Continue'; } }, 1000); b.onclick = () => { v.remove(); res(); }; }); }
+};
+
+/* ============================ VALLEY ============================ */
+const BUILDS = [
+  { id: 'cottage', art: 'cottage', x: 27, y: 46, w: 38, cost: 0 },
+  { id: 'well', art: 'well', x: 70, y: 40, w: 22, cost: 20 },
+  { id: 'flowers', art: 'flowers', x: 30, y: 64, w: 30, cost: 35 },
+  { id: 'windmill', art: 'windmill', x: 84, y: 62, w: 26, cost: 60 },
+  { id: 'scarecrow', art: 'scarecrow', x: 50, y: 74, w: 15, cost: 90 },
+  { id: 'tree', art: 'tree', x: 10, y: 74, w: 22, cost: 130 }
+];
+const NAMES = { cottage: 'Cottage', well: 'Well', flowers: 'Flower bed', windmill: 'Windmill', scarecrow: 'Scarecrow', tree: 'Apple tree' };
+let pipTimer = 0;
+const PIP_MS_PER_COIN = 6 * 60000, PIP_CAP_MS = 2 * 3600000;
+function pipStash() { if (!save.helper.hired) return 0; const el = Math.min(Date.now() - save.helper.last, PIP_CAP_MS); const mult = (Date.now() < save.helper.boostUntil ? 2 : 1) * (1 + 0.1 * (save.built.length - 1)); return Math.floor(el / PIP_MS_PER_COIN * mult); }
+function renderCoins() { $('#coinN').textContent = save.coins; }
+function renderBuilds(newId) {
+  const nextB = BUILDS.find((b) => !save.built.includes(b.id));
+  $('#builds').innerHTML = '';
+  for (const b of BUILDS) {
+    const built = save.built.includes(b.id), isNext = nextB && nextB.id === b.id; if (!built && !isNext) continue;   // only ONE ghost at a time (less choice, stronger pull)
+    const d = document.createElement('div'); d.className = 'b' + (built ? '' : ' ghost') + (newId === b.id ? ' new' : ''); d.style.left = b.x + '%'; d.style.top = b.y + '%'; d.style.width = b.w + '%'; d.innerHTML = ART[b.art] + (built ? '' : `<div class="tag"><span class="coin"></span>${b.cost}</div>`);
+    if (!built) d.onclick = () => tryBuild(b); $('#builds').appendChild(d);
+  }
+  const nb = $('#nextB');
+  if (nextB) { nb.classList.remove('hidden'); $('#nextNm').textContent = NAMES[nextB.id] + ' · ' + Math.min(save.coins, nextB.cost) + ' / ' + nextB.cost; $('#nextFill').style.width = clamp(save.coins / nextB.cost, 0, 1) * 100 + '%';
+    $('#nextGo').disabled = save.coins < nextB.cost; $('#nextGo').style.opacity = save.coins < nextB.cost ? .5 : 1; $('#nextGo').onclick = () => tryBuild(nextB); nb.style.display = save.ftue.sold ? '' : 'none'; }
+  else nb.classList.add('hidden');
+}
+function tryBuild(b) {
+  if (save.coins < b.cost) { toast('Need ' + (b.cost - save.coins) + ' more coins'); sfx.no(); return; }
+  save.coins -= b.cost; save.built.push(b.id); persist(); sfx.build(); buzz([20, 40, 20, 40, 60]); track('build', { id: b.id });
+  renderCoins(); renderBuilds(b.id); const r = $('#scene').getBoundingClientRect(); burst(r.left + r.width * b.x / 100, r.top + r.height * b.y / 100, { n: 40, speed: 6, colors: ['#e9cf9d', '#fff6e4', '#c8a96a'], size: 6 }); petals(24);
+}
+function renderStall() {
+  if (!$('#stall').dataset.art) { $('#stall').insertAdjacentHTML('afterbegin', ART.stall); $('#stall').dataset.art = 1; }
+  const n = save.basket; $('#basketN').textContent = n > 0 ? n + ' crops' : 'Stall'; $('#stall').classList.toggle('glow', n > 0 && !save.ftue.sold);
+  const bs = $('#btnSell'), b2 = $('#btnSell2'); bs.classList.toggle('hidden', n === 0); bs.textContent = n ? 'Sell ' + n + ' crops · +' + n + ' coins' : '';
+  const dbl = n >= 6 && Ads.canOfferRewarded(); b2.classList.toggle('hidden', !dbl); b2.textContent = '×2 · watch';
+  bs.onclick = () => sell(1); b2.onclick = () => Ads.rewarded('double_sale', 'double coins for this sale', () => sell(2));
+}
+async function sell(mult) {
+  Audio_.init(); const n = save.basket; if (!n) return; save.basket = 0; renderStall();
+  const total = n * mult; save.ftue.sold = 1; track(mult > 1 ? 'sale_x2' : 'sale', { crops: n, coins: total }); persist();
+  const from = $('#stall').getBoundingClientRect(), to = $('#coinIcon').getBoundingClientRect(); const cnt = Math.min(total, 14); let landed = 0;
+  buzz([12, 30, 12]);
+  for (let i = 0; i < cnt; i++) {
+    const c = document.createElement('i'); c.className = 'coin'; c.style.cssText = `position:fixed;left:0;top:0;z-index:70;width:28px;height:28px`; document.body.appendChild(c);
+    const x0 = from.left + from.width / 2 + (Math.random() - .5) * 50, y0 = from.top + 10, x1 = to.left + 14, y1 = to.top + 14, mx = (x0 + x1) / 2 + (Math.random() - .5) * 120, my = Math.min(y0, y1) - 60;
+    setTimeout(() => { sfx.coin(i); buzz(6); c.animate([{ transform: `translate(${x0}px,${y0}px) scale(.6)` }, { transform: `translate(${mx}px,${my}px) scale(1.1)`, offset: .45 }, { transform: `translate(${x1}px,${y1}px) scale(.8)` }], { duration: 650, easing: 'ease-in' }).onfinish = () => {
+      c.remove(); landed++; const share = landed === cnt ? total - Math.floor(total / cnt) * (cnt - 1) : Math.floor(total / cnt); save.coins += share; renderCoins(); const cb = $('#coinBox'); cb.classList.remove('bump'); void cb.offsetWidth; cb.classList.add('bump');
+      burst(x1, y1, { n: 4, speed: 2.5, size: 3 }); if (landed === cnt) { persist(); renderBuilds(); sellDone(); } }; }, i * 70);
+  }
+}
+function sellDone() {
+  if (!save.ftue.notif) { save.ftue.notif = 1; persist(); setTimeout(() => {                     // value moment -> soft pre-prompt (the real OS prompt only fires if they say yes)
+    const v = veil(`<div class="card"><h2>Know when crops are ready?</h2><p>A gentle nudge when your valley has coins waiting. Never spam.</p><div class="btns"><button class="pill primary" id="nYes">Yes, remind me</button><button class="pill ghost" id="nNo">Not now</button></div></div>`);
+    $('#nYes').onclick = () => { track('notif_preprompt', { yes: 1 }); v.remove(); toast('Reminders on (demo)'); hirePip(); }; $('#nNo').onclick = () => { track('notif_preprompt', { yes: 0 }); v.remove(); hirePip(); }; }, 500); }
+  else if (!save.ftue.helper) hirePip();
+  renderStall();
+}
+function hirePip() {
+  if (save.helper.hired) return;
+  setTimeout(() => { const v = veil(`<div class="card"><div style="width:90px;margin:0 auto">${ART.pip}</div><h2>Meet Pip</h2><p>Pip tends the valley and gathers coins while you’re away. Free.</p><div class="btns"><button class="pill primary" id="hireGo">Hire Pip</button></div></div>`);
+    $('#hireGo').onclick = () => { save.helper = { hired: true, last: Date.now(), boostUntil: 0 }; save.ftue.helper = 1; persist(); track('helper_hired'); sfx.build(); buzz([20, 40, 40]); v.remove(); showPip(); petals(30); toast('Pip is on the job'); renderStall(); }; }, 350);
+}
+function showPip() {
+  const w = $('#pipwrap'); w.classList.toggle('hidden', !save.helper.hired); if (!save.helper.hired) return; w.innerHTML = ART.pip + '<div id="pipbub" class="hidden"></div>';
+  let right = false; clearInterval(pipTimer); pipTimer = setInterval(() => { right = !right; w.style.left = (right ? 52 : 18) + '%'; w.firstElementChild.style.transform = right ? 'scaleX(-1)' : ''; }, 6000);
+  w.onclick = collectPip; updatePipBubble();
+}
+function updatePipBubble() { const b = $('#pipbub'); if (!b) return; const n = pipStash(); b.classList.toggle('hidden', n < 1); b.innerHTML = '<span class="coin" style="width:16px;height:16px"></span>' + n; }
+function collectPip() {
+  const n = pipStash(); if (n < 1) { toast(save.helper.hired ? 'Pip is still gathering…' : ''); return; }
+  save.helper.last = Date.now(); save.coins += n; persist(); track('pip_collect', { coins: n }); sfx.coin(2); buzz(15); renderCoins(); renderBuilds(); updatePipBubble();
+  const r = $('#pipwrap').getBoundingClientRect(); burst(r.left + r.width / 2, r.top, { n: 14, speed: 4 }); floatPage(r.left + r.width / 2, r.top, '+' + n);
+  if (Ads.canOfferRewarded() && Date.now() > save.helper.boostUntil) setTimeout(() => Ads.rewarded('pip_boost', 'Pip works 2× faster for 2 hours', () => { save.helper.boostUntil = Date.now() + 2 * 3600000; persist(); }), 700);
+}
+function floatPage(x, y, t) { const d = document.createElement('div'); d.className = 'float'; d.style.position = 'fixed'; d.textContent = t; d.style.left = x + 'px'; d.style.top = y + 'px'; document.body.appendChild(d); d.animate([{ opacity: 0, transform: 'translate(-50%,0)' }, { opacity: 1, offset: .2 }, { opacity: 0, transform: 'translate(-50%,-70px)' }], { duration: 900 }).onfinish = () => d.remove(); }
+function dailyGift() {
+  const today = new Date().toDateString(); if (save.daily.last === today || !save.ftue.helper) return;
+  const y = new Date(Date.now() - 864e5).toDateString(); save.daily.streak = save.daily.last === y ? save.daily.streak + 1 : Math.max(1, save.daily.streak + (save.daily.last ? 0 : 1)); // never resets: a missed day just pauses it
+  save.daily.last = today; const roll = Math.random(), amt = roll < 0.1 ? 40 : roll < 0.4 ? 20 : 10; save.coins += amt; persist(); track('daily_gift', { amt, streak: save.daily.streak });
+  setTimeout(() => { sfx.build(); veil(`<div class="card"><h2>${amt >= 40 ? 'Jackpot basket!' : 'Daily gift'}</h2><div style="font-size:54px">🧺</div><p>+${amt} coins · Day ${save.daily.streak} in the valley</p><div class="btns"><button class="pill primary" onclick="this.closest('.veil').remove();renderCoins();renderBuilds()">Thanks!</button></div></div>`); renderCoins(); }, 400);
+}
+function openValley(o = {}) {
+  clearVeils(); clearHint(); show('valley'); renderCoins(); renderBuilds(); renderStall(); showPip();
+  const sk = $('#streak'); sk.classList.toggle('hidden', !save.daily.streak); sk.textContent = '🔥 ' + save.daily.streak;
+  const nextN = cur >= LEVELS.length ? 'Replay' : 'Field ' + (save.level + 1); $('#btnPlay').textContent = save.level >= LEVELS.length ? 'Replay fields' : 'Play · ' + nextN;
+  $('#btnPlay').onclick = async () => { sfx.ui(); Audio_.init(); const idx = save.level >= LEVELS.length ? 0 : save.level; await Ads.maybeInterstitial(idx); startLevel(idx); };
+  clearInterval(openValley.t); openValley.t = setInterval(updatePipBubble, 15000);
+  if (o.ceremony === 'sale') { $('#btnPlay').style.display = 'none'; const w = setInterval(() => { if (save.ftue.helper) { clearInterval(w); $('#btnPlay').style.display = ''; } }, 400); setCaptionV('Sell your crops'); }
+  else { $('#btnPlay').style.display = ''; if (save.ftue.helper) dailyGift(); }
+  track('valley_open');
+}
+function setCaptionV(t) { toast(t); }
+
+/* ============================ SETTINGS / DEBUG ============================ */
+$('#btnSettings').onclick = () => {
+  const row = (k, l) => `<div class="set"><span>${l}</span><div class="tog ${save.settings[k] ? 'on' : ''}" data-k="${k}"></div></div>`;
+  const marksTxt = ['first_tap', 'level_win', 'harvest', 'sale', 'helper_hired', 'rewarded_offer', 'interstitial_show'].map((k) => k + ': ' + (marks[k] !== undefined ? (marks[k] / 1000).toFixed(1) + 's' : '—')).join('\n');
+  const v = veil(`<div class="card" style="text-align:left"><h2 style="text-align:center">Settings</h2>${row('sound', 'Sound')}${row('haptics', 'Haptics (phones that support it)')}${row('reduce', 'Reduce motion')}
+    <div style="margin-top:10px;font-weight:800">First-session timeline</div><pre class="log">${marksTxt}</pre>
+    ${DEBUG ? '<div class="btns" style="margin-top:8px"><button class="pill ghost" id="dCoins">+100 coins</button><button class="pill ghost" id="dTime">Pip +2h</button><button class="pill ghost" id="dLog">Copy event log</button><button class="pill ghost" id="dReset">Reset save</button></div>' : ''}
+    <div class="btns" style="margin-top:12px"><button class="pill primary" id="sClose">Done</button></div></div>`);
+  v.querySelectorAll('.tog').forEach((t) => t.onclick = () => { const k = t.dataset.k; save.settings[k] = !save.settings[k]; t.classList.toggle('on', save.settings[k]); persist(); sfx.ui(); });
+  $('#sClose').onclick = () => v.remove();
+  if (DEBUG) { $('#dCoins').onclick = () => { save.coins += 100; persist(); renderCoins(); renderBuilds(); }; $('#dTime').onclick = () => { save.helper.last -= 2 * 3600000; persist(); updatePipBubble(); };
+    $('#dLog').onclick = () => { navigator.clipboard && navigator.clipboard.writeText(JSON.stringify(save.log)); toast('Copied'); }; $('#dReset').onclick = () => { localStorage.removeItem(KEY); location.search = '?debug'; }; }
+};
+if (DEBUG) { self.H = { save: () => save, go: (i) => startLevel(i), win: () => { st.s[6] = lv.goal; st.status = 'won'; onWin(); }, valley: () => openValley({}), E, LEVELS }; }
+
+/* ============================ BOOT ============================ */
+if (save.level === 0 && !save.ftue.sold) { startLevel(0); }   // first move inside seconds: straight into the field, no menu, no splash
+else { cur = Math.min(save.level, LEVELS.length - 1); if (save.ftue.helper) openValley({}); else openValley({ ceremony: save.basket ? 'sale' : undefined }); }
+</script>
+</body>
+</html>
