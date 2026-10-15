@@ -1,6 +1,6 @@
 # Shell Run: design rules
 
-Status: 2026-10-15. This replaces the sowing-game docs (kept in `docs/` as an archive). Playable builds: `turtle3d/index.html` (3D, current) and `turtle/index.html` (2D, the first toy).
+Status: 2026-10-15 (v2). This replaces the sowing-game docs (kept in `docs/` as an archive). Current build: `shellrun/` (source in `shellrun/src`, built to `shellrun/dist/index.html` by `node shellrun/build.js`). Earlier toys: `turtle3d/` and `turtle/`. Art rules: `11-art-bible.md`.
 
 One sentence: baby turtles hatch and head for the sea on their own; you clear their path and rescue them, and every turtle you save joins the next night's crossing.
 
@@ -14,7 +14,9 @@ Test for any new idea: can a 6-year-old and a 70-year-old both understand it fro
 |---|---|
 | **Care beats score** | The pieces are babies with faces, not tokens. People protect more than they compete |
 | **Agency with autonomy** | Turtles walk on their own; you help, you don't steer. Watching them is the reward |
-| **Variable, readable threats** | Crabs (flip), gulls (grab), tourist (lure), logs (sweep). Each has a different rhythm, so attention stays alive |
+| **Variable, readable threats** | Trash (blocks), bags and rings (tangle), crabs (chase and flip), gulls (grab), tourist (lure), logs (sweep). Each has a different rhythm, so attention stays alive |
+| **Stewardship, honestly** | Every piece of trash goes in the bin. The beach visibly gets cleaner (more flowers, less dune litter) based on what you actually binned. Trash you leave is still there tomorrow |
+| **Every tap answers** | Sand puffs, wet sand squishes, water splashes, grass rustles, the sky twinkles, a walking turtle hops with a heart. No tap is dead |
 | **Telegraphing (fairness)** | Every threat warns first: gull shadow + red ring 1.75 s before the grab, flip timer ring 5 s, tourist walks in slowly. Loss always feels like "I could have", never "that was cheap" |
 | **Second chance drama** | Gull grab is not the end: tap to make it drop the turtle, then flip it back. Loss, rescue, relief in 3 seconds. This is the clip people share |
 | **Goal gradient** | Turtles speed up near the water (the "rush"). The last 2 metres feel exciting |
@@ -36,7 +38,9 @@ Test for any new idea: can a 6-year-old and a 70-year-old both understand it fro
 ## 4. Feel spec (what every action must do)
 | Action | Visual | Sound | Haptic |
 |---|---|---|---|
-| Tap rock | rock rolls away, sand burst, small camera kick | low thud | medium |
+| Tap trash | arcs into the bin, bin squashes, lid flaps, recycle symbol pops, pile rises | whoosh, then clunk (pitch climbs as the bin fills) | light, then triple |
+| Free a tangled turtle | bag flies to the bin, turtle pops, sparkles, "Free!" | snap + rising chime | double |
+| Tap rock | rock is kicked away with a hop, sand burst, small camera kick | low thud | medium |
 | Tap crab | crab sprints off-screen | skitter click | light |
 | Flip turtle back | turtle pops 45% bigger, sparkle burst, "Saved!" | rising two-note boing, pitch climbs with combo | double |
 | Shoo diving gull | feathers burst | gull squawk | light |
@@ -49,7 +53,8 @@ Test for any new idea: can a 6-year-old and a 70-year-old both understand it fro
 Haptics need the native app on iPhone (Safari has no vibration). Android browsers vibrate now.
 
 ## 5. Progression
-- **Season 1 (built):** 6 nights. Crew carries over: night N = survivors of N-1 + new hatchlings. Night 6 is the arribada (24 new + your crew from 3 nests).
+- **Season 1 (built, v2):** 7 nights, one new idea each: 1 trash + rocks, 2 crabs, 3 windy night (bags tangle), 4 gulls, 5 tourist, 6 stream with logs, 7 the arribada (20 new + your crew from 3 nests). Crew carries over: night N = survivors of N-1 + new hatchlings.
+- **Trash carries over too:** pieces left on the sand (up to 6) are still there the next night. The result card says so.
 - **Next (not built, needs playtests first):** bigger crossings (river, estuary, open-sea night), a beach that improves between seasons (volunteers, dimmed hotel lights, fences), adult turtles returning to nest after a few seasons (real natal homing).
 
 ## 6. Assets plan
