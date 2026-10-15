@@ -11,3 +11,10 @@ Goal: a Candy Crush style ladder of short, repeatable levels that feeds ad break
 - Obstacles: litter blockers, tanglers, rocks, sandcastles (tap to smash), beach balls (tap to pop, they flip turtles), crabs (speed scales), gulls, tourists with flash, wind bags, stream with logs.
 - Ad hooks (demo only for now): rewarded "bring back 3" on the result card, interstitial every 3rd win after level 4 (60 s minimum gap).
 - Bot checks (levels 8-40): careful bot passes all, one-tap-per-0.7s bot passes all, idle bot fails.
+
+## Moods and terrains (art sheets 16, 14, 12)
+- Moods: moonlit night, dusk, dawn, rainy storm. Each sets sky, sea, fog, lights, sun/moon, stars, clouds and a far lighthouse (`shellrun/src/look.js`).
+- Terrains: golden, coral, silver, volcanic sand. Chapters pick a terrain; generated levels pick a mood by seed.
+- Storm: rain, lightning with thunder and haptics, wet shiny sand, trash washed ashore. Level 6 swells the stream too.
+- Levels 1-7 now each show one new thing: trash, sandcastles, crabs, tangles + beach balls, gulls + tourists, rain + stream, big hatch.
+- Title screen is a live attract loop. Level 1 opens with a short hatching cinematic and a guided first tap.

@@ -83,6 +83,12 @@ button:disabled{opacity:.6}
 @keyframes pulse{50%{transform:scale(1.1)}}@keyframes shk{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 .chap{position:absolute;left:0;right:0;text-align:center;color:var(--cream);font-weight:900;font-size:14px;letter-spacing:.14em;text-transform:uppercase;opacity:.8}
 .mapbot{padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,rgba(8,14,28,.7))}.mapbot button{width:100%;min-height:62px;font-size:22px}
+.ribbon .new{display:block;margin-top:5px;font-size:12px;letter-spacing:.04em;font-weight:900;background:rgba(74,47,0,.18);border-radius:99px;padding:3px 10px;white-space:normal}
+#start{transition:opacity .45s}#start.out{opacity:0;pointer-events:none}
+#start h1{animation:floaty 3.2s ease-in-out infinite}#start h1 svg{animation:bob 2.2s ease-in-out infinite}
+#start .tag{color:var(--cream);font-weight:800;font-size:18px;opacity:.88;margin-top:12px;text-shadow:0 2px 0 rgba(0,0,0,.65),0 0 14px rgba(0,0,0,.7);text-align:center}
+#start button{animation:pulseBtn 1.8s ease-in-out infinite}
+@keyframes floaty{50%{transform:translateY(-6px)}}@keyframes bob{50%{transform:translateY(-4px) rotate(-4deg)}}@keyframes pulseBtn{50%{transform:scale(1.04)}}
 @media (prefers-reduced-motion: reduce){.card,.veil,.pill.bump{animation:none}}
 </style>
 
@@ -102,7 +108,7 @@ button:disabled{opacity:.6}
   </div>
   <div id="banner"><div class="ribbon" id="bannerT"></div></div>
   <div id="cap"></div>
-  <div id="start"><h1 id="title">Shell Run</h1><button class="b-green" id="go"></button></div>
+  <div id="start"><div><h1 id="title">Shell Run</h1><div class="tag">Guide the hatchlings home</div></div><button class="b-green" id="go"></button></div>
   <div id="ov"></div>
   <div id="load">Loading the beach…</div>
 </div>
@@ -182,7 +188,7 @@ function au() {
     musicG = AC.createGain(); musicG.gain.value = 1; musicG.connect(MG); musicG.connect(REV);
   }
   if (AC.state === 'suspended') AC.resume();
-  if (!audioOn) { audioOn = true; startAmbience(); startMusic(); }
+  if (!audioOn) { audioOn = true; startAmbience(); startMusic(); setRain(!!LK.rain); }
 }
 function setMuted(m) { muted = m; try { localStorage.setItem('sr_mute', m ? '1' : '0'); } catch (e) {} if (MG) MG.gain.setTargetAtTime(m ? 0 : .9, AC.currentTime, .05); }
 function tone(f, d, type = 'sine', v = .15, to, delay = 0, rev = .25, dest) {
@@ -200,6 +206,16 @@ function noise(d, v = .12, f = 800, delay = 0, q = 1, type = 'bandpass', rev = .
   g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + d);
   s.connect(fl).connect(g).connect(MG); if (rev) { const r = AC.createGain(); r.gain.value = rev; g.connect(r); r.connect(REV); }
   s.start(t, Math.random()); s.stop(t + d + .05);
+}
+let rainG = null;
+function setRain(on) {
+  if (!AC) return;
+  if (!rainG) {
+    const len = AC.sampleRate * 3, b = AC.createBuffer(1, len, AC.sampleRate), a = b.getChannelData(0); for (let i = 0; i < len; i++) a[i] = Math.random() * 2 - 1;
+    const s = AC.createBufferSource(); s.buffer = b; s.loop = true; const hp = AC.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1400; const lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 7000;
+    rainG = AC.createGain(); rainG.gain.value = 0; s.connect(hp).connect(lp).connect(rainG).connect(MG); s.start();
+  }
+  rainG.gain.setTargetAtTime(on ? .075 : 0, AC.currentTime, .6);
 }
 function startAmbience() {
   const len = AC.sampleRate * 4, b = AC.createBuffer(1, len, AC.sampleRate), a = b.getChannelData(0); let last = 0;
@@ -233,7 +249,7 @@ function playChord(ch, t) {
 function pluck(f, delay, v) { tone(f, 1.6, 'sine', v, 0, delay, .7); tone(f * 2, .6, 'sine', v * .25, 0, delay, .7); }
 const PENTA = [0, 2, 4, 7, 9];
 const note = (i, base = 440) => base * Math.pow(2, (PENTA[((i % 5) + 5) % 5] + 12 * Math.floor(i / 5)) / 12);
-const buzz = (p) => { if (muted) return; try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+const buzz = (p) => { if (muted || !AC) return; try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
 const sfx = {
   hatch() { tone(1500 + Math.random() * 400, .05, 'triangle', .035, 0, 0, 0); noise(.08, .05, 1800, 0, 2); },
   squeak() { tone(1900 + Math.random() * 500, .07, 'sine', .03, 2700, 0, .1); },
@@ -262,6 +278,7 @@ const sfx = {
   water() { tone(600, .08, 'sine', .08, 1200, 0, .3); tone(900, .06, 'sine', .05, 1600, .07, .3); noise(.18, .06, 2500, .02, 1, 'highpass', .2); buzz(6); },
   grass() { noise(.2, .07, 4200, 0, .7, 'highpass', .05); buzz(5); },
   sky() { pluck(midi(pick(MEL)) * 2, 0, .03); },
+  thunder() { noise(2.2, .32, 140, 0, .7, 'lowpass', .5); noise(1.2, .2, 90, .15, .7, 'lowpass', .5); tone(55, 1.6, 'sine', .22, 38, .1, .4); buzz([60, 40, 90, 40, 140]); },
   bin() { tone(120, .2, 'triangle', .12, 80, 0, 0); noise(.1, .08, 600, 0, 2); buzz(15); }
 };
 
@@ -311,7 +328,7 @@ function placeCam(dt) {
 addEventListener('resize', () => resize());
 
 /* lights: cool moon sky, warm key from the camera side so faces read, moon rim from the sea */
-scene.add(new THREE.HemisphereLight(0xaabbe6, 0x6a5538, .48));
+const hemiL = new THREE.HemisphereLight(0xaabbe6, 0x6a5538, .48); scene.add(hemiL);
 const keyL = new THREE.DirectionalLight(0xffe2b4, .66); keyL.position.set(-5, 12, 10); scene.add(keyL);
 const rimL = new THREE.DirectionalLight(0xbfd8ff, .32); rimL.position.set(3, 6, -14); scene.add(rimL);
 
@@ -353,18 +370,46 @@ class Batch {
 const _m = new THREE.Matrix4(), _m2 = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _p = new THREE.Vector3(), _s = new THREE.Vector3();
 function compose(out, x, y, z, rx, ry, rz, sx, sy = sx, sz = sx, order = 'YXZ') { _e.set(rx, ry, rz, order); _q.setFromEuler(_e); _p.set(x, y, z); _s.set(sx, sy, sz); return out.compose(_p, _q, _s); }
 
+/* ---- look.js ---- */
+/* ===================== LOOKS: moods (art sheet 16) x terrains. Pure data; world.js paints with it ===================== */
+const MOODS = {
+  night: { sky: ['#060e22', '#12203A', '#203c66', '#2c5080', '#22406b'], fog: '#22406b', hemi: [0xaabbe6, 0x6a5538, .48], key: [0xffe2b4, .66], rim: [0xbfd8ff, .32], sea: ['#38aaa8', '#17808e', '#0E5E70', '#123556', 0x03182a], disc: [0xffffff, .15, 1, 1], stars: 1, glit: [0xfff1c4, .6], lant: 1, clouds: 0, rain: 0, house: 1, rough: .95 },
+  dusk: { sky: ['#2b2459', '#74406a', '#d8704f', '#f9a64f', '#7a4a60'], fog: '#7a4a60', hemi: [0xffd0b0, 0x7a5238, .5], key: [0xffb26e, .72], rim: [0xff9fa8, .34], sea: ['#44b0a8', '#2b8f9a', '#1b6280', '#1b3a62', 0x1a0c20], disc: [0xffd9a0, .08, 1.15, 1], stars: .5, glit: [0xffb36b, .55], lant: .9, clouds: 1, rain: 0, house: 1, rough: .95 },
+  dawn: { sky: ['#78b4d8', '#a8d6e2', '#f4d8b6', '#fbe4bc', '#8fd0d2'], fog: '#8fd0d2', hemi: [0xfff4e0, 0x8a7a5a, .56], key: [0xfff0d0, .6], rim: [0xdff2ff, .3], sea: ['#74d2c8', '#4ab8c0', '#2c92aa', '#1f6c92', 0x082030], disc: [0xfff0a8, .05, 1.35, 1], stars: 0, glit: [0xfff7d0, .65], lant: .2, clouds: 1, rain: 0, house: 0, rough: .95 },
+  storm: { sky: ['#0a1124', '#1b2a44', '#31465f', '#3f5873', '#2c4860'], fog: '#2c4860', hemi: [0x93a8cc, 0x4a4234, .62], key: [0xc9d5ee, .62], rim: [0xa8c0e8, .3], sea: ['#2f8f94', '#1c707e', '#104c62', '#0e2e4a', 0x041420], disc: [0xd8dcc0, .16, .9, .85], stars: 0, glit: [0xdde8d0, .32], lant: 1, clouds: 2, rain: 1, house: 1, rough: .55 }
+};
+const TERRAINS = {
+  gold: { sand: '#E6CFA0', wet: '#B89B70', under: '#7f6c4c', dune: '#dcc08c' },
+  blush: { sand: '#EFC4A4', wet: '#B68A72', under: '#7b5a50', dune: '#e4b08e' },
+  pale: { sand: '#EEE7D3', wet: '#B7AE98', under: '#8a8270', dune: '#d9d1bd' },
+  dark: { sand: '#A89B8B', wet: '#6c6258', under: '#4d463f', dune: '#928676' }
+};
+let LK = MOODS.night, TR = TERRAINS.gold;
+
 /* ---- world.js ---- */
 /* ===================== WORLD: wide moonlit nesting beach (art target: image 15) ===================== */
 
 /* sky: screen-space gradient that lines up with the curved horizon */
 let skyTex = null;
+function cloud(x, cx, cy, r, c1, c2) {
+  const puff = (px, py, pr, col) => { x.fillStyle = col; x.beginPath(); const n = 9; for (let i = 0; i < n; i++) { const a = i / n * 6.283, k = pr * (.86 + ((i * 7919) % 5) * .05); x[i ? 'lineTo' : 'moveTo'](px + Math.cos(a) * k * 1.25, py + Math.sin(a) * k * .8); } x.closePath(); x.fill(); };
+  for (const [dx, dy, k] of [[-1.1, .2, .62], [-.45, -.25, .8], [.35, -.15, .85], [1.05, .15, .6], [0, .22, .9]]) puff(cx + dx * r, cy + dy * r, r * k, c1);
+  x.globalAlpha = .55; for (const [dx, dy, k] of [[-.4, .45, .55], [.45, .4, .55], [0, .5, .7]]) puff(cx + dx * r, cy + dy * r, r * k * .8, c2); x.globalAlpha = 1;
+}
 function buildSky() {
   const hf = clamp(1 - (horizonY * .5 + .5), .05, .6);           // horizon height from the top, 0..1
   if (skyTex) skyTex.dispose();
-  skyTex = canvasTex(64, 512, (x, w, h) => {
-    const g = x.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, '#060e22'); g.addColorStop(Math.max(.01, hf * .5), '#12203A'); g.addColorStop(Math.max(.02, hf - .03), '#203c66'); g.addColorStop(hf, '#2c5080'); g.addColorStop(Math.min(1, hf + .03), '#22406b'); g.addColorStop(1, '#22406b');
+  skyTex = canvasTex(256, 512, (x, w, h) => {
+    const S = LK.sky, g = x.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, S[0]); g.addColorStop(Math.max(.01, hf * .5), S[1]); g.addColorStop(Math.max(.02, hf - .03), S[2]); g.addColorStop(hf, S[3]); g.addColorStop(Math.min(1, hf + .03), S[4]); g.addColorStop(1, S[4]);
     x.fillStyle = g; x.fillRect(0, 0, w, h);
+    const hy = hf * h;
+    if (LK.clouds === 2) { for (const [cx, cy, r, c1, c2] of [[40, .22, 62, '#1c2740', '#0c1426'], [150, .12, 74, '#16213a', '#0a1122'], [230, .3, 58, '#233250', '#0e1730'], [100, .42, 46, '#2a3b58', '#121b30'], [200, .55, 44, '#304260', '#141d34']]) cloud(x, cx, cy * hy, r, c1, c2); }
+    else if (LK.clouds === 1) { const dusk = LK.sky[2] === '#d8704f'; for (const [cx, cy, r] of [[34, .55, 30], [210, .4, 38], [120, .75, 24]]) cloud(x, cx, cy * hy, r, dusk ? '#a8506a' : '#fdf3e6', dusk ? '#5a3258' : '#e9c9b4'); }
+    if (LK.house) {   // tiny far-off lighthouse on the horizon (sheet 14)
+      const lx = w * .13, lb = hy + 1, lh = 26; x.fillStyle = 'rgba(255,238,170,.5)'; const gl = x.createRadialGradient(lx, lb - lh, 1, lx, lb - lh, 22); gl.addColorStop(0, 'rgba(255,236,160,.8)'); gl.addColorStop(1, 'rgba(255,236,160,0)'); x.fillStyle = gl; x.fillRect(lx - 24, lb - lh - 24, 48, 48);
+      x.fillStyle = '#f3ead0'; x.beginPath(); x.moveTo(lx - 4.5, lb); x.lineTo(lx - 2.8, lb - lh); x.lineTo(lx + 2.8, lb - lh); x.lineTo(lx + 4.5, lb); x.fill(); x.fillStyle = '#E8664A'; x.fillRect(lx - 3.9, lb - 9, 7.8, 4); x.fillRect(lx - 3.3, lb - 19, 6.6, 3.4); x.fillStyle = '#12203A'; x.fillRect(lx - 3.6, lb - lh - 3, 7.2, 3); x.fillStyle = '#ffe9a0'; x.fillRect(lx - 2, lb - lh - 1, 4, 3);
+    }
   });
   scene.background = skyTex;
   placeMoon();
@@ -388,8 +433,8 @@ let moonNdcX = .42, moonNdcY = .7;
 function ndcToWorld(nx, ny, dist) { _v.set(nx, ny, .5).unproject(cam).sub(cam.position).normalize(); return cam.position.clone().addScaledVector(_v, dist); }
 function placeMoon() {
   placeCamAt(baseFocusZ, camDist);
-  moonNdcY = Math.min(.82, horizonY + .15);
-  moon.position.copy(ndcToWorld(moonNdcX, moonNdcY, 150)); moon.scale.setScalar(150 * .15 * (844 / Math.max(H, 400)));
+  moonNdcY = Math.min(.82, horizonY + LK.disc[1]);
+  moon.position.copy(ndcToWorld(moonNdcX, moonNdcY, 150)); moon.scale.setScalar(150 * .15 * LK.disc[2] * (844 / Math.max(H, 400)));
   // stars live in a band above the horizon
   const p = starGeo.attributes.position, base = [];
   const fr = (v) => { const s = Math.sin(v) * 43758.5453; return s - Math.floor(s); };
@@ -399,36 +444,43 @@ function placeMoon() {
   placeCam(0);
 }
 
-/* ---------- ground ---------- */
+/* ---------- ground (colours are painted per terrain + mood) ---------- */
+let groundGeo = null, groundJ = null; const groundMat = curved(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .95, metalness: 0 }), 'ground');
 (function ground() {
   const g = new THREE.PlaneGeometry(70, 26, 140, 52); g.rotateX(-Math.PI / 2); g.translate(0, 0, 7);
-  const p = g.attributes.position, c = new THREE.Color(), cols = [];
-  const dry = new THREE.Color(PAL.sand), wet = new THREE.Color(PAL.wet), under = new THREE.Color('#7f6c4c'), dune = new THREE.Color('#dcc08c'), grass = new THREE.Color('#6f9a4e'), grass2 = new THREE.Color('#87ad5c');
+  const p = g.attributes.position;
   for (let i = 0; i < p.count; i++) { const x = p.getX(i), z = p.getZ(i); p.setY(i, groundH(x, z)); }
-  const gi = g.toNonIndexed(); const q = gi.attributes.position;
-  for (let i = 0; i < q.count; i += 3) {
+  groundGeo = g.toNonIndexed(); const n = groundGeo.attributes.position.count;
+  groundGeo.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(n * 3), 3)); groundGeo.computeVertexNormals();
+  groundJ = new Float32Array(n / 3); for (let i = 0; i < groundJ.length; i++) groundJ[i] = (Math.random() - .5) * .012;
+  scene.add(new THREE.Mesh(groundGeo, groundMat));
+})();
+function paintGround() {
+  const q = groundGeo.attributes.position, col = groundGeo.attributes.color, c = new THREE.Color();
+  const dry = new THREE.Color(TR.sand), wet = new THREE.Color(TR.wet), under = new THREE.Color(TR.under), dune = new THREE.Color(TR.dune), grass = new THREE.Color('#6f9a4e'), grass2 = new THREE.Color('#87ad5c');
+  for (let i = 0, t = 0; i < q.count; i += 3, t++) {
     const x = (q.getX(i) + q.getX(i + 1) + q.getX(i + 2)) / 3, z = (q.getZ(i) + q.getZ(i + 1) + q.getZ(i + 2)) / 3;
     c.copy(dry);
     if (z < SHORE_Z + 1.9) c.lerp(wet, clamp((SHORE_Z + 1.9 - z) / 1.6, 0, 1));
     if (z < SHORE_Z - .2) c.lerp(under, clamp((SHORE_Z - .2 - z) / 1.5, 0, 1));
     if (z > 8.7 || Math.abs(x) > 4.7) c.lerp(dune, .6);
     if (isGrass(x, z)) c.lerp(Math.sin(x * 2.1 + z * 1.7) > 0 ? grass : grass2, clamp(Math.min(Math.abs(x) - 5.9, z - 9.3 > 0 ? 3 : 0) + .5, 0, .8) * (.6 + .4 * Math.sin(x * .7 + z * .9)));
-    c.offsetHSL(0, 0, (Math.random() - .5) * .012 + Math.sin(x * .9 + z * .35) * Math.sin(z * .6 - x * .2) * .025);
-    for (let k = 0; k < 3; k++) cols.push(c.r, c.g, c.b);
+    if (LK.rain && z > SHORE_Z + .6) c.lerp(wet, .55);     // rain-soaked sand
+    c.offsetHSL(0, 0, groundJ[t] + Math.sin(x * .9 + z * .35) * Math.sin(z * .6 - x * .2) * .025);
+    for (let k = 0; k < 3; k++) col.setXYZ(i + k, c.r, c.g, c.b);
   }
-  gi.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3)); gi.computeVertexNormals();
-  const m = new THREE.Mesh(gi, curved(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .95, metalness: 0 }), 'ground'));
-  scene.add(m);
-})();
+  col.needsUpdate = true;
+}
 
 /* ---------- sea: faceted vertex-animated water ---------- */
 const seaGeo = new THREE.PlaneGeometry(120, 96, 80, 64); seaGeo.rotateX(-Math.PI / 2); seaGeo.translate(0, 0, SHORE_Z + 1.3 - 48);
 const seaBase = seaGeo.attributes.position.array.slice();
-(function () {
-  const c = new THREE.Color(), a = new THREE.Color('#38aaa8'), b = new THREE.Color('#17808e'), d = new THREE.Color(PAL.teal), e = new THREE.Color('#123556'), cols = [], p = seaGeo.attributes.position;
-  for (let i = 0; i < p.count; i++) { const z = p.getZ(i), k = SHORE_Z - z; if (k < 2) c.copy(a).lerp(b, clamp(k / 2, 0, 1)); else if (k < 9) c.copy(b).lerp(d, (k - 2) / 7); else c.copy(d).lerp(e, clamp((k - 9) / 25, 0, 1)); cols.push(c.r, c.g, c.b); }
-  seaGeo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
-})();
+seaGeo.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(seaGeo.attributes.position.count * 3), 3));
+function paintSea() {
+  const c = new THREE.Color(), [A, B, D, E] = LK.sea.slice(0, 4).map((h) => new THREE.Color(h)), col = seaGeo.attributes.color, p = seaGeo.attributes.position;
+  for (let i = 0; i < p.count; i++) { const z = p.getZ(i), k = SHORE_Z - z; if (k < 2) c.copy(A).lerp(B, clamp(k / 2, 0, 1)); else if (k < 9) c.copy(B).lerp(D, (k - 2) / 7); else c.copy(D).lerp(E, clamp((k - 9) / 25, 0, 1)); col.setXYZ(i, c.r, c.g, c.b); }
+  col.needsUpdate = true; sea.material.emissive.setHex(LK.sea[4]);
+}
 const sea = new THREE.Mesh(seaGeo, curved(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .62, metalness: .04, flatShading: true, emissive: 0x03182a, transparent: true, opacity: .97 }), 'sea'));
 sea.frustumCulled = false; scene.add(sea);
 function foamStrip(width, op) { const n = 96, P = new Float32Array(n * 2 * 3), idx = []; for (let i = 0; i < n - 1; i++) { const a = i * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); } const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.setIndex(idx); const m = new THREE.Mesh(g, curved(new THREE.MeshBasicMaterial({ color: 0xeefaf6, transparent: true, opacity: op, depthWrite: false, side: THREE.DoubleSide }), 'foam')); m.userData = { n, width }; m.frustumCulled = false; scene.add(m); return m; }
@@ -584,6 +636,21 @@ function updateParts(dt) {
     parts.add(compose(_m, p.x, p.y, p.z, p.rx, p.rx * .7, 0, p.r * k, p.flat ? p.r * k * .25 : p.r * k, p.r * k));
   }
   parts.end(); if (parts.m.instanceColor) parts.m.instanceColor.needsUpdate = true;
+}
+
+/* ---------- apply a mood + terrain to the whole scene ---------- */
+let lookKey = '';
+function applyLook(mood, terrain) {
+  const key = mood + '/' + terrain; if (key === lookKey) return; lookKey = key;
+  LK = MOODS[mood] || MOODS.night; TR = TERRAINS[terrain] || TERRAINS.gold;
+  scene.fog.color.set(LK.fog);
+  hemiL.color.setHex(LK.hemi[0]); hemiL.groundColor.setHex(LK.hemi[1]); hemiL.intensity = LK.hemi[2];
+  keyL.color.setHex(LK.key[0]); keyL.intensity = LK.key[1]; rimL.color.setHex(LK.rim[0]); rimL.intensity = LK.rim[1];
+  groundMat.roughness = LK.rough; paintGround(); paintSea();
+  stars.visible = LK.stars > 0; stars.material.opacity = LK.stars;
+  moon.material.color.setHex(LK.disc[0]); moon.material.opacity = LK.disc[3];
+  for (const m of glitMats) { m.color.setHex(LK.glit[0]); m.opacity = LK.glit[1]; }
+  buildSky(); setRain(!!LK.rain);
 }
 
 /* ---- models.js ---- */
@@ -786,14 +853,16 @@ function makeBin(x, z) {
 /* ===================== GAME: nights, entities, one-tap help ===================== */
 /* ---------- levels: 7 hand-made lessons, then an endless seeded generator (same level = same layout, so retries are fair) ---------- */
 const INTRO = [
-  { name: 'First night', fresh: 10, nests: 1, litter: 4, tangle: 0, rocks: 2, crabs: 0, gulls: 0, tourists: 0, teach: 'litter', fact: 'Hatchlings head for the brightest horizon. On a natural beach, that is the moonlit sea.' },
-  { name: 'Crab beach', fresh: 6, nests: 2, litter: 4, tangle: 0, rocks: 1, crabs: 2, gulls: 0, tourists: 0, teach: 'crab', fact: 'Ghost crabs are one of the main hunters of hatchlings on the sand.' },
-  { name: 'Windy night', fresh: 6, nests: 2, litter: 3, tangle: 1, wind: 3, rocks: 1, crabs: 1, gulls: 0, tourists: 0, teach: 'tangle', fact: 'To a sea turtle, a floating plastic bag can look a lot like a jellyfish.' },
-  { name: 'Gull cove', fresh: 6, nests: 2, litter: 3, tangle: 1, rocks: 1, crabs: 1, gulls: 1, tourists: 0, teach: 'gull', fact: 'Gulls and other seabirds hunt hatchlings on the sand and in the shallows.' },
-  { name: 'Tourist season', fresh: 6, nests: 2, litter: 3, tangle: 1, rocks: 1, crabs: 1, gulls: 1, tourists: 1, teach: 'tourist', fact: 'Bright lights can lead hatchlings away from the sea. Nesting beaches ask visitors to keep lights off.' },
-  { name: 'The little stream', fresh: 6, nests: 2, litter: 3, tangle: 1, rocks: 0, crabs: 2, gulls: 1, tourists: 1, stream: true, teach: 'log', fact: 'Only about 1 in 1,000 hatchlings is thought to survive to adulthood. Every one counts.' },
-  { name: 'The Arribada', fresh: 20, nests: 3, litter: 4, tangle: 2, rocks: 1, crabs: 2, gulls: 2, tourists: 1, spawn: .16, teach: 'arribada', big: true, fact: 'In an arribada, thousands of olive ridley turtles nest on the same beach over a few nights.' }
+  { name: 'First hatch', mood: 'dusk', terrain: 'gold', fresh: 8, nests: 1, litter: 3, tangle: 0, rocks: 0, castles: 0, crabs: 0, gulls: 0, tourists: 0, teach: 'litter', new: 'Tap trash to bin it', fact: 'Hatchlings head for the brightest horizon. On a natural beach, that is the sea.' },
+  { name: 'Sandcastle', mood: 'night', terrain: 'gold', fresh: 8, nests: 2, litter: 2, tangle: 0, rocks: 1, castles: 2, crabs: 0, gulls: 0, tourists: 0, teach: 'castle', new: 'Tap sandcastles to smash them', fact: 'Sandcastles and holes on the beach can trap hatchlings. Fill holes in before you leave.' },
+  { name: 'Crab beach', mood: 'dawn', terrain: 'gold', fresh: 8, nests: 2, litter: 3, tangle: 0, rocks: 0, castles: 1, crabs: 2, gulls: 0, tourists: 0, teach: 'crab', new: 'Tap crabs to shoo them', fact: 'Ghost crabs are one of the main hunters of hatchlings on the sand.' },
+  { name: 'Windy shore', mood: 'dusk', terrain: 'blush', fresh: 8, nests: 2, litter: 3, tangle: 1, wind: 3, rocks: 0, castles: 1, crabs: 1, gulls: 0, tourists: 0, balls: 1, teach: 'tangle', new: 'Free tangled turtles. Pop beach balls', fact: 'To a sea turtle, a floating plastic bag can look a lot like a jellyfish.' },
+  { name: 'Gull cove', mood: 'night', terrain: 'pale', fresh: 9, nests: 2, litter: 3, tangle: 1, rocks: 1, castles: 1, crabs: 1, gulls: 1, tourists: 1, tourT: 17, teach: 'gull', new: 'Gulls dive. Tourists flash lights', fact: 'Bright lights can lead hatchlings away from the sea. Nesting beaches ask visitors to keep lights off.' },
+  { name: 'Rainy season', mood: 'storm', terrain: 'gold', fresh: 10, nests: 2, litter: 3, tangle: 1, rocks: 0, castles: 1, crabs: 2, gulls: 1, tourists: 0, balls: 1, stream: true, rain: true, teach: 'log', new: 'Rain brings trash and swells the stream', fact: 'Only about 1 in 1,000 hatchlings is thought to survive to adulthood. Every one counts.' },
+  { name: 'The Arribada', mood: 'night', terrain: 'gold', fresh: 20, nests: 3, litter: 4, tangle: 2, rocks: 1, castles: 1, crabs: 2, gulls: 2, tourists: 1, balls: 1, spawn: .16, teach: 'arribada', big: true, new: 'Thousands arrive at once', fact: 'In an arribada, thousands of olive ridley turtles nest on the same beach over a few nights.' }
 ];
+const ATTRACT = { name: '', mood: 'dusk', terrain: 'gold', fresh: 7, nests: 2, litter: 0, tangle: 0, rocks: 0, castles: 0, crabs: 0, gulls: 0, tourists: 0, teach: '', fact: '', attract: true };
+const CH_TERRAIN = ['gold', 'blush', 'dark', 'gold', 'pale', 'blush', 'dark', 'pale', 'gold', 'blush'];
 const CHAPTERS = ['Moonlit Cove', 'Coral Bay', 'Driftwood Dunes', 'Lantern Beach', 'Silver Shore', 'Pearl Lagoon', 'Starfall Sands', 'Salt Wind Point', 'Dune Gardens', 'Midnight Reef'];
 const LNAMES = ['Low tide', 'Hatch time', 'Silver sands', 'Dune dash', 'Starry shore', 'Foam line', 'Quiet cove', 'Night tide', 'Salt breeze', 'Lantern walk', 'Pearl cove', 'Midnight run', 'Shell steps', 'Moon path', 'Tide pools', 'Sandbar', 'Windy point', 'Reef edge', 'Calm waters', 'Last light'];
 const FACTS = ['Mother turtles return to the beach where they hatched to lay their own eggs.', 'A sea turtle nest holds around 100 eggs.', 'Hatchlings dig out together, usually at night, when the sand is cooler.', 'The temperature of the sand decides whether hatchlings are male or female.', 'Sea turtles have been around since the age of the dinosaurs.', 'Hatchlings swim for about 24 hours without stopping once they reach the water.', 'Leatherback turtles can dive deeper than 1,000 metres.', 'Artificial lights can confuse hatchlings. Keep beach lights off at night.', 'Filling in holes and knocking down sandcastles helps hatchlings reach the sea.', 'Plastic bags and balloons look like jellyfish to a hungry turtle.', 'Green turtles eat seagrass, which keeps seagrass beds healthy.', 'Hawksbill turtles help coral reefs by eating sponges.', 'Hatchlings follow the brightest horizon, which is usually moonlit sea.', 'Turtle footprints on the sand look like tiny tractor tracks.', 'Beach clean-ups really do help nesting turtles.', 'Some turtles travel thousands of kilometres between feeding and nesting beaches.'];
@@ -801,6 +870,7 @@ const _spec = {};
 function srand(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 function withSeed(seed, fn) { const o = Math.random, r = srand(seed); Math.random = r; try { fn(); } finally { Math.random = o; } }
 function levelSpec(i) {
+  if (i < 0) return ATTRACT;
   if (i < INTRO.length) return INTRO[i];
   if (_spec[i]) return _spec[i];
   const r = srand(i * 7919 + 101), k = i - INTRO.length, num = i + 1;
@@ -820,13 +890,14 @@ function levelSpec(i) {
   S.wind = i >= 9 && r() < .4 ? 2 + Math.floor(D / 3) : 0;
   S.stream = i >= 11 && r() < .22;
   if (!boss && !mega) { const mute = ['gulls', 'tourists', 'balls', 'crabs'][Math.floor(r() * 4)]; if (S[mute] > (mute === 'crabs' ? 1 : 0)) S[mute]--; }
+  const mr = r(); S.mood = mr < .38 ? 'night' : mr < .6 ? 'dusk' : mr < .8 ? 'dawn' : 'storm'; S.rain = S.mood === 'storm'; S.terrain = CH_TERRAIN[(i / 10 | 0) % 10];
   S.teach = '';
   return (_spec[i] = S);
 }
 const BIN_CAP = 6;
 
 /* ---------- state ---------- */
-let night = 0, crew = 0, carry = 0, spec = INTRO[0];
+let night = 0, crew = 0, carry = 0, spec = INTRO[0], attract = false, introT = 0, introMax = 1, rainT = 0, boltT = 9, bolt = 0;
 const season = { met: 0, saved: 0, spawned: 0, binned: 0 };
 let T = [], litter = [], rocks = [], crabs = [], gulls = [], tourists = [], logs = [], nests = [], balls = [];
 let spawnLeft = 0, spawnT = 0, safeN = 0, lostN = 0, total = 0, binnedN = 0, running = false, ended = false, time = 0, nightT = 0, windLeft = 0, windT = 0;
@@ -855,8 +926,8 @@ function freeSpot(minD, zmin, zmax, L) {
   return [rnd(-3.5, 3.5), rnd(zmin, zmax)];
 }
 function startNight(i) {
-  clearNight(); night = i; const L = spec = levelSpec(i); ended = false;
-  total = L.fresh; season.met += L.fresh; spawnLeft = total; spawnT = .9; safeN = 0; lostN = 0; binnedN = 0; running = true; nightT = 0; lastOne = false; combo = 0; slow = 1; hand = null;
+  clearNight(); night = i; const L = spec = levelSpec(i); ended = false; applyLook(L.mood, L.terrain); introMax = introT = attract ? 0 : (i === 0 ? 2.6 : 1.4); rainT = 4; boltT = rnd(5, 9);
+  total = L.fresh; season.met += L.fresh; spawnLeft = total; spawnT = attract ? .9 : (i === 0 ? 2.8 : 1.6); safeN = 0; lostN = 0; binnedN = 0; running = true; nightT = 0; lastOne = false; combo = 0; slow = 1; hand = null;
   windLeft = L.wind || 0; windT = 4; streamG.visible = !!L.stream;
   setTidiness(tidyNow = tidy());
   withSeed(i * 2654435 + 977, () => {
@@ -869,9 +940,10 @@ function startNight(i) {
   for (let k = 0; k < nL; k++) { const tang = k < L.tangle; const [x, z] = freeSpot(1.7, SHORE_Z + 1.6, NEST_Z - 2.4, L); addLitter(tang ? pick(TANGLERS) : pick(BLOCKERS), x, z); }
   // teaching night: put the first piece of trash right in the path of the first hatchling
   if (L.teach === 'litter' && litter[0]) { litter[0].x = rnd(-.4, .4); litter[0].z = NEST_Z - 3.2; }
+  if (L.teach === 'castle') { const c0 = rocks.find((r) => r.castle); if (c0) { c0.x = nests[0].x + .2; c0.z = NEST_Z - 3.4; c0.m.position.set(c0.x, groundH(c0.x, c0.z), c0.z); } }
   for (let k = 0; k < L.crabs; k++) crabs.push({ st: 'wait', t: 3 + k * 3.5, x: 0, z: 0, vx: 0, vz: 0, sp: 0, tgt: null, leg: 0, claw: 0, retT: 0, v: crabPool[k] });
   for (let k = 0; k < L.gulls; k++) gulls.push({ st: 'off', t: 5 + k * 4, x: 0, y: 3, z: 0, dir: 1, flap: 0, tgt: null, v: gullPool[k] });
-  for (let k = 0; k < L.tourists; k++) tourists.push({ st: 'wait', t: 7 + k * 6, x: 0, z: 0, tx: 0, dir: 1, walk: 0, flashT: 0, stand: 0, bow: 0, v: touristPool[k] });
+  for (let k = 0; k < L.tourists; k++) tourists.push({ st: 'wait', t: (L.tourT || 7) + k * 6, x: 0, z: 0, tx: 0, dir: 1, walk: 0, flashT: 0, stand: 0, bow: 0, v: touristPool[k] });
   if (L.stream) for (let k = 0; k < 3; k++) { const m = new THREE.Mesh(GEO.log, MAT); const w = rnd(1.6, 2.3); m.scale.set(w, 1, 1); nightRoot.add(m); logs.push({ x: -8 + k * 5.5, z: rnd(ST0 + .35, ST1 - .35), w, st: 'float', vx: 0, vz: 0, rot: 0, m }); }
   for (let k = 0; k < (L.balls || 0); k++) { const m = new THREE.Mesh(GEO.ball, MAT); m.scale.setScalar(MS); m.visible = false; nightRoot.add(m); balls.push({ st: 'wait', t: 6 + k * 4.5, x: 0, z: 0, y: .3, dir: 1, rot: 0, ph: rnd(0, 6), pt: 0, hitCool: 0, m }); }
   });
@@ -892,6 +964,7 @@ function spawnTurtle() {
   const idx = total - spawnLeft, isCrew = idx < crew;
   let tx = clamp(n.x + rnd(-2.4, 2.4), -3.9, 3.9);
   if (idx === 0 && spec.teach === 'litter' && litter[0]) tx = litter[0].x;
+  if (idx === 0 && spec.teach === 'castle') { const c0 = rocks.find((r) => r.castle); if (c0) tx = c0.x; }
   T.push({ x: n.x + rnd(-.25, .25), z: n.z - .25, tx, st: 'walk', flipT: 0, ph: Math.random() * 6, hd: Math.PI, sp: rnd(.85, 1.05) * (spec.teach === 'arribada' ? 1.1 : 1), stuck: 0, block: null, vy: 0, hgt: 0, crew: isCrew, pop: 0, born: 0, hop: 0, lure: 0, lx: 0, lz: 0, sink: 0, gone: 0, printT: 0, step: 1, tang: null, boopT: 0, lostWhy: '', look: 0 });
   spawnLeft--; n.wob = .4; sfx.hatch(); burst3(n.x, .2, n.z, ['#f4ead2', '#e6cfa0'], 8, { size: .9 });
 }
@@ -966,6 +1039,7 @@ function toss(l) {
 }
 function landInBin(l) {
   l.st = 'binned'; l.m.visible = false; bin.n++; binnedN++; season.binned++; bin.sq = 1; bin.lidT = .45;
+  if (!taught.binned) { taught.binned = 1; ui.cap('Into the bin. Keep the path clear!', 2.4); buzz([10, 30, 14]); }
   sfx.clunk(bin.n); burst3(bin.x, 1.35, bin.z, ['#4FA3D9', '#ffffff', '#bfe8e0'], 8, { size: .7 });
   ui.fx('recycle', bin.x, 1.6, bin.z); ui.hud();
   const pile = bin.pile.children; for (let i = 0; i < pile.length; i++) pile[i].visible = i < Math.min(bin.n, pile.length);
@@ -978,6 +1052,12 @@ function update(dt) {
   if (comboT > 0) comboT -= dt;
   if (running && spawnLeft > 0 && (spawnT -= dt) <= 0) { spawnTurtle(); spawnT = FAST ? .12 : (L.spawn ? rnd(L.spawn * .6, L.spawn * 1.4) : rnd(.38, .62)); }
   for (const n of nests) n.wob = Math.max(0, n.wob - dt);
+  if (introT > 0) { introT -= dt; if (Math.random() < dt * 7) { const n = pick(nests); n.wob = .35; tone(700 + Math.random() * 500, .05, 'square', .018, 0, 0, 0); buzz(4); } if (!taught.hatching && introT < 2.2 && !attract && night === 0) { taught.hatching = 1; ui.cap('The eggs are hatching…', 2.2); } }
+  if (L.rain) {
+    if (running && (rainT -= dt) <= 0) { rainT = rnd(5.5, 8); const left = Math.random() < .5; addLitter(pick(['can', 'bottle', 'bag', 'cup']), left ? -6.5 : 6.5, rnd(SHORE_Z + 2, NEST_Z - 2.5), true); if (!taught.rain) { taught.rain = 1; ui.cap('The rain washes trash ashore…', 2.4); } }
+    if ((boltT -= dt) <= 0) { boltT = rnd(9, 16); bolt = 1; setTimeout(() => sfx.thunder(), 380 + Math.random() * 500); }
+  }
+  if (bolt > 0) bolt = Math.max(0, bolt - dt * 2.4);
   // wind blows bags in from the side
   if (windLeft > 0 && (windT -= dt) <= 0) { windLeft--; windT = rnd(5, 8); const left = Math.random() < .5; addLitter('bag', left ? -6.5 : 6.5, rnd(SHORE_Z + 2, NEST_Z - 2.5), true); if (!taught.wind) { taught.wind = 1; ui.cap('The wind brings bags…', 2.2); } }
   // turtles
@@ -1015,6 +1095,7 @@ function update(dt) {
   // last turtle: slow everything, ease the camera in
   const alive = T.filter((t) => ['walk', 'flip', 'tangle', 'drop', 'carried'].includes(t.st));
   if (running && spawnLeft === 0 && alive.length === 1 && total > 3) { if (!lastOne) { lastOne = true; ui.cap('The last one…', 2); musicMood = 2; } const t = alive[0]; focusTo.set(t.x * .6, 0, lerp(baseFocusZ, t.z, .55)); zoomTo = .74; }
+  else if (introT > 0) { const u = clamp(introT / introMax, 0, 1); focusTo.set(0, 0, lerp(baseFocusZ, NEST_Z - 2.2, u)); zoomTo = 1 - .24 * u; }
   else { focusTo.set(0, 0, baseFocusZ); zoomTo = 1; if (!lastOne) musicMood = gulls.some((g) => g.st === 'dive') ? 1 : 0; }
   // litter
   for (const l of litter) {
@@ -1031,7 +1112,7 @@ function update(dt) {
   updateBalls(dt, L); updateCrabs(dt, L); updateGulls(dt); updateTourists(dt, L); updateLogs(dt, L); updateVolunteer(dt);
   if (L.stream && !taught.log && logs.some((l) => l.st === 'float' && T.some((t) => t.st === 'walk' && Math.abs(t.z - l.z) < .45 && Math.abs(t.x - l.x) < l.w / 2))) { taught.log = 1; const l = logs.find((l) => l.st === 'float'); hand = { o: l, y: .2, kind: 'log' }; ui.cap('Push the logs away!', 2.6); }
   if (hand) { const o = hand.o; const done = (hand.kind === 'flip' && o.st !== 'flip') || (hand.kind === 'tangle' && o.st !== 'tangle') || (hand.kind === 'tourist' && o.st !== 'enter' && o.st !== 'stand') || (hand.kind === 'crab' && o.st !== 'walk') || ((hand.kind === 'litter' || hand.kind === 'drift') && o.st !== 'lie' && o.st !== 'drift') || (hand.kind === 'rock' && o.st !== 'idle') || (hand.kind === 'ball' && o.st !== 'roll') || (hand.kind === 'log' && o.st !== 'float'); if (done) { hand = null; ui.capOff(); } }
-  if (running && !ended && spawnLeft === 0 && T.every((t) => ['swim', 'gone', 'lost'].includes(t.st))) { ended = true; running = false; musicMood = 0; setTimeout(endNight, 1200); }
+  if (running && !ended && spawnLeft === 0 && T.every((t) => ['swim', 'gone', 'lost'].includes(t.st))) { ended = true; running = false; musicMood = 0; if (attract) setTimeout(() => { if (attract) { begin(-1); running = true; } }, 1800); else setTimeout(endNight, 1200); }
 }
 function teachBlock(blk, t) {
   if (litter.includes(blk) && !taught.litter) { taught.litter = 1; hand = { o: blk, y: .15, kind: 'litter' }; ui.cap('Tap the trash!', 99); }
@@ -1212,7 +1293,7 @@ function sync() {
   shadowAt(bin.x, bin.z, .75);
   shadows.end();
   if (streamG.visible) streamTex.offset.x -= .0025;
-  for (const [i, s] of lanternGlows.entries()) s.material.opacity = .75 + Math.sin(time * 3 + i * 2) * .08 + Math.sin(time * 11 + i) * .04;
+  for (const [i, s] of lanternGlows.entries()) s.material.opacity = (.75 + Math.sin(time * 3 + i * 2) * .08 + Math.sin(time * 11 + i) * .04) * LK.lant;
 }
 
 /* ---- ui.js ---- */
@@ -1250,9 +1331,9 @@ $('#snd').onclick = (e) => { e.stopPropagation(); au(); setMuted(!muted); $('#sn
 let bannerTO = 0;
 ui.night = function () {
   ui.hud(); if (!started) return;
-  const L = spec; $('#bannerT').className = 'ribbon' + (L.big ? ' coral' : '');
-  $('#bannerT').innerHTML = `<small>${L.big ? 'BIG HATCH · LEVEL ' + (night + 1) : 'LEVEL ' + (night + 1)}</small>${L.name}`;
-  $('#banner').classList.add('on'); clearTimeout(bannerTO); bannerTO = setTimeout(() => $('#banner').classList.remove('on'), 2600);
+  const L = spec; if (L.attract) return; $('#bannerT').className = 'ribbon' + (L.big ? ' coral' : '');
+  $('#bannerT').innerHTML = `<small>${L.big ? 'BIG HATCH · LEVEL ' + (night + 1) : 'LEVEL ' + (night + 1)}</small>${L.name}${L.new ? `<span class="new">NEW · ${L.new}</span>` : ''}`;
+  $('#banner').classList.add('on'); clearTimeout(bannerTO); bannerTO = setTimeout(() => $('#banner').classList.remove('on'), L.new ? 3800 : 2400); if (L.big) { buzz([30, 40, 30]); }
 };
 let capT = 0;
 ui.cap = function (s, d) { const c = $('#cap'); c.textContent = s; c.classList.add('on'); capT = d; };
@@ -1276,8 +1357,20 @@ function segRing(x, y, r, frac, w) {
   oc.lineWidth = w; oc.lineCap = 'round';
   for (let i = 0; i < n; i++) { const a0 = -Math.PI / 2 + i / n * 6.283 + .12, a1 = a0 + 6.283 / n - .24; oc.strokeStyle = i / n < frac ? col : 'rgba(18,32,58,.75)'; oc.beginPath(); oc.arc(x, y, r, a0, a1); oc.stroke(); }
 }
+const drops = Array.from({ length: 150 }, () => ({ x: Math.random(), y: Math.random(), v: .9 + Math.random() * .9, l: .018 + Math.random() * .02 }));
+function weatherFx(K) {
+  if (LK.rain) {
+    oc.strokeStyle = 'rgba(205,225,255,.32)'; oc.lineWidth = 1.3 * K; oc.lineCap = 'round'; oc.beginPath();
+    const dt = Math.min(.05, lastRaw || .016);
+    for (const d of drops) { d.y += d.v * dt * 1.6; d.x -= d.v * dt * .35; if (d.y > 1.05) { d.y = -.05; d.x = Math.random() * 1.3; } const x = d.x * W, y = d.y * H; oc.moveTo(x, y); oc.lineTo(x - d.l * W * .25, y - d.l * H); }
+    oc.stroke();
+    if (Math.random() < dt * 6) ui.fx('ring', (Math.random() - .5) * 9, 0, -4 + Math.random() * 11);
+    oc.fillStyle = 'rgba(8,16,34,.09)'; oc.fillRect(0, 0, W, H);
+  }
+  if (bolt > 0) { oc.fillStyle = `rgba(225,238,255,${Math.min(.6, bolt * .6)})`; oc.fillRect(0, 0, W, H); }
+}
 function overlay() {
-  oc.clearRect(0, 0, W, H); const K = k();
+  oc.clearRect(0, 0, W, H); const K = k(); weatherFx(K);
   // gull target: red segmented ring with inward arrows, tightening
   for (const g of gulls) if (g.st === 'dive' && g.tgt) {
     const s = scr(g.tgt.x, .1, g.tgt.z), p = 1 - clamp(g.dT / 1.75, 0, 1), r = (40 - p * 14) * K, pulse = .7 + .3 * Math.sin(time * 22);
@@ -1347,7 +1440,7 @@ function adBreak(then) {
 function endNight() {
   const L = spec, pct = safeN / total, pass = safeN >= Math.ceil(total * .7), stars = !pass ? 0 : safeN === total ? 3 : pct >= .8 ? 2 : 1;
   ui.capOff(); hand = null;
-  if (safeN === total) sfx.win(); else sfx.safe(0);
+  if (safeN === total) { sfx.win(); for (let i = 0; i < 7; i++) setTimeout(() => { burst3((Math.random() - .5) * 7, .6, SHORE_Z + .6 + Math.random() * 2, ['#ffd166', '#ffffff', '#8fd19e', '#6fd1c8', '#E8664A'], 26, { g: 2.2, up: 2.3, size: 1.1 }); tone(note(i * 2 + 4), .5, 'triangle', .1, 0, 0, .5); buzz(14); shake = .14; }, i * 150); } else sfx.safe(0);
   if (pass) { PROG.best[night] = Math.max(PROG.best[night] || 0, stars); PROG.unlocked = Math.max(PROG.unlocked, night + 1); saveProg(); }
   const dots = Array.from({ length: total }, (_, i) => `<b class="${i < safeN ? '' : 'x'}"></b>`).join('');
   const head = !pass ? 'Not this time' : safeN === total ? 'Every single one!' : safeN >= total - 2 ? 'So close!' : 'Level complete';
@@ -1420,9 +1513,9 @@ resize();
 $('#title').innerHTML = ICON.turtle() + 'Shell Run';
 $('#go').innerHTML = ICON.play + 'Play';
 const n0 = Q.has('n') ? Math.max(0, +Q.get('n') | 0) : 0;
-begin(n0); running = false;
+if (Q.has('n')) { begin(n0); running = false; } else { attract = true; begin(-1); running = true; }
 requestAnimationFrame(loop);
-$('#go').onclick = () => { au(); $('#start').remove(); started = true; if (PROG.unlocked === 0 || Q.has('n')) { $('#app').classList.add('playing'); running = true; ui.night(); } else showMap(); };
+$('#go').onclick = () => { au(); buzz([12, 40, 18]); $('#start').classList.add('out'); setTimeout(() => $('#start').remove(), 500); started = true; const was = attract; attract = false; Object.assign(season, { met: 0, saved: 0, spawned: 0, binned: 0 }); if (PROG.unlocked === 0 || Q.has('n')) { $('#app').classList.add('playing'); if (was) begin(Q.has('n') ? n0 : 0); running = true; ui.night(); } else { if (was) running = false; showMap(); } };
 self.G = {
   get T() { return T; }, get litter() { return litter; }, get balls() { return balls; }, get rocks() { return rocks; }, get crabs() { return crabs; }, get gulls() { return gulls; }, get logs() { return logs; }, get tourists() { return tourists; },
   tap, scr, groundAt, surfaceTap, get running() { return running; }, get night() { return night; }, get safe() { return safeN; }, get lost() { return lostN; }, get total() { return total; }, get binned() { return binnedN; },

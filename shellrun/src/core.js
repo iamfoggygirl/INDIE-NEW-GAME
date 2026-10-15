@@ -69,7 +69,7 @@ function au() {
     musicG = AC.createGain(); musicG.gain.value = 1; musicG.connect(MG); musicG.connect(REV);
   }
   if (AC.state === 'suspended') AC.resume();
-  if (!audioOn) { audioOn = true; startAmbience(); startMusic(); }
+  if (!audioOn) { audioOn = true; startAmbience(); startMusic(); setRain(!!LK.rain); }
 }
 function setMuted(m) { muted = m; try { localStorage.setItem('sr_mute', m ? '1' : '0'); } catch (e) {} if (MG) MG.gain.setTargetAtTime(m ? 0 : .9, AC.currentTime, .05); }
 function tone(f, d, type = 'sine', v = .15, to, delay = 0, rev = .25, dest) {
@@ -87,6 +87,16 @@ function noise(d, v = .12, f = 800, delay = 0, q = 1, type = 'bandpass', rev = .
   g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + d);
   s.connect(fl).connect(g).connect(MG); if (rev) { const r = AC.createGain(); r.gain.value = rev; g.connect(r); r.connect(REV); }
   s.start(t, Math.random()); s.stop(t + d + .05);
+}
+let rainG = null;
+function setRain(on) {
+  if (!AC) return;
+  if (!rainG) {
+    const len = AC.sampleRate * 3, b = AC.createBuffer(1, len, AC.sampleRate), a = b.getChannelData(0); for (let i = 0; i < len; i++) a[i] = Math.random() * 2 - 1;
+    const s = AC.createBufferSource(); s.buffer = b; s.loop = true; const hp = AC.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1400; const lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 7000;
+    rainG = AC.createGain(); rainG.gain.value = 0; s.connect(hp).connect(lp).connect(rainG).connect(MG); s.start();
+  }
+  rainG.gain.setTargetAtTime(on ? .075 : 0, AC.currentTime, .6);
 }
 function startAmbience() {
   const len = AC.sampleRate * 4, b = AC.createBuffer(1, len, AC.sampleRate), a = b.getChannelData(0); let last = 0;
@@ -120,7 +130,7 @@ function playChord(ch, t) {
 function pluck(f, delay, v) { tone(f, 1.6, 'sine', v, 0, delay, .7); tone(f * 2, .6, 'sine', v * .25, 0, delay, .7); }
 const PENTA = [0, 2, 4, 7, 9];
 const note = (i, base = 440) => base * Math.pow(2, (PENTA[((i % 5) + 5) % 5] + 12 * Math.floor(i / 5)) / 12);
-const buzz = (p) => { if (muted) return; try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+const buzz = (p) => { if (muted || !AC) return; try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
 const sfx = {
   hatch() { tone(1500 + Math.random() * 400, .05, 'triangle', .035, 0, 0, 0); noise(.08, .05, 1800, 0, 2); },
   squeak() { tone(1900 + Math.random() * 500, .07, 'sine', .03, 2700, 0, .1); },
@@ -149,6 +159,7 @@ const sfx = {
   water() { tone(600, .08, 'sine', .08, 1200, 0, .3); tone(900, .06, 'sine', .05, 1600, .07, .3); noise(.18, .06, 2500, .02, 1, 'highpass', .2); buzz(6); },
   grass() { noise(.2, .07, 4200, 0, .7, 'highpass', .05); buzz(5); },
   sky() { pluck(midi(pick(MEL)) * 2, 0, .03); },
+  thunder() { noise(2.2, .32, 140, 0, .7, 'lowpass', .5); noise(1.2, .2, 90, .15, .7, 'lowpass', .5); tone(55, 1.6, 'sine', .22, 38, .1, .4); buzz([60, 40, 90, 40, 140]); },
   bin() { tone(120, .2, 'triangle', .12, 80, 0, 0); noise(.1, .08, 600, 0, 2); buzz(15); }
 };
 
@@ -198,7 +209,7 @@ function placeCam(dt) {
 addEventListener('resize', () => resize());
 
 /* lights: cool moon sky, warm key from the camera side so faces read, moon rim from the sea */
-scene.add(new THREE.HemisphereLight(0xaabbe6, 0x6a5538, .48));
+const hemiL = new THREE.HemisphereLight(0xaabbe6, 0x6a5538, .48); scene.add(hemiL);
 const keyL = new THREE.DirectionalLight(0xffe2b4, .66); keyL.position.set(-5, 12, 10); scene.add(keyL);
 const rimL = new THREE.DirectionalLight(0xbfd8ff, .32); rimL.position.set(3, 6, -14); scene.add(rimL);
 

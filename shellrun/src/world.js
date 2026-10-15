@@ -2,13 +2,25 @@
 
 /* sky: screen-space gradient that lines up with the curved horizon */
 let skyTex = null;
+function cloud(x, cx, cy, r, c1, c2) {
+  const puff = (px, py, pr, col) => { x.fillStyle = col; x.beginPath(); const n = 9; for (let i = 0; i < n; i++) { const a = i / n * 6.283, k = pr * (.86 + ((i * 7919) % 5) * .05); x[i ? 'lineTo' : 'moveTo'](px + Math.cos(a) * k * 1.25, py + Math.sin(a) * k * .8); } x.closePath(); x.fill(); };
+  for (const [dx, dy, k] of [[-1.1, .2, .62], [-.45, -.25, .8], [.35, -.15, .85], [1.05, .15, .6], [0, .22, .9]]) puff(cx + dx * r, cy + dy * r, r * k, c1);
+  x.globalAlpha = .55; for (const [dx, dy, k] of [[-.4, .45, .55], [.45, .4, .55], [0, .5, .7]]) puff(cx + dx * r, cy + dy * r, r * k * .8, c2); x.globalAlpha = 1;
+}
 function buildSky() {
   const hf = clamp(1 - (horizonY * .5 + .5), .05, .6);           // horizon height from the top, 0..1
   if (skyTex) skyTex.dispose();
-  skyTex = canvasTex(64, 512, (x, w, h) => {
-    const g = x.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, '#060e22'); g.addColorStop(Math.max(.01, hf * .5), '#12203A'); g.addColorStop(Math.max(.02, hf - .03), '#203c66'); g.addColorStop(hf, '#2c5080'); g.addColorStop(Math.min(1, hf + .03), '#22406b'); g.addColorStop(1, '#22406b');
+  skyTex = canvasTex(256, 512, (x, w, h) => {
+    const S = LK.sky, g = x.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, S[0]); g.addColorStop(Math.max(.01, hf * .5), S[1]); g.addColorStop(Math.max(.02, hf - .03), S[2]); g.addColorStop(hf, S[3]); g.addColorStop(Math.min(1, hf + .03), S[4]); g.addColorStop(1, S[4]);
     x.fillStyle = g; x.fillRect(0, 0, w, h);
+    const hy = hf * h;
+    if (LK.clouds === 2) { for (const [cx, cy, r, c1, c2] of [[40, .22, 62, '#1c2740', '#0c1426'], [150, .12, 74, '#16213a', '#0a1122'], [230, .3, 58, '#233250', '#0e1730'], [100, .42, 46, '#2a3b58', '#121b30'], [200, .55, 44, '#304260', '#141d34']]) cloud(x, cx, cy * hy, r, c1, c2); }
+    else if (LK.clouds === 1) { const dusk = LK.sky[2] === '#d8704f'; for (const [cx, cy, r] of [[34, .55, 30], [210, .4, 38], [120, .75, 24]]) cloud(x, cx, cy * hy, r, dusk ? '#a8506a' : '#fdf3e6', dusk ? '#5a3258' : '#e9c9b4'); }
+    if (LK.house) {   // tiny far-off lighthouse on the horizon (sheet 14)
+      const lx = w * .13, lb = hy + 1, lh = 26; x.fillStyle = 'rgba(255,238,170,.5)'; const gl = x.createRadialGradient(lx, lb - lh, 1, lx, lb - lh, 22); gl.addColorStop(0, 'rgba(255,236,160,.8)'); gl.addColorStop(1, 'rgba(255,236,160,0)'); x.fillStyle = gl; x.fillRect(lx - 24, lb - lh - 24, 48, 48);
+      x.fillStyle = '#f3ead0'; x.beginPath(); x.moveTo(lx - 4.5, lb); x.lineTo(lx - 2.8, lb - lh); x.lineTo(lx + 2.8, lb - lh); x.lineTo(lx + 4.5, lb); x.fill(); x.fillStyle = '#E8664A'; x.fillRect(lx - 3.9, lb - 9, 7.8, 4); x.fillRect(lx - 3.3, lb - 19, 6.6, 3.4); x.fillStyle = '#12203A'; x.fillRect(lx - 3.6, lb - lh - 3, 7.2, 3); x.fillStyle = '#ffe9a0'; x.fillRect(lx - 2, lb - lh - 1, 4, 3);
+    }
   });
   scene.background = skyTex;
   placeMoon();
@@ -32,8 +44,8 @@ let moonNdcX = .42, moonNdcY = .7;
 function ndcToWorld(nx, ny, dist) { _v.set(nx, ny, .5).unproject(cam).sub(cam.position).normalize(); return cam.position.clone().addScaledVector(_v, dist); }
 function placeMoon() {
   placeCamAt(baseFocusZ, camDist);
-  moonNdcY = Math.min(.82, horizonY + .15);
-  moon.position.copy(ndcToWorld(moonNdcX, moonNdcY, 150)); moon.scale.setScalar(150 * .15 * (844 / Math.max(H, 400)));
+  moonNdcY = Math.min(.82, horizonY + LK.disc[1]);
+  moon.position.copy(ndcToWorld(moonNdcX, moonNdcY, 150)); moon.scale.setScalar(150 * .15 * LK.disc[2] * (844 / Math.max(H, 400)));
   // stars live in a band above the horizon
   const p = starGeo.attributes.position, base = [];
   const fr = (v) => { const s = Math.sin(v) * 43758.5453; return s - Math.floor(s); };
@@ -43,36 +55,43 @@ function placeMoon() {
   placeCam(0);
 }
 
-/* ---------- ground ---------- */
+/* ---------- ground (colours are painted per terrain + mood) ---------- */
+let groundGeo = null, groundJ = null; const groundMat = curved(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .95, metalness: 0 }), 'ground');
 (function ground() {
   const g = new THREE.PlaneGeometry(70, 26, 140, 52); g.rotateX(-Math.PI / 2); g.translate(0, 0, 7);
-  const p = g.attributes.position, c = new THREE.Color(), cols = [];
-  const dry = new THREE.Color(PAL.sand), wet = new THREE.Color(PAL.wet), under = new THREE.Color('#7f6c4c'), dune = new THREE.Color('#dcc08c'), grass = new THREE.Color('#6f9a4e'), grass2 = new THREE.Color('#87ad5c');
+  const p = g.attributes.position;
   for (let i = 0; i < p.count; i++) { const x = p.getX(i), z = p.getZ(i); p.setY(i, groundH(x, z)); }
-  const gi = g.toNonIndexed(); const q = gi.attributes.position;
-  for (let i = 0; i < q.count; i += 3) {
+  groundGeo = g.toNonIndexed(); const n = groundGeo.attributes.position.count;
+  groundGeo.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(n * 3), 3)); groundGeo.computeVertexNormals();
+  groundJ = new Float32Array(n / 3); for (let i = 0; i < groundJ.length; i++) groundJ[i] = (Math.random() - .5) * .012;
+  scene.add(new THREE.Mesh(groundGeo, groundMat));
+})();
+function paintGround() {
+  const q = groundGeo.attributes.position, col = groundGeo.attributes.color, c = new THREE.Color();
+  const dry = new THREE.Color(TR.sand), wet = new THREE.Color(TR.wet), under = new THREE.Color(TR.under), dune = new THREE.Color(TR.dune), grass = new THREE.Color('#6f9a4e'), grass2 = new THREE.Color('#87ad5c');
+  for (let i = 0, t = 0; i < q.count; i += 3, t++) {
     const x = (q.getX(i) + q.getX(i + 1) + q.getX(i + 2)) / 3, z = (q.getZ(i) + q.getZ(i + 1) + q.getZ(i + 2)) / 3;
     c.copy(dry);
     if (z < SHORE_Z + 1.9) c.lerp(wet, clamp((SHORE_Z + 1.9 - z) / 1.6, 0, 1));
     if (z < SHORE_Z - .2) c.lerp(under, clamp((SHORE_Z - .2 - z) / 1.5, 0, 1));
     if (z > 8.7 || Math.abs(x) > 4.7) c.lerp(dune, .6);
     if (isGrass(x, z)) c.lerp(Math.sin(x * 2.1 + z * 1.7) > 0 ? grass : grass2, clamp(Math.min(Math.abs(x) - 5.9, z - 9.3 > 0 ? 3 : 0) + .5, 0, .8) * (.6 + .4 * Math.sin(x * .7 + z * .9)));
-    c.offsetHSL(0, 0, (Math.random() - .5) * .012 + Math.sin(x * .9 + z * .35) * Math.sin(z * .6 - x * .2) * .025);
-    for (let k = 0; k < 3; k++) cols.push(c.r, c.g, c.b);
+    if (LK.rain && z > SHORE_Z + .6) c.lerp(wet, .55);     // rain-soaked sand
+    c.offsetHSL(0, 0, groundJ[t] + Math.sin(x * .9 + z * .35) * Math.sin(z * .6 - x * .2) * .025);
+    for (let k = 0; k < 3; k++) col.setXYZ(i + k, c.r, c.g, c.b);
   }
-  gi.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3)); gi.computeVertexNormals();
-  const m = new THREE.Mesh(gi, curved(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .95, metalness: 0 }), 'ground'));
-  scene.add(m);
-})();
+  col.needsUpdate = true;
+}
 
 /* ---------- sea: faceted vertex-animated water ---------- */
 const seaGeo = new THREE.PlaneGeometry(120, 96, 80, 64); seaGeo.rotateX(-Math.PI / 2); seaGeo.translate(0, 0, SHORE_Z + 1.3 - 48);
 const seaBase = seaGeo.attributes.position.array.slice();
-(function () {
-  const c = new THREE.Color(), a = new THREE.Color('#38aaa8'), b = new THREE.Color('#17808e'), d = new THREE.Color(PAL.teal), e = new THREE.Color('#123556'), cols = [], p = seaGeo.attributes.position;
-  for (let i = 0; i < p.count; i++) { const z = p.getZ(i), k = SHORE_Z - z; if (k < 2) c.copy(a).lerp(b, clamp(k / 2, 0, 1)); else if (k < 9) c.copy(b).lerp(d, (k - 2) / 7); else c.copy(d).lerp(e, clamp((k - 9) / 25, 0, 1)); cols.push(c.r, c.g, c.b); }
-  seaGeo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
-})();
+seaGeo.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(seaGeo.attributes.position.count * 3), 3));
+function paintSea() {
+  const c = new THREE.Color(), [A, B, D, E] = LK.sea.slice(0, 4).map((h) => new THREE.Color(h)), col = seaGeo.attributes.color, p = seaGeo.attributes.position;
+  for (let i = 0; i < p.count; i++) { const z = p.getZ(i), k = SHORE_Z - z; if (k < 2) c.copy(A).lerp(B, clamp(k / 2, 0, 1)); else if (k < 9) c.copy(B).lerp(D, (k - 2) / 7); else c.copy(D).lerp(E, clamp((k - 9) / 25, 0, 1)); col.setXYZ(i, c.r, c.g, c.b); }
+  col.needsUpdate = true; sea.material.emissive.setHex(LK.sea[4]);
+}
 const sea = new THREE.Mesh(seaGeo, curved(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .62, metalness: .04, flatShading: true, emissive: 0x03182a, transparent: true, opacity: .97 }), 'sea'));
 sea.frustumCulled = false; scene.add(sea);
 function foamStrip(width, op) { const n = 96, P = new Float32Array(n * 2 * 3), idx = []; for (let i = 0; i < n - 1; i++) { const a = i * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); } const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.setIndex(idx); const m = new THREE.Mesh(g, curved(new THREE.MeshBasicMaterial({ color: 0xeefaf6, transparent: true, opacity: op, depthWrite: false, side: THREE.DoubleSide }), 'foam')); m.userData = { n, width }; m.frustumCulled = false; scene.add(m); return m; }
@@ -228,4 +247,19 @@ function updateParts(dt) {
     parts.add(compose(_m, p.x, p.y, p.z, p.rx, p.rx * .7, 0, p.r * k, p.flat ? p.r * k * .25 : p.r * k, p.r * k));
   }
   parts.end(); if (parts.m.instanceColor) parts.m.instanceColor.needsUpdate = true;
+}
+
+/* ---------- apply a mood + terrain to the whole scene ---------- */
+let lookKey = '';
+function applyLook(mood, terrain) {
+  const key = mood + '/' + terrain; if (key === lookKey) return; lookKey = key;
+  LK = MOODS[mood] || MOODS.night; TR = TERRAINS[terrain] || TERRAINS.gold;
+  scene.fog.color.set(LK.fog);
+  hemiL.color.setHex(LK.hemi[0]); hemiL.groundColor.setHex(LK.hemi[1]); hemiL.intensity = LK.hemi[2];
+  keyL.color.setHex(LK.key[0]); keyL.intensity = LK.key[1]; rimL.color.setHex(LK.rim[0]); rimL.intensity = LK.rim[1];
+  groundMat.roughness = LK.rough; paintGround(); paintSea();
+  stars.visible = LK.stars > 0; stars.material.opacity = LK.stars;
+  moon.material.color.setHex(LK.disc[0]); moon.material.opacity = LK.disc[3];
+  for (const m of glitMats) { m.color.setHex(LK.glit[0]); m.opacity = LK.glit[1]; }
+  buildSky(); setRain(!!LK.rain);
 }

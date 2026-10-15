@@ -32,9 +32,9 @@ $('#snd').onclick = (e) => { e.stopPropagation(); au(); setMuted(!muted); $('#sn
 let bannerTO = 0;
 ui.night = function () {
   ui.hud(); if (!started) return;
-  const L = spec; $('#bannerT').className = 'ribbon' + (L.big ? ' coral' : '');
-  $('#bannerT').innerHTML = `<small>${L.big ? 'BIG HATCH · LEVEL ' + (night + 1) : 'LEVEL ' + (night + 1)}</small>${L.name}`;
-  $('#banner').classList.add('on'); clearTimeout(bannerTO); bannerTO = setTimeout(() => $('#banner').classList.remove('on'), 2600);
+  const L = spec; if (L.attract) return; $('#bannerT').className = 'ribbon' + (L.big ? ' coral' : '');
+  $('#bannerT').innerHTML = `<small>${L.big ? 'BIG HATCH · LEVEL ' + (night + 1) : 'LEVEL ' + (night + 1)}</small>${L.name}${L.new ? `<span class="new">NEW · ${L.new}</span>` : ''}`;
+  $('#banner').classList.add('on'); clearTimeout(bannerTO); bannerTO = setTimeout(() => $('#banner').classList.remove('on'), L.new ? 3800 : 2400); if (L.big) { buzz([30, 40, 30]); }
 };
 let capT = 0;
 ui.cap = function (s, d) { const c = $('#cap'); c.textContent = s; c.classList.add('on'); capT = d; };
@@ -58,8 +58,20 @@ function segRing(x, y, r, frac, w) {
   oc.lineWidth = w; oc.lineCap = 'round';
   for (let i = 0; i < n; i++) { const a0 = -Math.PI / 2 + i / n * 6.283 + .12, a1 = a0 + 6.283 / n - .24; oc.strokeStyle = i / n < frac ? col : 'rgba(18,32,58,.75)'; oc.beginPath(); oc.arc(x, y, r, a0, a1); oc.stroke(); }
 }
+const drops = Array.from({ length: 150 }, () => ({ x: Math.random(), y: Math.random(), v: .9 + Math.random() * .9, l: .018 + Math.random() * .02 }));
+function weatherFx(K) {
+  if (LK.rain) {
+    oc.strokeStyle = 'rgba(205,225,255,.32)'; oc.lineWidth = 1.3 * K; oc.lineCap = 'round'; oc.beginPath();
+    const dt = Math.min(.05, lastRaw || .016);
+    for (const d of drops) { d.y += d.v * dt * 1.6; d.x -= d.v * dt * .35; if (d.y > 1.05) { d.y = -.05; d.x = Math.random() * 1.3; } const x = d.x * W, y = d.y * H; oc.moveTo(x, y); oc.lineTo(x - d.l * W * .25, y - d.l * H); }
+    oc.stroke();
+    if (Math.random() < dt * 6) ui.fx('ring', (Math.random() - .5) * 9, 0, -4 + Math.random() * 11);
+    oc.fillStyle = 'rgba(8,16,34,.09)'; oc.fillRect(0, 0, W, H);
+  }
+  if (bolt > 0) { oc.fillStyle = `rgba(225,238,255,${Math.min(.6, bolt * .6)})`; oc.fillRect(0, 0, W, H); }
+}
 function overlay() {
-  oc.clearRect(0, 0, W, H); const K = k();
+  oc.clearRect(0, 0, W, H); const K = k(); weatherFx(K);
   // gull target: red segmented ring with inward arrows, tightening
   for (const g of gulls) if (g.st === 'dive' && g.tgt) {
     const s = scr(g.tgt.x, .1, g.tgt.z), p = 1 - clamp(g.dT / 1.75, 0, 1), r = (40 - p * 14) * K, pulse = .7 + .3 * Math.sin(time * 22);
@@ -129,7 +141,7 @@ function adBreak(then) {
 function endNight() {
   const L = spec, pct = safeN / total, pass = safeN >= Math.ceil(total * .7), stars = !pass ? 0 : safeN === total ? 3 : pct >= .8 ? 2 : 1;
   ui.capOff(); hand = null;
-  if (safeN === total) sfx.win(); else sfx.safe(0);
+  if (safeN === total) { sfx.win(); for (let i = 0; i < 7; i++) setTimeout(() => { burst3((Math.random() - .5) * 7, .6, SHORE_Z + .6 + Math.random() * 2, ['#ffd166', '#ffffff', '#8fd19e', '#6fd1c8', '#E8664A'], 26, { g: 2.2, up: 2.3, size: 1.1 }); tone(note(i * 2 + 4), .5, 'triangle', .1, 0, 0, .5); buzz(14); shake = .14; }, i * 150); } else sfx.safe(0);
   if (pass) { PROG.best[night] = Math.max(PROG.best[night] || 0, stars); PROG.unlocked = Math.max(PROG.unlocked, night + 1); saveProg(); }
   const dots = Array.from({ length: total }, (_, i) => `<b class="${i < safeN ? '' : 'x'}"></b>`).join('');
   const head = !pass ? 'Not this time' : safeN === total ? 'Every single one!' : safeN >= total - 2 ? 'So close!' : 'Level complete';
@@ -202,9 +214,9 @@ resize();
 $('#title').innerHTML = ICON.turtle() + 'Shell Run';
 $('#go').innerHTML = ICON.play + 'Play';
 const n0 = Q.has('n') ? Math.max(0, +Q.get('n') | 0) : 0;
-begin(n0); running = false;
+if (Q.has('n')) { begin(n0); running = false; } else { attract = true; begin(-1); running = true; }
 requestAnimationFrame(loop);
-$('#go').onclick = () => { au(); $('#start').remove(); started = true; if (PROG.unlocked === 0 || Q.has('n')) { $('#app').classList.add('playing'); running = true; ui.night(); } else showMap(); };
+$('#go').onclick = () => { au(); buzz([12, 40, 18]); $('#start').classList.add('out'); setTimeout(() => $('#start').remove(), 500); started = true; const was = attract; attract = false; Object.assign(season, { met: 0, saved: 0, spawned: 0, binned: 0 }); if (PROG.unlocked === 0 || Q.has('n')) { $('#app').classList.add('playing'); if (was) begin(Q.has('n') ? n0 : 0); running = true; ui.night(); } else { if (was) running = false; showMap(); } };
 self.G = {
   get T() { return T; }, get litter() { return litter; }, get balls() { return balls; }, get rocks() { return rocks; }, get crabs() { return crabs; }, get gulls() { return gulls; }, get logs() { return logs; }, get tourists() { return tourists; },
   tap, scr, groundAt, surfaceTap, get running() { return running; }, get night() { return night; }, get safe() { return safeN; }, get lost() { return lostN; }, get total() { return total; }, get binned() { return binnedN; },

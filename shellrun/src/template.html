@@ -88,6 +88,12 @@ button:disabled{opacity:.6}
 @keyframes pulse{50%{transform:scale(1.1)}}@keyframes shk{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 .chap{position:absolute;left:0;right:0;text-align:center;color:var(--cream);font-weight:900;font-size:14px;letter-spacing:.14em;text-transform:uppercase;opacity:.8}
 .mapbot{padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,rgba(8,14,28,.7))}.mapbot button{width:100%;min-height:62px;font-size:22px}
+.ribbon .new{display:block;margin-top:5px;font-size:12px;letter-spacing:.04em;font-weight:900;background:rgba(74,47,0,.18);border-radius:99px;padding:3px 10px;white-space:normal}
+#start{transition:opacity .45s}#start.out{opacity:0;pointer-events:none}
+#start h1{animation:floaty 3.2s ease-in-out infinite}#start h1 svg{animation:bob 2.2s ease-in-out infinite}
+#start .tag{color:var(--cream);font-weight:800;font-size:18px;opacity:.88;margin-top:12px;text-shadow:0 2px 0 rgba(0,0,0,.65),0 0 14px rgba(0,0,0,.7);text-align:center}
+#start button{animation:pulseBtn 1.8s ease-in-out infinite}
+@keyframes floaty{50%{transform:translateY(-6px)}}@keyframes bob{50%{transform:translateY(-4px) rotate(-4deg)}}@keyframes pulseBtn{50%{transform:scale(1.04)}}
 @media (prefers-reduced-motion: reduce){.card,.veil,.pill.bump{animation:none}}
 </style>
 </head>
@@ -108,7 +114,7 @@ button:disabled{opacity:.6}
   </div>
   <div id="banner"><div class="ribbon" id="bannerT"></div></div>
   <div id="cap"></div>
-  <div id="start"><h1 id="title">Shell Run</h1><button class="b-green" id="go"></button></div>
+  <div id="start"><div><h1 id="title">Shell Run</h1><div class="tag">Guide the hatchlings home</div></div><button class="b-green" id="go"></button></div>
   <div id="ov"></div>
   <div id="load">Loading the beach…</div>
 </div>

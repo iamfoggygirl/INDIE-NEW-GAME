@@ -2,7 +2,7 @@
 // Inlines src/*.js into one self-contained page: dist/index.html (+ dist/artifact.html for publishing).
 const fs = require('fs'), path = require('path');
 const src = path.join(__dirname, 'src');
-const order = ['core.js', 'world.js', 'models.js', 'game.js', 'ui.js'];
+const order = ['core.js', 'look.js', 'world.js', 'models.js', 'game.js', 'ui.js'];
 const code = order.map((f) => `/* ---- ${f} ---- */\n` + fs.readFileSync(path.join(src, f), 'utf8')).join('\n');
 const html = fs.readFileSync(path.join(src, 'template.html'), 'utf8').replace('/*__SRC__*/', () => code);
 fs.mkdirSync(path.join(__dirname, 'dist'), { recursive: true });
