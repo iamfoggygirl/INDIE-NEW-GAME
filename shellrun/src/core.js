@@ -130,7 +130,9 @@ function playChord(ch, t) {
 function pluck(f, delay, v) { tone(f, 1.6, 'sine', v, 0, delay, .7); tone(f * 2, .6, 'sine', v * .25, 0, delay, .7); }
 const PENTA = [0, 2, 4, 7, 9];
 const note = (i, base = 440) => base * Math.pow(2, (PENTA[((i % 5) + 5) % 5] + 12 * Math.floor(i / 5)) / 12);
-const buzz = (p) => { if (muted || !AC) return; try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+let hapOn = true; try { hapOn = localStorage.getItem('sr_hap') !== '0'; } catch (e) {}
+function setHaptics(v) { hapOn = v; try { localStorage.setItem('sr_hap', v ? '1' : '0'); } catch (e) {} }
+const buzz = (p) => { if (!hapOn || !AC) return; try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
 const sfx = {
   hatch() { tone(1500 + Math.random() * 400, .05, 'triangle', .035, 0, 0, 0); noise(.08, .05, 1800, 0, 2); },
   squeak() { tone(1900 + Math.random() * 500, .07, 'sine', .03, 2700, 0, .1); },
@@ -159,6 +161,8 @@ const sfx = {
   water() { tone(600, .08, 'sine', .08, 1200, 0, .3); tone(900, .06, 'sine', .05, 1600, .07, .3); noise(.18, .06, 2500, .02, 1, 'highpass', .2); buzz(6); },
   grass() { noise(.2, .07, 4200, 0, .7, 'highpass', .05); buzz(5); },
   sky() { pluck(midi(pick(MEL)) * 2, 0, .03); },
+  ready() { tone(880, .12, 'triangle', .1, 1320, 0, .4); tone(1320, .22, 'sine', .08, 1760, .1, .5); buzz([12, 30, 12]); },
+  power() { [0, 4, 7, 12, 16].forEach((n, i) => tone(midi(69 + n), .4, 'triangle', .1, 0, i * .05, .5)); noise(.45, .12, 2600, 0, .8, 'highpass'); buzz([20, 30, 40, 30, 70]); },
   thunder() { noise(2.2, .32, 140, 0, .7, 'lowpass', .5); noise(1.2, .2, 90, .15, .7, 'lowpass', .5); tone(55, 1.6, 'sine', .22, 38, .1, .4); buzz([60, 40, 90, 40, 140]); },
   bin() { tone(120, .2, 'triangle', .12, 80, 0, 0); noise(.1, .08, 600, 0, 2); buzz(15); }
 };

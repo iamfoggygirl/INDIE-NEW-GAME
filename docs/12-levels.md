@@ -18,3 +18,13 @@ Goal: a Candy Crush style ladder of short, repeatable levels that feeds ad break
 - Storm: rain, lightning with thunder and haptics, wet shiny sand, trash washed ashore. Level 6 swells the stream too.
 - Levels 1-7 now each show one new thing: trash, sandcastles, crabs, tangles + beach balls, gulls + tourists, rain + stream, big hatch.
 - Title screen is a live attract loop. Level 1 opens with a short hatching cinematic and a guided first tap.
+
+## Batch: pause, power-ups, shop, facts, hearts, variety
+- Pause menu (button, Esc/P, auto-pause on tab hide) with sound and buzz toggles.
+- Power-ups from level 3: Clean, Surge, Ranger. Charge ring fills with rescues; shop boosts are a demo.
+- Did-you-know toasts, once each, from verified conservation sources.
+- Hearts HUD: allowed losses = total - ceil(total*.7). Last heart pulses red with a heartbeat.
+- Heart moments: helped turtles send thank-you hearts at the sea; combo of 3+ makes walkers hop; idle hatchlings look back.
+- New obstacles: umbrella (fold), hole (traps, fill in). Crabs can burrow up from the sand near prey.
+- Mid-level events (trip, crabs, gust, balls, gull, tourist, hole, trash) and per-level flavours (Rush hour, Crab party, Litterbug, Gusty, Birds and flashes).
+- Lore: "We can't control the turtles. We can clear what people left behind." (title, level 1 caption, pause card).

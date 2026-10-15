@@ -155,6 +155,15 @@ GEO.castle = merge([
   [BX(.18, .12, .04), '#c9a55e', M(0, .3, .42)],
   [BX(.05, .26, .02), '#f4ead2', M(.22, 1.0, -.05)]
 ]);
+/* ---- beach umbrella left on the sand: a big blocker that folds when tapped ---- */
+GEO.umbrella = (function () {
+  const p = [[CY(.04, .045, 1.25, 6), '#8a6a43', M(.05, .62, 0, 1, 1, 1, 0, 0, -.1)], [CY(.3, .42, .12, 8), '#e2c27c', M(0, .06, 0), .1]];
+  for (let k = 0; k < 8; k++) p.push([new THREE.ConeGeometry(.85, .45, 1, 1, false, k * Math.PI / 4, Math.PI / 4), k % 2 ? '#fbf1d8' : '#E8664A', M(.12, 1.32, 0, 1, 1, 1, 0, 0, -.1), .12]);
+  p.push([S(.05, 6, 4), '#E0B040', M(.1, 1.58, 0, 1, 1, 1)]);
+  return merge(p);
+})();
+/* ---- a hole in the sand: traps hatchlings (sheet 14 / Leave No Trace advice) ---- */
+GEO.litter.hole = merge([[TO(.26, .07, 5, 12), '#d9be8c', M(0, .03, 0, 1, 1, 1, Math.PI / 2, 0, 0), .1], [CY(.25, .2, .05, 12), '#3b2d1c', M(0, .02, 0), .1], [CY(.12, .1, .04, 10), '#241a10', M(0, .01, 0)]]);
 /* ---- beach ball: spins across the sand and flips anything it hits ---- */
 GEO.ball = (function () {
   const g = S(.3, 12, 8).toNonIndexed(); const p = g.attributes.position, col = [], cs = ['#e8664a', '#fbf1d8', '#3f9bf0', '#E0B040', '#7DB05A', '#fbf1d8'];

@@ -13,6 +13,15 @@ const ICON = {
   sndOn: '<svg viewBox="0 0 32 32"><path d="M5 12h5l7-6v20l-7-6H5z" fill="#6fd1c8"/><path d="M21 11a6 6 0 0 1 0 10M24 7a11 11 0 0 1 0 18" fill="none" stroke="#FFF3C4" stroke-width="2.4" stroke-linecap="round"/></svg>',
   sndOff: '<svg viewBox="0 0 32 32"><path d="M5 12h5l7-6v20l-7-6H5z" fill="#6fd1c8" opacity=".55"/><path d="M21 12l7 8m0-8l-7 8" stroke="#FFF3C4" stroke-width="2.4" stroke-linecap="round"/></svg>',
   map: '<svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z" fill="currentColor" opacity=".9"/><path d="M9 4v14M15 6v14" stroke="#1d3157" stroke-width="1.4"/></svg>',
+  pause: '<svg viewBox="0 0 32 32"><rect x="8" y="6" width="6" height="20" rx="2.5" fill="#FFF3C4"/><rect x="18" y="6" width="6" height="20" rx="2.5" fill="#FFF3C4"/></svg>',
+  clean: '<svg viewBox="0 0 32 32"><path d="M21 3l6 6-9 9-6-6z" fill="#c9a06a"/><path d="M12 13l6 6-6 8c-2 2-6 2-9 0 4-1 5-3 5-6z" fill="#E0B040"/><circle cx="26" cy="22" r="1.8" fill="#FFF3C4"/><circle cx="22" cy="28" r="1.2" fill="#FFF3C4"/><circle cx="27" cy="27" r="1" fill="#FFF3C4"/></svg>',
+  surge: '<svg viewBox="0 0 32 32"><path d="M20 4a11 11 0 1 0 8 20A10 10 0 0 1 20 4z" fill="#FFF3C4"/><path d="M5 8l4 1.5M3 16h5M5 24l4-1.5" stroke="#E0B040" stroke-width="2.4" stroke-linecap="round"/></svg>',
+  ranger: '<svg viewBox="0 0 32 32"><path d="M16 3l11 4v8c0 7-5 12-11 14C10 27 5 22 5 15V7z" fill="#4f7d36"/><path d="M16 9l2.2 4.6 5 .6-3.7 3.4 1 5-4.5-2.5-4.5 2.5 1-5-3.7-3.4 5-.6z" fill="#E0B040"/></svg>',
+  gift: '<svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="12" rx="2" fill="#fff3c4"/><rect x="2" y="6" width="20" height="5" rx="2" fill="#fff"/><rect x="10.5" y="6" width="3" height="15" fill="#E8664A"/><path d="M12 6c-3-4-7-2-5 0zM12 6c3-4 7-2 5 0z" fill="#E8664A"/></svg>',
+  shop: '<svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6z" fill="#6fd1c8"/><path d="M9 8V6a3 3 0 0 1 6 0v2" fill="none" stroke="#FFF3C4" stroke-width="2" stroke-linecap="round"/></svg>',
+  flame: '<svg viewBox="0 0 24 24"><path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 2-4 3-6 1 2 2 2 2 2 1-2 1-5 1-8z" fill="#E8664A"/><path d="M12 12c2 2 3 3 3 5a3 3 0 0 1-6 0c0-2 2-3 3-5z" fill="#FFD166"/></svg>',
+  heart: '<svg viewBox="0 0 24 24"><path d="M12 21C5 15.5 2.5 12 2.5 8.2A5 5 0 0 1 12 6a5 5 0 0 1 9.5 2.2C21.5 12 19 15.5 12 21z" fill="#E8664A" stroke="#a8432d" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.5 8.5a2.6 2.6 0 0 1 2.4-2" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".7"/></svg>',
+  heartX: '<svg viewBox="0 0 24 24"><path d="M12 21C5 15.5 2.5 12 2.5 8.2A5 5 0 0 1 12 6a5 5 0 0 1 9.5 2.2C21.5 12 19 15.5 12 21z" fill="#ffffff" fill-opacity=".16" stroke="#ffffff" stroke-opacity=".4" stroke-width="1.4" stroke-linejoin="round" stroke-dasharray="2.5 2"/></svg>',
   leaf: '<svg viewBox="0 0 24 24"><path d="M4 20C4 9 11 4 21 4c0 10-5 16-15 16" fill="#7DB05A"/><path d="M5 19c4-5 8-8 12-11" stroke="#4f7d36" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>'
 };
 const ui = {};
@@ -22,7 +31,8 @@ const k = () => W / 390;
 ui.hud = function (bumpWhich) {
   $('#nightP').innerHTML = `${ICON.moon}<span class="sub">LEVEL</span><span>${night + 1}</span>`;
   $('#safeP').innerHTML = `${ICON.turtle(undefined, undefined, ICON.ok)}<span>${safeN}</span><span class="sub">/${total}</span>`;
-  $('#lostP').innerHTML = `${ICON.turtle('#E8664A', '#a8432d', ICON.x)}<span>${lostN}</span>`; $('#lostP').classList.toggle('on', lostN > 0);
+  const al = allowedLoss(), hn = Math.min(al, 9), left = Math.max(0, hn - lostN);
+  $('#lostP').innerHTML = al > 0 && !attract ? Array.from({ length: hn }, (_, i) => `<span class="ht ${i < left ? '' : 'gone'} ${bumpWhich === 'lost' && i === left ? 'brk' : ''}">${i < left ? ICON.heart : ICON.heartX}</span>`).join('') : ''; $('#lostP').classList.toggle('on', al > 0 && !attract); $('#lostP').classList.toggle('last', al > 0 && lostN >= al);
   $('#binP').innerHTML = `${ICON.bin}<span>${binnedN}</span>`;
   const bump = (sel) => { const e = $(sel); e.classList.remove('bump'); void e.offsetWidth; e.classList.add('bump'); };
   if (bumpWhich === 'safe') bump('#safeP'); else if (bumpWhich === 'lost') bump('#lostP'); else if (bumpWhich !== undefined) bump('#binP');
@@ -33,10 +43,11 @@ let bannerTO = 0;
 ui.night = function () {
   ui.hud(); if (!started) return;
   const L = spec; if (L.attract) return; $('#bannerT').className = 'ribbon' + (L.big ? ' coral' : '');
-  $('#bannerT').innerHTML = `<small>${L.big ? 'BIG HATCH · LEVEL ' + (night + 1) : 'LEVEL ' + (night + 1)}</small>${L.name}${L.new ? `<span class="new">NEW · ${L.new}</span>` : ''}`;
+  $('#bannerT').innerHTML = `<small>${L.big ? 'BIG HATCH · LEVEL ' + (night + 1) : 'LEVEL ' + (night + 1)}</small><i class="place">${L.place || CHAPTERS[(night / 10 | 0) % CHAPTERS.length]}</i>${L.name}${L.new ? `<span class="new">NEW · ${L.new}</span>` : L.tag ? `<span class="new tag">${L.tag}</span>` : ''}`;
   $('#banner').classList.add('on'); clearTimeout(bannerTO); bannerTO = setTimeout(() => $('#banner').classList.remove('on'), L.new ? 3800 : 2400); if (L.big) { buzz([30, 40, 30]); }
 };
 let capT = 0;
+ui.danger = (on) => { const d = $('#dng'); if (d) d.classList.toggle('on', !!on); };
 ui.cap = function (s, d) { const c = $('#cap'); c.textContent = s; c.classList.add('on'); capT = d; };
 ui.capOff = function () { $('#cap').classList.remove('on'); capT = 0; };
 
@@ -68,6 +79,7 @@ function weatherFx(K) {
     if (Math.random() < dt * 6) ui.fx('ring', (Math.random() - .5) * 9, 0, -4 + Math.random() * 11);
     oc.fillStyle = 'rgba(8,16,34,.09)'; oc.fillRect(0, 0, W, H);
   }
+  if (surgeT > 0) { const s = scr(0, 0, SHORE_Z), a = Math.min(1, surgeT) * .3, g = oc.createRadialGradient(s.x, s.y, 10, s.x, s.y, W * 1.1); g.addColorStop(0, `rgba(255,236,160,${a})`); g.addColorStop(1, 'rgba(255,236,160,0)'); oc.fillStyle = g; oc.fillRect(0, 0, W, H); }
   if (bolt > 0) { oc.fillStyle = `rgba(225,238,255,${Math.min(.6, bolt * .6)})`; oc.fillRect(0, 0, W, H); }
 }
 function overlay() {
@@ -125,7 +137,7 @@ function overlay() {
 }
 
 /* ---------- progress (saved on the device) ---------- */
-const PROG = (() => { let d = { best: {}, unlocked: 0, done: 0 }; try { d = Object.assign(d, JSON.parse(localStorage.getItem('shellrun.v1') || '{}')); } catch (e) {} return d; })();
+const PROG = (() => { let d = { best: {}, unlocked: 0, done: 0, facts: {}, boosts: 0, saved: 0, streak: 0, lastDay: '', noAds: false, gift: 0 }; try { d = Object.assign(d, JSON.parse(localStorage.getItem('shellrun.v1') || '{}')); } catch (e) {} return d; })();
 const saveProg = () => { try { localStorage.setItem('shellrun.v1', JSON.stringify(PROG)); } catch (e) {} };
 const starTotal = () => Object.values(PROG.best).reduce((a, b) => a + b, 0);
 
@@ -140,9 +152,10 @@ function adBreak(then) {
 }
 function endNight() {
   const L = spec, pct = safeN / total, pass = safeN >= Math.ceil(total * .7), stars = !pass ? 0 : safeN === total ? 3 : pct >= .8 ? 2 : 1;
-  ui.capOff(); hand = null;
+  ui.capOff(); hand = null; powerKind = null; ui.power();
   if (safeN === total) { sfx.win(); for (let i = 0; i < 7; i++) setTimeout(() => { burst3((Math.random() - .5) * 7, .6, SHORE_Z + .6 + Math.random() * 2, ['#ffd166', '#ffffff', '#8fd19e', '#6fd1c8', '#E8664A'], 26, { g: 2.2, up: 2.3, size: 1.1 }); tone(note(i * 2 + 4), .5, 'triangle', .1, 0, 0, .5); buzz(14); shake = .14; }, i * 150); } else sfx.safe(0);
-  if (pass) { PROG.best[night] = Math.max(PROG.best[night] || 0, stars); PROG.unlocked = Math.max(PROG.unlocked, night + 1); saveProg(); }
+  if (pass) { PROG.best[night] = Math.max(PROG.best[night] || 0, stars); PROG.unlocked = Math.max(PROG.unlocked, night + 1); }
+  saveProg();
   const dots = Array.from({ length: total }, (_, i) => `<b class="${i < safeN ? '' : 'x'}"></b>`).join('');
   const head = !pass ? 'Not this time' : safeN === total ? 'Every single one!' : safeN >= total - 2 ? 'So close!' : 'Level complete';
   const line = pass ? (stars === 3 ? 'A perfect level!' : 'Save them all for 3 stars.') : `Save at least ${Math.ceil(total * .7)} to pass.`;
@@ -166,7 +179,7 @@ function endNight() {
   const back = Math.min(3, lostN), b = v.querySelector('#bring');
   if (b) b.onclick = () => { b.disabled = true; let n = 3; b.innerHTML = `${ICON.ad}Demo ad · ${n}`; const iv = setInterval(() => { n--; if (n > 0) b.innerHTML = `${ICON.ad}Demo ad · ${n}`; else { clearInterval(iv); rewardUsed = true; safeN += back; lostN -= back; season.saved += back; v.remove(); endNight(); } }, 1000); };
   const nx = v.querySelector('#next');
-  if (nx) nx.onclick = () => { au(); v.remove(); rewardUsed = false; wins++; const go = () => begin(night + 1); if (night >= 3 && wins % 3 === 0 && Date.now() - lastAd > 60000) adBreak(go); else go(); };
+  if (nx) nx.onclick = () => { au(); v.remove(); rewardUsed = false; wins++; const go = () => begin(night + 1); if (!PROG.noAds && night >= 3 && wins % 3 === 0 && Date.now() - lastAd > 60000) adBreak(go); else go(); };
   v.querySelector('#retry').onclick = () => { au(); v.remove(); rewardUsed = false; Object.assign(season, snap.season); begin(night); };
   v.querySelector('#maps').onclick = () => { au(); v.remove(); rewardUsed = false; showMap(); };
 }
@@ -186,12 +199,89 @@ function showMap() {
   const v = document.createElement('div'); v.className = 'map';
   v.innerHTML = `<div class="maptop"><div class="pill">${ICON.star.replace('<svg', '<svg style="width:26px;height:26px"')}<span>${starTotal()}</span></div><div class="maptitle">Shell Run</div><div class="pill">${ICON.moon}<span>${cur + 1}</span></div></div>
     <div class="scroller"><div class="track" style="width:${Wd}px;height:${Ht}px"><svg width="${Wd}" height="${Ht}" viewBox="0 0 ${Wd} ${Ht}"><path d="${path}" fill="none" stroke="rgba(255,243,196,.28)" stroke-width="10" stroke-linecap="round" stroke-dasharray="1 18"/></svg>${nodes}</div></div>
-    <div class="mapbot"><button class="b-green" id="mplay">${ICON.play}Play level ${cur + 1}</button></div>`;
+    <div class="mapbot"><button class="b-navy" id="mshop" aria-label="Shop">${ICON.shop}</button><button class="b-green" id="mplay">${ICON.play}Play level ${cur + 1}</button></div>`;
   $('#app').appendChild(v);
   const sc = v.querySelector('.scroller'); sc.scrollTop = Math.max(0, py(cur) - sc.clientHeight * .6);
   const startAt = (i) => { au(); v.remove(); $('#app').classList.add('playing'); begin(i); running = true; ui.night(); };
   v.querySelectorAll('.node').forEach((n) => { n.onclick = () => { const i = +n.dataset.i; if (i <= cur) startAt(i); else { n.classList.remove('shake'); void n.offsetWidth; n.classList.add('shake'); sfx.uhoh && sfx.uhoh(); } }; });
   v.querySelector('#mplay').onclick = () => startAt(cur);
+  v.querySelector('#mshop').onclick = () => { au(); showShop(); };
+}
+
+/* ---------- pause ---------- */
+$('#pauseB').innerHTML = ICON.pause;
+ui.pause = function () {
+  if (paused || !running || ended || attract || !started) return;
+  paused = true; const v = document.createElement('div'); v.className = 'veil';
+  v.innerHTML = `<div class="card"><div class="ribbon">Paused</div><div class="inner">
+    <div class="lbl" style="margin-bottom:6px">Level ${night + 1} · ${spec.name}</div>
+    <div class="fact"><b>Save ${Math.ceil(total * .7)} of ${total} to pass. ${safeN} home so far.</b></div>
+    <div class="row" style="background:transparent;padding:0 2px">${ICON.leaf}<span class="fact" style="margin:0">You can't steer the turtles. Nature knows the way. The obstacles are man-made, so we can remove them.</span></div>
+    <div class="btns"><button class="b-green" id="pr">${ICON.play}Resume</button>
+    <button class="b-navy" id="prs">${ICON.retry}Restart level</button>
+    <button class="b-navy" id="pm">${ICON.map}Level map</button>
+    <div class="tog"><button class="b-navy" id="pt1"></button><button class="b-navy" id="pt2"></button></div></div></div></div>`;
+  $('#ov').appendChild(v);
+  const lab = () => { v.querySelector('#pt1').innerHTML = (muted ? ICON.sndOff : ICON.sndOn) + (muted ? 'Sound off' : 'Sound on'); v.querySelector('#pt2').innerHTML = '<span style="font-size:20px">📳</span>' + (hapOn ? 'Buzz on' : 'Buzz off'); }; lab();
+  const close = () => { v.remove(); paused = false; };
+  v.querySelector('#pr').onclick = () => { au(); close(); };
+  v.querySelector('#prs').onclick = () => { au(); close(); Object.assign(season, snap.season); begin(night); };
+  v.querySelector('#pm').onclick = () => { au(); close(); running = false; powerKind = null; ui.power(); showMap(); };
+  v.querySelector('#pt1').onclick = () => { au(); setMuted(!muted); $('#snd').innerHTML = muted ? ICON.sndOff : ICON.sndOn; lab(); };
+  v.querySelector('#pt2').onclick = () => { setHaptics(!hapOn); if (hapOn) buzz(30); lab(); };
+};
+$('#pauseB').onclick = (e) => { e.stopPropagation(); au(); ui.pause(); };
+document.addEventListener('visibilitychange', () => { if (document.hidden) ui.pause(); });
+addEventListener('keydown', (e) => { if (e.key === 'Escape' || e.key === 'p') { const r = document.querySelector('#pr'); if (r) r.click(); else ui.pause(); } });
+
+/* ---------- boost button ---------- */
+const POWER_ICON = { clean: ICON.clean, surge: ICON.surge, ranger: ICON.ranger };
+ui.power = function () {
+  const b = $('#power'); if (!powerKind || attract || !started) { b.classList.remove('on', 'ready'); return; }
+  b.classList.add('on'); b.classList.toggle('ready', powerReady); b.style.setProperty('--p', Math.round((powerReady ? 1 : charge) * 100));
+  $('#powerIn').innerHTML = POWER_ICON[powerKind]; const c = $('#powerCnt'); c.textContent = '+' + PROG.boosts; c.style.display = PROG.boosts > 0 ? 'grid' : 'none';
+};
+$('#power').onclick = (e) => { e.stopPropagation(); au(); if (paused) return; if (!usePower()) { ui.cap('Help turtles to fill the ring', 1.6); buzz(20); sfx.uhoh(); } };
+
+/* ---------- did-you-know toasts, shown at the moment of the action ---------- */
+const FACTCARD = {
+  litter: 'Beach trash blocks hatchlings and can be swallowed. Pack out what you bring in.',
+  castle: 'Sandcastles and holes can trap hatchlings. Knock them down before you leave the beach.',
+  crab: 'Ghost crabs, raccoons and foxes hunt hatchlings on the beach.',
+  tangle: 'Plastic bags and fishing line can tangle turtles. A bag can look like a jellyfish.',
+  gull: 'Seabirds snatch hatchlings on the sand and in the shallows.',
+  light: 'Bright lights pull hatchlings away from the sea. Use moonlight or a red torch.',
+  rain: 'Storms can wash trash onto nesting beaches.',
+  hole: 'Holes in the sand can trap hatchlings. Always fill them in before you leave the beach.',
+  gear: 'Beach toys, chairs and umbrellas left out become obstacles for turtles.',
+  hands: 'In real life, never pick up a hatchling. Clear its path and let it crawl on its own.'
+};
+let toastTO = 0;
+ui.fact = function (key) {
+  if (attract || PROG.facts[key] || !FACTCARD[key]) return; PROG.facts[key] = 1; saveProg();
+  const t = $('#toast'); t.innerHTML = `${ICON.leaf}<div><small>DID YOU KNOW?</small>${FACTCARD[key]}</div>`; t.classList.add('on'); clearTimeout(toastTO); toastTO = setTimeout(() => t.classList.remove('on'), 5400);
+};
+
+/* ---------- demo shop (no real purchases yet) ---------- */
+function showShop() {
+  const v = document.createElement('div'); v.className = 'veil'; v.style.zIndex = 14;
+  const draw = () => {
+    const rowH = (id, ic, t, sub, btn, off) => `<div class="row shop">${ic}<div style="flex:1"><b>${t}</b><span style="font-size:12px;opacity:.75;font-weight:700">${sub}</span></div><button class="b-green sm" id="${id}" ${off ? 'disabled' : ''}>${btn}</button></div>`;
+    v.innerHTML = `<div class="card"><div class="ribbon">Shop</div><div class="inner">
+      <div class="lbl" style="margin-bottom:8px">Your boosts: <b>${PROG.boosts}</b></div>
+      ${rowH('b0', ICON.ad, 'Free boost', 'Watch a short video', 'Watch', false)}
+      ${rowH('b1', ICON.clean, '5 boosts', 'Use any time in a level', '$0.99', false)}
+      ${rowH('b2', ICON.surge, '20 boosts', 'Best value', '$2.99', false)}
+      ${rowH('b3', ICON.ad, 'No more level ads', 'Video boosts stay optional', PROG.noAds ? 'Owned' : '$2.99', PROG.noAds)}
+      <div class="fact" style="font-size:12px;opacity:.75">Demo store. No real money is charged yet.</div>
+      <div class="btns"><button class="b-navy" id="bc">Back</button></div></div></div>`;
+    v.querySelector('#bc').onclick = () => v.remove();
+    const add = (n) => { PROG.boosts += n; saveProg(); sfx.win(); buzz([20, 30, 20]); draw(); };
+    v.querySelector('#b1').onclick = () => add(5); v.querySelector('#b2').onclick = () => add(20);
+    v.querySelector('#b3').onclick = () => { PROG.noAds = true; saveProg(); sfx.win(); draw(); };
+    v.querySelector('#b0').onclick = (e) => { const b = e.currentTarget; b.disabled = true; let n = 3; b.textContent = n; const iv = setInterval(() => { n--; if (n > 0) b.textContent = n; else { clearInterval(iv); add(1); } }, 1000); };
+  };
+  draw(); $('#app').appendChild(v);
 }
 
 /* ---------- loop + boot ---------- */
@@ -204,7 +294,7 @@ function loop(ts) {
   if (freeze > 0) { freeze -= raw; dt = 0; }
   if (capT > 0 && capT < 90 && (capT -= raw) <= 0) ui.capOff();
   if (capT >= 90 && !hand && !T.some((t) => t.st === 'flip' || t.st === 'carried' || t.st === 'tangle') && !gulls.some((g) => g.st === 'dive')) capT = 1.2;
-  for (let s = 0; s < TS; s++) update(dt); updateSea(time); updatePrints(); updateParts(dt); sync(); placeCam(raw);
+  if (!paused) for (let s = 0; s < TS; s++) update(dt); updateSea(time); updatePrints(); updateParts(dt); sync(); placeCam(raw);
   R.render(scene, cam); overlay();
   if (!booted) { booted = true; $('#load').remove(); }
   requestAnimationFrame(loop);
@@ -212,7 +302,12 @@ function loop(ts) {
 self.onHorizon = buildSky;
 resize();
 $('#title').innerHTML = ICON.turtle() + 'Shell Run';
-$('#go').innerHTML = ICON.play + 'Play';
+$('#go').innerHTML = ICON.play + (PROG.unlocked ? 'Continue · Level ' + (PROG.unlocked + 1) : 'Play');
+(function title() {
+  const today = new Date().toDateString(), y = new Date(Date.now() - 864e5).toDateString();
+  if (PROG.lastDay !== today) { PROG.streak = PROG.lastDay === y ? PROG.streak + 1 : 1; PROG.lastDay = today; PROG.boosts += 1; PROG.gift = 1; saveProg(); } else PROG.gift = 0;
+  $('#tagstats').innerHTML = `<span class="chip">${ICON.flame}Day ${PROG.streak}</span>${PROG.saved ? `<span class="chip">${ICON.turtle()}${PROG.saved} guided home</span>` : ''}${PROG.gift ? `<span class="chip gift">${ICON.gift}+1 boost</span>` : ''}`;
+})();
 const n0 = Q.has('n') ? Math.max(0, +Q.get('n') | 0) : 0;
 if (Q.has('n')) { begin(n0); running = false; } else { attract = true; begin(-1); running = true; }
 requestAnimationFrame(loop);
@@ -221,5 +316,5 @@ self.G = {
   get T() { return T; }, get litter() { return litter; }, get balls() { return balls; }, get rocks() { return rocks; }, get crabs() { return crabs; }, get gulls() { return gulls; }, get logs() { return logs; }, get tourists() { return tourists; },
   tap, scr, groundAt, surfaceTap, get running() { return running; }, get night() { return night; }, get safe() { return safeN; }, get lost() { return lostN; }, get total() { return total; }, get binned() { return binnedN; },
   get season() { return season; }, get carry() { return carry; }, get surf() { return surfLog; }, get bin() { return bin; }, get shoreZ() { return SHORE_Z; }, time: () => time,
-  info: () => ({ calls: R.info.render.calls, tris: R.info.render.triangles, geos: R.info.memory.geometries, tex: R.info.memory.textures }), levels: Infinity, begin, levelSpec, PROG, get spec() { return spec; }
+  info: () => ({ calls: R.info.render.calls, tris: R.info.render.triangles, geos: R.info.memory.geometries, tex: R.info.memory.textures }), levels: Infinity, begin, levelSpec, usePower, showShop, showMap, get power() { return { kind: powerKind, charge, ready: powerReady, surge: surgeT, ranger: rangerT }; }, get paused() { return paused; }, fact: (k) => ui.fact(k), PROG, get spec() { return spec; }
 };
