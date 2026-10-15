@@ -73,6 +73,16 @@ const vol = Object.assign(makePerson('vol'), { st: 'idle', x: 8, z: 3.6, walk: 0
 const crabPool = [makeCrab(), makeCrab(), makeCrab(), makeCrab()], gullPool = [makeGull(), makeGull(), makeGull()], touristPool = [makePerson('tourist'), makePerson('tourist')];
 touristPool.forEach((p) => { p.cone = new THREE.Mesh(GEO.flashCone, flashMat); p.cone.position.set(0, 1.3, .3); p.tilt.add(p.cone); });
 const allowedLoss = () => Math.max(0, total - Math.ceil(total * .7));
+const dolMesh = new THREE.Mesh(GEO.dolphin, MAT); dolMesh.visible = false; dolMesh.rotation.order = 'YXZ'; scene.add(dolMesh);
+const dol = { on: false, p: 0, next: 14, dir: 1, z: -11, splashed: 0 };
+function updateDolphin(dt) {
+  if (!dol.on) { if (spec.mood !== 'storm' && (dol.next -= dt) <= 0) { dol.on = true; dol.p = 0; dol.dir = Math.random() < .5 ? -1 : 1; dol.z = SHORE_Z - rnd(2.4, 4.4); dol.splashed = 0; } else return; }
+  dol.p += dt / 1.7; const u = dol.p;
+  if (u >= 1) { dol.on = false; dolMesh.visible = false; dol.next = rnd(26, 48); const x = 4.6 * dol.dir; ui.fx('splash', x, 0, dol.z); burst3(x, .05, dol.z, ['#bfe8e0', '#ffffff'], 8, { up: 1.2, size: .8 }); return; }
+  const x = lerp(-4.6, 4.6, u) * dol.dir, y = Math.sin(u * Math.PI) * 1.35 - .3, ang = Math.atan2(Math.cos(u * Math.PI) * Math.PI * 1.35, 9.2);
+  dolMesh.visible = y > -.25; dolMesh.position.set(x, y, dol.z); dolMesh.scale.setScalar(1.25); dolMesh.rotation.set(0, dol.dir > 0 ? 0 : Math.PI, ang);
+  if (!dol.splashed && y > -.2) { dol.splashed = 1; ui.fx('splash', x, 0, dol.z); burst3(x, .05, dol.z, ['#bfe8e0', '#ffffff'], 8, { up: 1.2, size: .8 }); sfx.water(); }
+}
 const tidy = () => season.spawned ? season.binned / season.spawned : 0;
 
 function clearNight() {
@@ -212,7 +222,6 @@ function rescue(kind, t, label) {
   combo = comboT > 0 ? combo + 1 : 1; comboT = 2.6; comboKind = kind;
   if (t && label) ui.float(t.x, .6, t.z, label);
   if (combo >= 2) { sfx.combo(combo); ui.combo(combo, kind); }
-  if (combo >= 3) { let n = 0; for (const w of T) if (w.st === 'walk' && w.hop <= 0 && n < 3) { w.hop = 1; w.look = .9; ui.fx('heart', w.x, .8, w.z); n++; } if (n) buzz(6); }
 }
 function shoo(g) {
   if (g.st === 'carry' && g.tgt) { const t = g.tgt; t.st = 'drop'; t.vy = 0; t.hgt = g.y - .5; ui.float(t.x, t.hgt + .4, t.z, 'Got it back!'); rescue('rescue', null); slow = 1; slowT = 0; if (!taught.drop) { taught.drop = 1; ui.cap('Now flip it back!', 2.5); } }
@@ -244,7 +253,7 @@ function landInBin(l) {
 
 /* ---------- update ---------- */
 function update(dt) {
-  time += dt; nightT += dt; timeU.value += dt; const L = spec;
+  time += dt; nightT += dt; timeU.value += dt; const L = spec; updateDolphin(dt);
   if (comboT > 0) comboT -= dt;
   if (running && spawnLeft > 0 && (spawnT -= dt) <= 0) { spawnTurtle(); spawnT = FAST ? .12 : (L.spawn ? rnd(L.spawn * .6, L.spawn * 1.4) : L.pace0 ? rnd(L.pace0, L.pace1) + (L.lull && (total - spawnLeft) % 5 === 0 ? L.lull : 0) : rnd(.38, .62)); }
   for (const n of nests) n.wob = Math.max(0, n.wob - dt);
@@ -266,8 +275,6 @@ function update(dt) {
   if (windLeft > 0 && (windT -= dt) <= 0) { windLeft--; windT = rnd(5, 8); const left = Math.random() < .5; addLitter('bag', left ? -6.5 : 6.5, rnd(SHORE_Z + 2, NEST_Z - 2.5), true); if (!taught.wind) { taught.wind = 1; ui.cap('The wind brings bags…', 2.2); } }
   // surprises that fire as the night goes on
   if (running && !attract && L.events) { const fr = (total - spawnLeft) / total; L.events.forEach((ev, k) => { if (!evDone[k] && fr >= ev.at) { evDone[k] = 1; doEvent(ev.kind); } }); }
-  // quiet moments: a hatchling looks back at you
-  if (running && !attract && !hand && (idleHeartT -= dt) <= 0) { idleHeartT = rnd(7, 11); if (nightT - lastTapT > 5) { const w = T.filter((t) => t.st === 'walk' && t.born > 1); if (w.length) { const t = pick(w); t.look = 1.2; t.hop = 1; ui.fx('heart', t.x, .8, t.z); buzz(5); } } }
   // last heart: the screen pulses red
   const al = allowedLoss(), dg = running && !attract && al > 0 && lostN === al;
   if (dg !== dangerOn) { dangerOn = dg; ui.danger(dg); dangerT = 0; if (dg && !hand) ui.cap('Last heart! No more mistakes', 2.2); }
@@ -347,7 +354,7 @@ function teachBlock(blk, t) {
 }
 function tangle(t, l) { t.st = 'tangle'; t.flipT = 5.5; t.tang = l; l.st = 'tangle'; l.t = t; sfx.uhoh(); burst3(t.x, .1, t.z, ['#e9d3a6'], 6); if (!taught.tangle) { taught.tangle = 1; hand = { o: t, y: .25, kind: 'tangle' }; ui.cap('Tap to free it!', 99); } }
 function flip(t) { if (t.st === 'flip') return; t.st = 'flip'; t.flipT = 5; sfx.uhoh(); burst3(t.x, .1, t.z, ['#e9d3a6'], 6); if (!taught.flip) { taught.flip = 1; hand = { o: t, y: .25, kind: 'flip' }; ui.cap('Tap to flip it back!', 99); } }
-function reachSea(t) { t.st = 'swim'; t.safe = true; safeN++; if (t.helped && !attract) { ui.fx('heart', t.x, .9, t.z); ui.fx('heart', t.x + .25, 1.2, t.z); buzz([8, 40, 8]); } if (!attract && !passed && safeN >= Math.ceil(total * .7)) { passed = true; sfx.ready(); if (!hand) ui.cap('Level passed! Save them all for 3 stars', 2.4); } if (!attract) PROG.saved++; season.saved++; ui.hud('safe'); sfx.safe(safeN); burst3(t.x, .1, t.z, ['#eaf7ff', '#bfe8e0', '#ffffff'], 14); ui.fx('splash', t.x, 0, t.z); ui.float(t.x, .5, t.z, '+1'); }
+function reachSea(t) { t.st = 'swim'; t.safe = true; safeN++; if (!attract && !passed && safeN >= Math.ceil(total * .7)) { passed = true; sfx.ready(); if (!hand) ui.cap('Level passed! Save them all for 3 stars', 2.4); } if (!attract) PROG.saved++; season.saved++; ui.hud('safe'); sfx.safe(safeN); burst3(t.x, .1, t.z, ['#eaf7ff', '#bfe8e0', '#ffffff'], 14); ui.fx('splash', t.x, 0, t.z); ui.float(t.x, .5, t.z, '+1'); }
 function loseTurtle(t, why) {
   if (t.st === 'lost' || t.st === 'gone') return;
   if (t.tang) { t.tang.st = 'lie'; t.tang.t = null; if (!t.tang.hole) { t.tang.x = t.x; t.tang.z = t.z; } t.tang = null; }

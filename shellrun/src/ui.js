@@ -48,7 +48,7 @@ ui.night = function () {
 };
 let capT = 0;
 ui.danger = (on) => { const d = $('#dng'); if (d) d.classList.toggle('on', !!on); };
-ui.cap = function (s, d) { const c = $('#cap'); c.textContent = s; c.classList.add('on'); capT = d; };
+ui.cap = function (s, d) { if (attract) return; const c = $('#cap'); c.textContent = s; c.classList.add('on'); capT = d; };
 ui.capOff = function () { $('#cap').classList.remove('on'); capT = 0; };
 
 /* ---------- overlay effects (crisp 2D on top of 3D) ---------- */
@@ -106,7 +106,7 @@ function overlay() {
     if (p < .3) { oc.globalAlpha = .5 + .5 * Math.sin(time * 16); oc.strokeStyle = '#fff'; oc.lineWidth = 2 * K; oc.beginPath(); oc.arc(s.x, s.y, 37 * K, 0, 6.3); oc.stroke(); oc.globalAlpha = 1; }
   }
   // stuck / dazzled marks
-  oc.font = `900 ${16 * K}px ui-rounded,system-ui,sans-serif`; oc.textAlign = 'center'; oc.textBaseline = 'middle';
+  oc.font = `400 ${17 * K}px 'Lilita One',ui-rounded,system-ui,sans-serif`; oc.textAlign = 'center'; oc.textBaseline = 'middle';
   for (const t of T) if (t.st === 'walk' && (t.stuck > .5 || t.lure > 0)) { const s = scr(t.x, .55, t.z); const m = t.lure > 0 ? '✦' : '?'; const bob = Math.sin(time * 5 + t.ph) * 2 * K; oc.fillStyle = '#FFF3C4'; oc.strokeStyle = 'rgba(18,32,58,.7)'; oc.lineWidth = 4 * K; oc.strokeText(m, s.x, s.y - 10 * K + bob); oc.fillText(m, s.x, s.y - 10 * K + bob); }
   // effects
   for (let i = fx.length - 1; i >= 0; i--) {
@@ -123,7 +123,7 @@ function overlay() {
   }
   oc.globalAlpha = 1;
   // floating words
-  oc.font = `900 ${21 * K}px ui-rounded,system-ui,sans-serif`; oc.lineJoin = 'round';
+  oc.font = `400 ${22 * K}px 'Lilita One',ui-rounded,system-ui,sans-serif`; oc.lineJoin = 'round';
   for (let i = floats.length - 1; i >= 0; i--) { const f = floats[i]; f.t += lastRaw; if (f.t > 1.15) { floats.splice(i, 1); continue; } const s = scr(f.x, f.y, f.z); const pop = f.t < .15 ? .7 + f.t / .15 * .35 : 1.05 - Math.min(.05, (f.t - .15)); oc.save(); oc.translate(s.x, s.y - f.t * 44 * K); oc.scale(pop, pop); oc.globalAlpha = 1 - Math.max(0, f.t - .7) / .45; oc.fillStyle = '#FFF3C4'; oc.strokeStyle = 'rgba(18,32,58,.75)'; oc.lineWidth = 5 * K; oc.strokeText(f.s, 0, 0); oc.fillText(f.s, 0, 0); oc.restore(); }
   oc.globalAlpha = 1;
   if (comboFx) { comboFx.t += lastRaw; const p = comboFx.t; if (p > 1.3) comboFx = null; else { const sc = 1 + Math.max(0, .35 - p) * 1.6; oc.save(); oc.translate(W / 2, H * .27); oc.scale(sc, sc); oc.globalAlpha = Math.min(1, 1.7 - p); oc.font = `900 ${36 * K}px ui-rounded,system-ui,sans-serif`; oc.fillStyle = '#E0B040'; oc.strokeStyle = 'rgba(40,20,0,.65)'; oc.lineWidth = 7 * K; const s = `${{ tidy: 'Tidy', rescue: 'Rescue', shoo: 'Guard' }[comboFx.kind]} ×${comboFx.n}`; oc.strokeText(s, 0, 0); oc.fillText(s, 0, 0); oc.restore(); } }
@@ -313,6 +313,7 @@ if (Q.has('n')) { begin(n0); running = false; } else { attract = true; begin(-1)
 requestAnimationFrame(loop);
 $('#go').onclick = () => { au(); buzz([12, 40, 18]); $('#start').classList.add('out'); setTimeout(() => $('#start').remove(), 500); started = true; const was = attract; attract = false; Object.assign(season, { met: 0, saved: 0, spawned: 0, binned: 0 }); if (PROG.unlocked === 0 || Q.has('n')) { $('#app').classList.add('playing'); if (was) begin(Q.has('n') ? n0 : 0); running = true; ui.night(); } else { if (was) running = false; showMap(); } };
 self.G = {
+  dolGo: () => { dol.next = 0; },
   get T() { return T; }, get litter() { return litter; }, get balls() { return balls; }, get rocks() { return rocks; }, get crabs() { return crabs; }, get gulls() { return gulls; }, get logs() { return logs; }, get tourists() { return tourists; },
   tap, scr, groundAt, surfaceTap, get running() { return running; }, get night() { return night; }, get safe() { return safeN; }, get lost() { return lostN; }, get total() { return total; }, get binned() { return binnedN; },
   get season() { return season; }, get carry() { return carry; }, get surf() { return surfLog; }, get bin() { return bin; }, get shoreZ() { return SHORE_Z; }, time: () => time,

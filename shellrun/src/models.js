@@ -201,3 +201,6 @@ function makeBin(x, z) {
   g.add(body, lid, logo, pile); g.position.set(x, groundH(x, z), z); g.rotation.y = -.35; g.scale.setScalar(1.25); scene.add(g);
   return { g, lid, pile, x, z, n: 0, sq: 0, lidT: 0 };
 }
+
+/* ---- a dolphin that leaps through the sea now and then (ocean-life easter egg) ---- */
+GEO.dolphin = merge([[S(.5, 10, 8), '#6f8fa8', M(0, 0, 0, 1.7, .62, .62), .06], [S(.46, 8, 6), '#dfe9ef', M(.02, -.15, 0, 1.6, .4, .55)], [CN(.13, .5, 6), '#6f8fa8', M(.98, -.05, 0, 1, 1, 1, 0, 0, -Math.PI / 2)], [CN(.17, .4, 4), '#5f7f98', M(-.05, .42, 0, 1, 1, 1, 0, 0, .35)], [CN(.12, .6, 5), '#6f8fa8', M(-1.1, .05, 0, 1, 1, 1, 0, 0, Math.PI / 2)], [S(.2, 6, 4), '#5f7f98', M(-1.45, .1, 0, .35, .06, .6)], [S(.12, 6, 4), '#5f7f98', M(.35, -.22, .3, .6, .12, .3)], [S(.12, 6, 4), '#5f7f98', M(.35, -.22, -.3, .6, .12, .3)]]);

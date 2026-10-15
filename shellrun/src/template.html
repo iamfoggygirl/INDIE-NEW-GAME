@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Shell Run</title><meta name="description" content="Guide baby sea turtles from the nest to the sea. Clear what people left behind."><link rel="icon" type="image/svg+xml" href="/icon.svg"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="manifest" href="/manifest.webmanifest"><meta property="og:type" content="website"><meta property="og:title" content="Shell Run"><meta property="og:description" content="Guide baby sea turtles from the nest to the sea."><meta property="og:image" content="https://shellrun.netlify.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://shellrun.netlify.app/og.png">
+<title>Shell Run</title><meta name="description" content="Guide baby sea turtles from the nest to the sea. Clear what people left behind."><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Lilita+One&display=swap" rel="stylesheet"><link rel="icon" type="image/svg+xml" href="/icon.svg"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="manifest" href="/manifest.webmanifest"><meta property="og:type" content="website"><meta property="og:title" content="Shell Run"><meta property="og:description" content="Guide baby sea turtles from the nest to the sea."><meta property="og:image" content="https://shellrun.netlify.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://shellrun.netlify.app/og.png">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#12203A"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
 :root{color-scheme:dark;--navy:#12203A;--frame:#1d3157;--frame2:#29426f;--cream:#fbf1d8;--cream2:#f3e3bf;--ink:#1b2433;--muted:#6a7186;--green:#7DB05A;--green2:#4f7d36;--teal:#6fd1c8;--teal2:#3d9e96;--gold:#E0B040;--coral:#E8664A;--red:#D93A3A}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:none}
-html,body{margin:0;height:100%;background:#0b1428;overflow:hidden;font-family:ui-rounded,"SF Pro Rounded","Nunito","Varela Round",system-ui,-apple-system,sans-serif;color:var(--ink)}
+html,body{margin:0;height:100%;background:#0b1428;overflow:hidden;font-family:"Fredoka",ui-rounded,"SF Pro Rounded","Nunito","Varela Round",system-ui,-apple-system,sans-serif;color:var(--ink)}
 #app{position:relative;margin:0 auto;height:100%;max-width:560px;overflow:hidden;background:#12203A}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 #ov2{z-index:2}
@@ -101,8 +101,6 @@ button:disabled{opacity:.6}
 .ribbon .new{display:block;margin-top:5px;font-size:12px;letter-spacing:.04em;font-weight:900;background:rgba(74,47,0,.18);border-radius:99px;padding:3px 10px;white-space:normal}
 #start{transition:opacity .45s}#start.out{opacity:0;pointer-events:none}
 #start h1{animation:floaty 3.2s ease-in-out infinite}#start h1 svg{animation:bob 2.2s ease-in-out infinite}
-#start .lore{color:var(--cream);font-weight:700;font-size:13px;font-style:italic;opacity:.7;margin:8px 22px 0;text-align:center;text-shadow:0 2px 0 rgba(0,0,0,.65),0 0 12px rgba(0,0,0,.7)}
-#start .tag{color:var(--cream);font-weight:800;font-size:18px;opacity:.88;margin-top:12px;text-shadow:0 2px 0 rgba(0,0,0,.65),0 0 14px rgba(0,0,0,.7);text-align:center}
 #start button{animation:pulseBtn 1.8s ease-in-out infinite}
 @keyframes floaty{50%{transform:translateY(-6px)}}@keyframes bob{50%{transform:translateY(-4px) rotate(-4deg)}}@keyframes pulseBtn{50%{transform:scale(1.04)}}
 .left{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
@@ -119,6 +117,19 @@ button:disabled{opacity:.6}
 .tog{display:flex;gap:9px}.tog button{flex:1;font-size:14px;min-height:46px;padding:8px}
 .mapbot{display:flex;gap:10px}.mapbot .b-navy{flex:none;width:66px;min-height:62px;padding:0}.mapbot .b-navy svg{width:30px;height:30px}
 @media (prefers-reduced-motion: reduce){.card,.veil,.pill.bump{animation:none}}
+
+/* typography: playful display face for game text, rounded UI face for the rest */
+h1,.ribbon,button,.big,.pill,#cap,.chip,.new,.combo{font-family:"Lilita One","Fredoka",ui-rounded,system-ui,sans-serif;font-weight:400;letter-spacing:.02em}
+.ribbon{font-size:22px}
+#start{pointer-events:none}#start button{pointer-events:auto}
+#start .top{display:flex;flex-direction:column;align-items:center}
+#start h1{white-space:nowrap;font-size:70px;line-height:.9;letter-spacing:.01em;color:#fff4d6;-webkit-text-stroke:2px rgba(26,40,70,.55);paint-order:stroke fill;text-shadow:0 6px 0 #2a4a6b,0 9px 0 rgba(0,0,0,.28),0 0 44px rgba(0,0,0,.35)}
+#start .tag{margin-top:20px;color:#ffd166;font-weight:600;font-size:14px;letter-spacing:.2em;text-transform:uppercase;text-shadow:0 2px 0 rgba(0,0,0,.6),0 0 12px rgba(0,0,0,.6);text-align:center}
+#start .stats{margin-top:26px}
+#start .bot{display:flex;flex-direction:column;align-items:center;gap:22px;width:100%}
+#start .lore{max-width:270px;text-align:center;color:#fff4d6;font-weight:500;font-size:15px;line-height:1.4;opacity:0;animation:loreIn 1.2s .9s forwards;text-shadow:0 2px 0 rgba(0,0,0,.6),0 0 14px rgba(0,0,0,.65)}
+#start .lore::before{content:"";display:block;width:34px;height:3px;border-radius:3px;background:#ffd166;margin:0 auto 10px;opacity:.85}
+@keyframes loreIn{to{opacity:.88}}
 </style>
 </head>
 <body>
@@ -141,7 +152,7 @@ button:disabled{opacity:.6}
   <div id="cap"></div>
   <div id="toast"></div>
   <button id="power" aria-label="Boost"><div class="in" id="powerIn"></div><span class="cnt" id="powerCnt"></span></button>
-  <div id="start"><div><h1 id="title">Shell Run</h1><div class="tag">Guide the hatchlings home</div><div class="lore">We can't control the turtles. We can clear what people left behind.</div><div class="stats" id="tagstats"></div></div><button class="b-green" id="go"></button></div>
+  <div id="start"><div class="top"><h1 id="title">Shell Run</h1><div class="tag">Guide the hatchlings home</div><div class="stats" id="tagstats"></div></div><div class="bot"><div class="lore">We can't control the turtles.<br>We can clear what people left behind.</div><button class="b-green" id="go"></button></div></div>
   <div id="ov"></div>
   <div id="load">Loading the beach…</div>
 </div>
