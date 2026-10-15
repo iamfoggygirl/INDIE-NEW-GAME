@@ -1,0 +1,5 @@
+# Shell Run is one finished file, so there is nothing to build.
+# Netlify just serves the folder that holds it.
+[build]
+  publish = "shellrun/dist"
+  command = ""
