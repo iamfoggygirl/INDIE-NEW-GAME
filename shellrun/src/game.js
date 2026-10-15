@@ -247,7 +247,7 @@ function landInBin(l) {
   if (!taught.binned) { taught.binned = 1; ui.cap('Into the bin. Keep the path clear!', 2.4); buzz([10, 30, 14]); }
   sfx.clunk(bin.n); burst3(bin.x, 1.35, bin.z, ['#4FA3D9', '#ffffff', '#bfe8e0'], 8, { size: .7 });
   ui.fx('recycle', bin.x, 1.6, bin.z); ui.hud();
-  const pile = bin.pile.children; for (let i = 0; i < pile.length; i++) pile[i].visible = i < Math.min(bin.n, pile.length);
+  const pile = bin.pile.children; for (let i = 0; i < pile.length; i++) pile[i].visible = false;   // items disappear into the bin; a visible pile looked like the trash had come back out
   if (bin.n >= BIN_CAP - 1 && vol.st === 'idle') { vol.st = 'enter'; vol.x = 8.5; vol.z = bin.z + .8; vol.g.visible = true; }
 }
 
@@ -354,7 +354,7 @@ function teachBlock(blk, t) {
 }
 function tangle(t, l) { t.st = 'tangle'; t.flipT = 5.5; t.tang = l; l.st = 'tangle'; l.t = t; sfx.uhoh(); burst3(t.x, .1, t.z, ['#e9d3a6'], 6); if (!taught.tangle) { taught.tangle = 1; hand = { o: t, y: .25, kind: 'tangle' }; ui.cap('Tap to free it!', 99); } }
 function flip(t) { if (t.st === 'flip') return; t.st = 'flip'; t.flipT = 5; sfx.uhoh(); burst3(t.x, .1, t.z, ['#e9d3a6'], 6); if (!taught.flip) { taught.flip = 1; hand = { o: t, y: .25, kind: 'flip' }; ui.cap('Tap to flip it back!', 99); } }
-function reachSea(t) { t.st = 'swim'; t.safe = true; safeN++; if (!attract && !passed && safeN >= Math.ceil(total * .7)) { passed = true; sfx.ready(); if (!hand) ui.cap('Level passed! Save them all for 3 stars', 2.4); } if (!attract) PROG.saved++; season.saved++; ui.hud('safe'); sfx.safe(safeN); burst3(t.x, .1, t.z, ['#eaf7ff', '#bfe8e0', '#ffffff'], 14); ui.fx('splash', t.x, 0, t.z); ui.float(t.x, .5, t.z, '+1'); }
+function reachSea(t) { t.st = 'swim'; t.safe = true; safeN++; if (t.helped && !attract) { ui.fx('heart', t.x, .9, t.z); buzz(8); } if (t.helped && !attract) { ui.fx('heart', t.x, .9, t.z); buzz([8, 40, 8]); } if (!attract && !passed && safeN >= Math.ceil(total * .7)) { passed = true; sfx.ready(); if (!hand) ui.cap('Level passed! Save them all for 3 stars', 2.4); } if (!attract) PROG.saved++; season.saved++; ui.hud('safe'); sfx.safe(safeN); burst3(t.x, .1, t.z, ['#eaf7ff', '#bfe8e0', '#ffffff'], 14); ui.fx('splash', t.x, 0, t.z); ui.float(t.x, .5, t.z, '+1'); }
 function loseTurtle(t, why) {
   if (t.st === 'lost' || t.st === 'gone') return;
   if (t.tang) { t.tang.st = 'lie'; t.tang.t = null; if (!t.tang.hole) { t.tang.x = t.x; t.tang.z = t.z; } t.tang = null; }

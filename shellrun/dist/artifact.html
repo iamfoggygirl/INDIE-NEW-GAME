@@ -1152,7 +1152,7 @@ function landInBin(l) {
   if (!taught.binned) { taught.binned = 1; ui.cap('Into the bin. Keep the path clear!', 2.4); buzz([10, 30, 14]); }
   sfx.clunk(bin.n); burst3(bin.x, 1.35, bin.z, ['#4FA3D9', '#ffffff', '#bfe8e0'], 8, { size: .7 });
   ui.fx('recycle', bin.x, 1.6, bin.z); ui.hud();
-  const pile = bin.pile.children; for (let i = 0; i < pile.length; i++) pile[i].visible = i < Math.min(bin.n, pile.length);
+  const pile = bin.pile.children; for (let i = 0; i < pile.length; i++) pile[i].visible = false;   // items disappear into the bin; a visible pile looked like the trash had come back out
   if (bin.n >= BIN_CAP - 1 && vol.st === 'idle') { vol.st = 'enter'; vol.x = 8.5; vol.z = bin.z + .8; vol.g.visible = true; }
 }
 
@@ -1259,7 +1259,7 @@ function teachBlock(blk, t) {
 }
 function tangle(t, l) { t.st = 'tangle'; t.flipT = 5.5; t.tang = l; l.st = 'tangle'; l.t = t; sfx.uhoh(); burst3(t.x, .1, t.z, ['#e9d3a6'], 6); if (!taught.tangle) { taught.tangle = 1; hand = { o: t, y: .25, kind: 'tangle' }; ui.cap('Tap to free it!', 99); } }
 function flip(t) { if (t.st === 'flip') return; t.st = 'flip'; t.flipT = 5; sfx.uhoh(); burst3(t.x, .1, t.z, ['#e9d3a6'], 6); if (!taught.flip) { taught.flip = 1; hand = { o: t, y: .25, kind: 'flip' }; ui.cap('Tap to flip it back!', 99); } }
-function reachSea(t) { t.st = 'swim'; t.safe = true; safeN++; if (!attract && !passed && safeN >= Math.ceil(total * .7)) { passed = true; sfx.ready(); if (!hand) ui.cap('Level passed! Save them all for 3 stars', 2.4); } if (!attract) PROG.saved++; season.saved++; ui.hud('safe'); sfx.safe(safeN); burst3(t.x, .1, t.z, ['#eaf7ff', '#bfe8e0', '#ffffff'], 14); ui.fx('splash', t.x, 0, t.z); ui.float(t.x, .5, t.z, '+1'); }
+function reachSea(t) { t.st = 'swim'; t.safe = true; safeN++; if (t.helped && !attract) { ui.fx('heart', t.x, .9, t.z); buzz(8); } if (t.helped && !attract) { ui.fx('heart', t.x, .9, t.z); buzz([8, 40, 8]); } if (!attract && !passed && safeN >= Math.ceil(total * .7)) { passed = true; sfx.ready(); if (!hand) ui.cap('Level passed! Save them all for 3 stars', 2.4); } if (!attract) PROG.saved++; season.saved++; ui.hud('safe'); sfx.safe(safeN); burst3(t.x, .1, t.z, ['#eaf7ff', '#bfe8e0', '#ffffff'], 14); ui.fx('splash', t.x, 0, t.z); ui.float(t.x, .5, t.z, '+1'); }
 function loseTurtle(t, why) {
   if (t.st === 'lost' || t.st === 'gone') return;
   if (t.tang) { t.tang.st = 'lie'; t.tang.t = null; if (!t.tang.hole) { t.tang.x = t.x; t.tang.z = t.z; } t.tang = null; }
@@ -1483,7 +1483,7 @@ $('#snd').innerHTML = muted ? ICON.sndOff : ICON.sndOn;
 $('#snd').onclick = (e) => { e.stopPropagation(); au(); setMuted(!muted); $('#snd').innerHTML = muted ? ICON.sndOff : ICON.sndOn; };
 let bannerTO = 0;
 ui.night = function () {
-  ui.hud(); if (!started) return;
+  levelFacts = []; ui.hud(); if (!started) return;
   const L = spec; if (L.attract) return; $('#bannerT').className = 'ribbon' + (L.big ? ' coral' : '');
   $('#bannerT').innerHTML = `<small>${L.big ? 'BIG HATCH · LEVEL ' + (night + 1) : 'LEVEL ' + (night + 1)}</small><i class="place">${L.place || CHAPTERS[(night / 10 | 0) % CHAPTERS.length]}</i>${L.name}${L.new ? `<span class="new">NEW · ${L.new}</span>` : L.tag ? `<span class="new tag">${L.tag}</span>` : ''}`;
   $('#banner').classList.add('on'); clearTimeout(bannerTO); bannerTO = setTimeout(() => $('#banner').classList.remove('on'), L.new ? 3800 : 2400); if (L.big) { buzz([30, 40, 30]); }
@@ -1608,6 +1608,7 @@ function endNight() {
     <div class="crew">${dots}</div>
     <div class="row">${ICON.bin}<span>${binnedN} binned</span><div class="bar"><i style="width:0%"></i></div><span>${tidyPct}% clean</span></div>
     <div class="fact"><b>${line}</b></div>
+    ${levelFacts.length ? factRow(FACTCARD[levelFacts[levelFacts.length - 1]]) : ''}
     <div class="row" style="background:transparent;padding:0 2px">${ICON.leaf}<span class="fact" style="margin:0">${L.fact}</span></div>
     <div class="btns">
       ${pass ? `<button class="b-green" id="next">${ICON.play}Next level</button>` : ''}
@@ -1658,7 +1659,8 @@ ui.pause = function () {
   v.innerHTML = `<div class="card"><div class="ribbon">Paused</div><div class="inner">
     <div class="lbl" style="margin-bottom:6px">Level ${night + 1} · ${spec.name}</div>
     <div class="fact"><b>Save ${Math.ceil(total * .7)} of ${total} to pass. ${safeN} home so far.</b></div>
-    <div class="row" style="background:transparent;padding:0 2px">${ICON.leaf}<span class="fact" style="margin:0">You can't steer the turtles. Nature knows the way. The obstacles are man-made, so we can remove them.</span></div>
+    ${factRow(FACTCARD[levelFacts[levelFacts.length - 1]] || FACTCARD[Object.keys(FACTCARD)[(night * 3) % Object.keys(FACTCARD).length]])}
+    <div class="row" style="background:transparent;padding:0 2px">${ICON.leaf}<span class="fact" style="margin:0">You can't steer the turtles. The obstacles are man-made, so we can remove them.</span></div>
     <div class="btns"><button class="b-green" id="pr">${ICON.play}Resume</button>
     <button class="b-navy" id="prs">${ICON.retry}Restart level</button>
     <button class="b-navy" id="pm">${ICON.map}Level map</button>
@@ -1698,11 +1700,11 @@ const FACTCARD = {
   gear: 'Beach toys, chairs and umbrellas left out become obstacles for turtles.',
   hands: 'In real life, never pick up a hatchling. Clear its path and let it crawl on its own.'
 };
-let toastTO = 0;
+let levelFacts = [];
 ui.fact = function (key) {
-  if (attract || PROG.facts[key] || !FACTCARD[key]) return; PROG.facts[key] = 1; saveProg();
-  const t = $('#toast'); t.innerHTML = `${ICON.leaf}<div><small>DID YOU KNOW?</small>${FACTCARD[key]}</div>`; t.classList.add('on'); clearTimeout(toastTO); toastTO = setTimeout(() => t.classList.remove('on'), 5400);
+  if (attract || !FACTCARD[key]) return; if (!levelFacts.includes(key)) levelFacts.push(key); if (!PROG.facts[key]) { PROG.facts[key] = 1; saveProg(); }
 };
+const factRow = (txt) => `<div class="row" style="background:transparent;padding:0 2px">${ICON.leaf}<span class="fact" style="margin:0"><b>Did you know?</b> ${txt}</span></div>`;
 
 /* ---------- demo shop (no real purchases yet) ---------- */
 function showShop() {

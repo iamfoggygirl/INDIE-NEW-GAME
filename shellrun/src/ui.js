@@ -41,7 +41,7 @@ $('#snd').innerHTML = muted ? ICON.sndOff : ICON.sndOn;
 $('#snd').onclick = (e) => { e.stopPropagation(); au(); setMuted(!muted); $('#snd').innerHTML = muted ? ICON.sndOff : ICON.sndOn; };
 let bannerTO = 0;
 ui.night = function () {
-  ui.hud(); if (!started) return;
+  levelFacts = []; ui.hud(); if (!started) return;
   const L = spec; if (L.attract) return; $('#bannerT').className = 'ribbon' + (L.big ? ' coral' : '');
   $('#bannerT').innerHTML = `<small>${L.big ? 'BIG HATCH · LEVEL ' + (night + 1) : 'LEVEL ' + (night + 1)}</small><i class="place">${L.place || CHAPTERS[(night / 10 | 0) % CHAPTERS.length]}</i>${L.name}${L.new ? `<span class="new">NEW · ${L.new}</span>` : L.tag ? `<span class="new tag">${L.tag}</span>` : ''}`;
   $('#banner').classList.add('on'); clearTimeout(bannerTO); bannerTO = setTimeout(() => $('#banner').classList.remove('on'), L.new ? 3800 : 2400); if (L.big) { buzz([30, 40, 30]); }
@@ -166,6 +166,7 @@ function endNight() {
     <div class="crew">${dots}</div>
     <div class="row">${ICON.bin}<span>${binnedN} binned</span><div class="bar"><i style="width:0%"></i></div><span>${tidyPct}% clean</span></div>
     <div class="fact"><b>${line}</b></div>
+    ${levelFacts.length ? factRow(FACTCARD[levelFacts[levelFacts.length - 1]]) : ''}
     <div class="row" style="background:transparent;padding:0 2px">${ICON.leaf}<span class="fact" style="margin:0">${L.fact}</span></div>
     <div class="btns">
       ${pass ? `<button class="b-green" id="next">${ICON.play}Next level</button>` : ''}
@@ -216,7 +217,8 @@ ui.pause = function () {
   v.innerHTML = `<div class="card"><div class="ribbon">Paused</div><div class="inner">
     <div class="lbl" style="margin-bottom:6px">Level ${night + 1} · ${spec.name}</div>
     <div class="fact"><b>Save ${Math.ceil(total * .7)} of ${total} to pass. ${safeN} home so far.</b></div>
-    <div class="row" style="background:transparent;padding:0 2px">${ICON.leaf}<span class="fact" style="margin:0">You can't steer the turtles. Nature knows the way. The obstacles are man-made, so we can remove them.</span></div>
+    ${factRow(FACTCARD[levelFacts[levelFacts.length - 1]] || FACTCARD[Object.keys(FACTCARD)[(night * 3) % Object.keys(FACTCARD).length]])}
+    <div class="row" style="background:transparent;padding:0 2px">${ICON.leaf}<span class="fact" style="margin:0">You can't steer the turtles. The obstacles are man-made, so we can remove them.</span></div>
     <div class="btns"><button class="b-green" id="pr">${ICON.play}Resume</button>
     <button class="b-navy" id="prs">${ICON.retry}Restart level</button>
     <button class="b-navy" id="pm">${ICON.map}Level map</button>
@@ -256,11 +258,11 @@ const FACTCARD = {
   gear: 'Beach toys, chairs and umbrellas left out become obstacles for turtles.',
   hands: 'In real life, never pick up a hatchling. Clear its path and let it crawl on its own.'
 };
-let toastTO = 0;
+let levelFacts = [];
 ui.fact = function (key) {
-  if (attract || PROG.facts[key] || !FACTCARD[key]) return; PROG.facts[key] = 1; saveProg();
-  const t = $('#toast'); t.innerHTML = `${ICON.leaf}<div><small>DID YOU KNOW?</small>${FACTCARD[key]}</div>`; t.classList.add('on'); clearTimeout(toastTO); toastTO = setTimeout(() => t.classList.remove('on'), 5400);
+  if (attract || !FACTCARD[key]) return; if (!levelFacts.includes(key)) levelFacts.push(key); if (!PROG.facts[key]) { PROG.facts[key] = 1; saveProg(); }
 };
+const factRow = (txt) => `<div class="row" style="background:transparent;padding:0 2px">${ICON.leaf}<span class="fact" style="margin:0"><b>Did you know?</b> ${txt}</span></div>`;
 
 /* ---------- demo shop (no real purchases yet) ---------- */
 function showShop() {
