@@ -36,11 +36,11 @@ const isGrass = (x, z) => (Math.abs(x) > 4.95 + Math.sin(z * .8) * .2 && z > SHO
 /* ---------- curved world: far geometry bends away so the horizon and moon show at the top ---------- */
 const CURVE = { z0: { value: SHORE_Z - 1.2 }, k: { value: .045 } };
 const curveY = (z) => { const c = Math.max(0, CURVE.z0.value - z); return -c * c * CURVE.k.value; };
-const timeU = { value: 0 };
+const timeU = { value: 0 }, windU = { value: 1 };
 function curved(mat, key = 'c', extra) {
   mat.onBeforeCompile = (sh) => {
-    sh.uniforms.uCz = CURVE.z0; sh.uniforms.uCk = CURVE.k; sh.uniforms.uTime = timeU;
-    sh.vertexShader = 'uniform float uCz; uniform float uCk; uniform float uTime;\n' + sh.vertexShader.replace('#include <project_vertex>',
+    sh.uniforms.uCz = CURVE.z0; sh.uniforms.uCk = CURVE.k; sh.uniforms.uTime = timeU; sh.uniforms.uWind = windU;
+    sh.vertexShader = 'uniform float uCz; uniform float uCk; uniform float uTime; uniform float uWind;\n' + sh.vertexShader.replace('#include <project_vertex>',
       `vec4 mvPosition = vec4( transformed, 1.0 );
 #ifdef USE_INSTANCING
   mvPosition = instanceMatrix * mvPosition;
@@ -164,7 +164,15 @@ const sfx = {
   ready() { tone(880, .12, 'triangle', .1, 1320, 0, .4); tone(1320, .22, 'sine', .08, 1760, .1, .5); buzz([12, 30, 12]); },
   power() { [0, 4, 7, 12, 16].forEach((n, i) => tone(midi(69 + n), .4, 'triangle', .1, 0, i * .05, .5)); noise(.45, .12, 2600, 0, .8, 'highpass'); buzz([20, 30, 40, 30, 70]); },
   thunder() { noise(2.2, .32, 140, 0, .7, 'lowpass', .5); noise(1.2, .2, 90, .15, .7, 'lowpass', .5); tone(55, 1.6, 'sine', .22, 38, .1, .4); buzz([60, 40, 90, 40, 140]); },
-  bin() { tone(120, .2, 'triangle', .12, 80, 0, 0); noise(.1, .08, 600, 0, 2); buzz(15); }
+  bin() { tone(120, .2, 'triangle', .12, 80, 0, 0); noise(.1, .08, 600, 0, 2); buzz(15); },
+  waveWarn() { noise(1.3, .09, 380, 0, .7, 'lowpass', .4); tone(110, 1.2, 'sine', .06, 180, 0, .3); },
+  wave() { noise(1.8, .3, 520, 0, .6, 'lowpass', .5); noise(1.3, .13, 1900, .15, .8, 'bandpass', .4); tone(70, .9, 'sine', .14, 45, 0, .3); buzz([30, 40, 70, 40, 30]); },
+  rip() { noise(.14, .17, 2300, 0, 2, 'bandpass', 0); tone(620, .07, 'square', .03, 300, 0, 0); buzz(14); },
+  bark() { tone(540, .07, 'sawtooth', .07, 380, 0, .1); tone(500, .09, 'sawtooth', .06, 330, .13, .1); buzz([12, 30, 12]); },
+  click() { tone(1900, .03, 'square', .04, 0, 0, 0); tone(900, .06, 'triangle', .05, 500, .03, 0); buzz(10); },
+  chime() { [0, 4, 7, 11, 14].forEach((n, i) => tone(midi(81 + n), .22, 'sine', .06, 0, i * .045, .5)); buzz([10, 20, 10]); },
+  gold() { [0, 4, 7, 12, 16, 19].forEach((n, i) => tone(midi(76 + n), .3, 'triangle', .07, 0, i * .06, .6)); buzz([15, 25, 15, 25, 40]); },
+  coin() { tone(1320, .08, 'square', .03, 0, 0, .2); tone(1760, .14, 'sine', .06, 0, .06, .4); }
 };
 
 /* ---------- renderer, scene, camera ---------- */

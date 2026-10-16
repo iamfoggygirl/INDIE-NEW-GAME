@@ -3,18 +3,32 @@ const GEO = {};
 const SHELL = PAL.shell, SKIN = PAL.skin, SPOT = PAL.cream, EYE = '#14161c', HI = '#ffffff';
 
 /* ---- baby turtle (sheet 01). Local frame: faces +z, origin on the ground. Parts are instanced for every turtle. ---- */
-function turtleBody(crew) {
-  const sh = crew ? '#46773f' : SHELL, rim = crew ? PAL.gold : '#4d7a40', plate = crew ? '#f0c95a' : '#4b7b40';   // crew: green shell with gold rim and plates
+/* shell skins (Crew). Bodies and flippers stay hatchling green, the shell changes. Built on demand. */
+const SKINS = {
+  classic: { name: 'Classic', sh: SHELL, rim: '#4d7a40', plate: '#4b7b40', price: 0 },
+  sunset: { name: 'Sunset', sh: '#e8603a', rim: '#c4462a', plate: '#ffb05a', price: 30 },
+  coral: { name: 'Coral reef', sh: '#2a9e98', rim: '#1f7d78', plate: '#3cbcb0', dots: '#ff8a6b', price: 60 },
+  ice: { name: 'Ice', sh: '#7cc8ea', rim: '#58a6d0', plate: '#cdf0ff', price: 100 },
+  patch: { name: 'Patchwork', sh: '#efe4c8', rim: '#b89a6a', plates: ['#e8664a', '#2fa8a0', '#ffd23f', '#7DB05A', '#9b7be0', '#f6e7c8', '#3f8fd8'], price: 150 },
+  galaxy: { name: 'Galaxy', sh: '#2b2a6e', rim: '#1c1b4a', plate: '#43389a', dots: '#fff6c8', price: 220 },
+  glow: { name: 'Glow', sh: '#0d3f3a', rim: '#0a2e2a', plate: '#3dffd0', glow: 1, price: 300 },
+  gold: { name: 'Golden', sh: '#c99418', rim: '#a8740e', plate: '#ffd23f', price: 400 }
+};
+const SKIN_ORDER = ['classic', 'sunset', 'coral', 'ice', 'patch', 'galaxy', 'glow', 'gold'];
+function turtleBody(id) {
+  const k = SKINS[id] || SKINS.classic;
   const parts = [
     [S(.25, 16, 8), '#ecdcb0', M(0, .07, 0, 1, .3, 1.12)],
-    [IC(.27, 1), sh, M(0, .12, 0, 1, .52, 1.14), .07],
-    [TO(.252, .042, 5, 18), rim, M(0, .1, 0, 1, 1.14, 1, Math.PI / 2, 0, 0), .06],
+    [IC(.27, 1), k.sh, M(0, .12, 0, 1, .52, 1.14), .07],
+    [TO(.252, .042, 5, 18), k.rim, M(0, .1, 0, 1, 1.14, 1, Math.PI / 2, 0, 0), .06],
     [CN(.04, .11, 5), SKIN, M(0, .08, -.32, 1, 1, 1, -Math.PI / 2, 0, 0)]
   ];
-  for (const [x, z, tx, tz] of [[0, 0, 0, 0], [0, .14, -.35, 0], [0, -.14, .35, 0], [.12, .06, -.1, -.45], [-.12, .06, -.1, .45], [.11, -.08, .15, -.45], [-.11, -.08, .15, .45]]) parts.push([CY(.07, .078, .028, 6), plate, M(x, (x || z) ? .238 : .262, z, 1, 1, 1, tx, 0, tz), .05]);
+  [[0, 0, 0, 0], [0, .14, -.35, 0], [0, -.14, .35, 0], [.12, .06, -.1, -.45], [-.12, .06, -.1, .45], [.11, -.08, .15, -.45], [-.11, -.08, .15, .45]].forEach(([x, z, tx, tz], i) => parts.push([CY(.07, .078, .028, 6), k.plates ? k.plates[i % k.plates.length] : k.plate, M(x, (x || z) ? .238 : .262, z, 1, 1, 1, tx, 0, tz), .05]));
+  if (k.dots) for (let i = 0; i < 9; i++) { const a = i * 2.39 + .4, f = .45 + (i % 3) * .17, y = .12 + .27 * .52 * Math.sqrt(1 - f * f) + .012; parts.push([S(.02, 6, 4), k.dots, M(Math.cos(a) * .27 * f, y, Math.sin(a) * .27 * 1.14 * f, 1, .5, 1)]); }
   return merge(parts);
 }
-GEO.tBody = turtleBody(false); GEO.tBodyCrew = turtleBody(true);
+GEO.skin = {}; const skinGeo = (id) => GEO.skin[id] || (GEO.skin[id] = turtleBody(id));
+GEO.tBody = skinGeo('classic'); GEO.tBodyGold = skinGeo('gold');
 GEO.tHead = merge([   // pivot at the neck; eyes sit high on the sides so they read from behind as the turtles walk to the sea
   [S(.118, 16, 12), SKIN, M(0, .05, .085)],
   [S(.05, 12, 10), EYE, M(-.082, .1, .14, .8, 1.05, 1)], [S(.05, 12, 10), EYE, M(.082, .1, .14, .8, 1.05, 1)],
@@ -32,14 +46,16 @@ function flipper(side, back) {
 GEO.fFR = flipper(1, false); GEO.fFL = flipper(-1, false); GEO.fBR = flipper(1, true); GEO.fBL = flipper(-1, true);
 const TMAX = 90;
 const TB = {
-  body: new Batch(GEO.tBody, MAT, TMAX), crew: new Batch(GEO.tBodyCrew, MAT, TMAX), head: new Batch(GEO.tHead, MAT, TMAX),
+  body: new Batch(GEO.tBody, MAT, TMAX), gold: new Batch(GEO.tBodyGold, MAT, 6), head: new Batch(GEO.tHead, MAT, TMAX),
   fr: new Batch(GEO.fFR, MAT, TMAX), fl: new Batch(GEO.fFL, MAT, TMAX), br: new Batch(GEO.fBR, MAT, TMAX), bl: new Batch(GEO.fBL, MAT, TMAX)
 };
+let skinNow = 'classic';
+function setSkin(id) { if (!SKINS[id]) id = 'classic'; skinNow = id; TB.body.m.geometry = skinGeo(id); }
 const PIV = { head: [0, .13, .26], fr: [.19, .07, .12], fl: [-.19, .07, .12], br: [.14, .06, -.17], bl: [-.14, .06, -.17] };
 /* pose: {x,y,z,yaw,pitch,roll,sx,sy,sz, head:[rx,ry], fr/fl/br/bl:[rx,ry,rz]} */
 function drawTurtle(t, P) {
   compose(_m2, P.x, P.y, P.z, P.pitch, P.yaw, P.roll, P.sx * MS, P.sy * MS, P.sz * MS);
-  (t.crew ? TB.crew : TB.body).add(_m2);
+  (t.gold ? TB.gold : TB.body).add(_m2);
   const part = (b, piv, r) => { compose(_m, piv[0], piv[1], piv[2], r[0], r[1], r[2], 1, 1, 1, 'XYZ'); _m.premultiply(_m2); b.add(_m); };
   part(TB.head, PIV.head, P.head); part(TB.fr, PIV.fr, P.fr); part(TB.fl, PIV.fl, P.fl); part(TB.br, PIV.br, P.br); part(TB.bl, PIV.bl, P.bl);
 }
@@ -205,3 +221,48 @@ function makeBin(x, z) {
 
 /* ---- a dolphin that leaps through the sea now and then (ocean-life easter egg) ---- */
 GEO.dolphin = merge([[S(.5, 10, 8), '#6f8fa8', M(0, 0, 0, 1.7, .62, .62), .06], [S(.46, 8, 6), '#dfe9ef', M(.02, -.15, 0, 1.6, .4, .55)], [CN(.13, .5, 6), '#6f8fa8', M(.98, -.05, 0, 1, 1, 1, 0, 0, -Math.PI / 2)], [CN(.17, .4, 4), '#5f7f98', M(-.05, .42, 0, 1, 1, 1, 0, 0, .35)], [CN(.12, .6, 5), '#6f8fa8', M(-1.1, .05, 0, 1, 1, 1, 0, 0, Math.PI / 2)], [S(.2, 6, 4), '#5f7f98', M(-1.45, .1, 0, .35, .06, .6)], [S(.12, 6, 4), '#5f7f98', M(.35, -.22, .3, .6, .12, .3)], [S(.12, 6, 4), '#5f7f98', M(.35, -.22, -.3, .6, .12, .3)]]);
+
+/* ---- launch content: beach chair, ghost net, tyre ruts, beach light, off-leash dog ---- */
+GEO.chair = (function () {
+  const p = [], fr = '#dfe4ea';
+  for (const sx of [-.4, .4]) { p.push([CY(.028, .028, 1.0, 5), fr, M(sx, .42, -.02, 1, 1, 1, .62, 0, 0)]); p.push([CY(.028, .028, .72, 5), fr, M(sx, .3, .26, 1, 1, 1, -.62, 0, 0)]); p.push([CY(.025, .025, .5, 5), fr, M(sx, .5, .18, 1, 1, 1, Math.PI / 2, 0, 0)]); }
+  const cols = ['#3f8fd8', '#fbf1d8', '#3f8fd8', '#fbf1d8', '#3f8fd8'];
+  for (let k = 0; k < 5; k++) p.push([BX(.16, .03, .7), cols[k], M(-.32 + k * .16, .5, -.08, 1, 1, 1, -.62, 0, 0), .05]);
+  for (let k = 0; k < 5; k++) p.push([BX(.16, .03, .32), cols[k], M(-.32 + k * .16, .36, .3, 1, 1, 1, .12, 0, 0), .05]);
+  return merge(p);
+})();
+GEO.net = merge([
+  [IC(.3, 1), '#24706c', M(0, .03, 0, 1.75, .14, 1.2), .1],
+  ...Array.from({ length: 16 }, (_, i) => [TO(.16 + (i % 5) * .045, .02, 3, 16), ['#2f8f8a', '#3fae9e', '#1f6f6a', '#5cc4b0'][i % 4], M(Math.sin(i * 2.1) * .36, .06 + (i % 3) * .035, Math.cos(i * 1.7) * .24, 1, 1, 1, Math.PI / 2 + Math.sin(i) * .5, i * .8, Math.cos(i * 1.3) * .35)]),
+  [S(.1, 10, 8), '#ff7a3a', M(-.42, .1, .14)], [S(.1, 10, 8), '#ff7a3a', M(.4, .1, -.12)], [S(.085, 10, 8), '#ffd23f', M(.06, .14, .26)],
+  [CY(.025, .025, .9, 5), '#d9c08a', M(.05, .07, -.05, 1, 1, 1, Math.PI / 2, .7, 0)]
+]);
+GEO.rut = (function () { const p = [[BX(2.8, .02, .24), '#8f714a', M(0, .01, -.21)], [BX(2.8, .02, .24), '#8f714a', M(0, .01, .21)], [BX(2.9, .03, .06), '#c4a578', M(0, .02, 0)]]; for (let x = -1.3; x <= 1.31; x += .2) for (const z of [-.21, .21]) p.push([BX(.06, .025, .22), '#725836', M(x, .02, z, 1, 1, 1, 0, .5, 0)]); return merge(p); })();
+GEO.lampPost = merge([[CY(.07, .1, 2.3, 7), '#3a4250', M(0, 1.15, 0), .05], [CY(.2, .24, .1, 8), '#2c333f', M(0, .05, 0)], [BX(.08, .08, .5), '#3a4250', M(0, 2.25, .22)], [CN(.26, .2, 8), '#2c333f', M(0, 2.3, .44)]]);
+GEO.bulb = new THREE.SphereGeometry(.12, 10, 8);
+const bulbOnM = curved(new THREE.MeshBasicMaterial({ color: 0xfff1b0 }), 'bulbOn'), bulbOffM = curved(new THREE.MeshBasicMaterial({ color: 0x5a6070 }), 'bulbOff');
+const poolTex = canvasTex(128, 128, (x) => { const g = x.createRadialGradient(64, 64, 0, 64, 64, 64); g.addColorStop(0, 'rgba(255,236,160,.75)'); g.addColorStop(.5, 'rgba(255,220,130,.28)'); g.addColorStop(1, 'rgba(255,220,130,0)'); x.fillStyle = g; x.fillRect(0, 0, 128, 128); });
+function makeLamp() {
+  const g = new THREE.Group(), post = new THREE.Mesh(GEO.lampPost, MAT), bulb = new THREE.Mesh(GEO.bulb, bulbOnM); bulb.position.set(0, 2.18, .44);
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: poolTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })); glow.position.set(0, 2.18, .44); glow.scale.setScalar(2.6);
+  const pool = new THREE.Mesh(new THREE.PlaneGeometry(5, 5).rotateX(-Math.PI / 2), curved(new THREE.MeshBasicMaterial({ map: poolTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }), 'pool')); pool.position.set(0, .06, .9);
+  g.add(post, bulb, glow, pool); g.scale.setScalar(1.05); g.visible = false; scene.add(g);
+  return { g, bulb, glow, pool };
+}
+const DOGC = '#d9a066', DOGD = '#8a5a34', DOGW = '#fbf1e0';
+GEO.dog = merge([
+  [S(.3, 14, 10), DOGC, M(0, .42, 0, .78, .72, 1.35), .04], [S(.24, 12, 8), DOGW, M(0, .36, .16, .72, .6, .9)],
+  [S(.24, 14, 12), DOGC, M(0, .7, .44)], [S(.13, 12, 10), DOGW, M(0, .62, .62, 1, .8, 1.1)], [S(.045, 8, 6), '#1e1a18', M(0, .66, .74)],
+  [S(.04, 8, 6), EYE, M(-.1, .76, .62)], [S(.04, 8, 6), EYE, M(.1, .76, .62)], [S(.013, 4, 3), HI, M(-.09, .785, .655)], [S(.013, 4, 3), HI, M(.11, .785, .655)],
+  [S(.11, 10, 8), DOGD, M(-.21, .7, .4, .45, 1.25, .85, 0, 0, .35)], [S(.11, 10, 8), DOGD, M(.21, .7, .4, .45, 1.25, .85, 0, 0, -.35)],
+  [TO(.17, .035, 5, 14), '#e5533a', M(0, .56, .34, 1, 1, 1, Math.PI / 2 - .5, 0, 0)], [S(.04, 6, 4), '#ffd23f', M(0, .44, .46)],
+  [S(.035, 6, 4), '#f07a8a', M(0, .56, .7, 1.3, .4, 1)]
+]);
+GEO.dogLeg = merge([[CY(.06, .055, .32, 6), DOGC, M(0, -.16, 0)], [S(.07, 8, 6), DOGW, M(0, -.32, .02, 1, .6, 1.2)]]);
+GEO.dogTail = merge([[CN(.05, .34, 6), DOGC, M(0, .17, 0)], [S(.045, 6, 4), DOGW, M(0, .34, 0)]]);
+function makeDog() {
+  const g = new THREE.Group(), body = new THREE.Mesh(GEO.dog, MAT), legs = [[-.14, .3], [.14, .3], [-.14, -.28], [.14, -.28]].map(([x, z]) => { const m = new THREE.Mesh(GEO.dogLeg, MAT); m.position.set(x, .34, z); return m; });
+  const tail = new THREE.Mesh(GEO.dogTail, MAT); tail.position.set(0, .55, -.42); tail.rotation.x = -.7;
+  g.add(body, tail, ...legs); g.scale.setScalar(MS * .82); g.visible = false; scene.add(g);
+  return { g, legs, tail };
+}

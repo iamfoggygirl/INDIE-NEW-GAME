@@ -16,7 +16,7 @@ function buildSky() {
     x.fillStyle = g; x.fillRect(0, 0, w, h);
     const hy = hf * h;
     if (LK.clouds === 2) { for (const [cx, cy, r, c1, c2] of [[40, .22, 62, '#1c2740', '#0c1426'], [150, .12, 74, '#16213a', '#0a1122'], [230, .3, 58, '#233250', '#0e1730'], [100, .42, 46, '#2a3b58', '#121b30'], [200, .55, 44, '#304260', '#141d34']]) cloud(x, cx, cy * hy, r, c1, c2); }
-    else if (LK.clouds === 1) { const dusk = LK.sky[2] === '#d8704f'; for (const [cx, cy, r] of [[34, .55, 30], [210, .4, 38], [120, .75, 24]]) cloud(x, cx, cy * hy, r, dusk ? '#a8506a' : '#fdf3e6', dusk ? '#5a3258' : '#e9c9b4'); }
+    else if (LK.clouds === 1) { const dusk = LK.sky[2] === '#d8704f', cc = LK.cloudC; for (const [cx, cy, r] of [[34, .55, 30], [210, .4, 38], [120, .75, 24]]) cloud(x, cx, cy * hy, r, cc ? cc[0] : dusk ? '#a8506a' : '#fdf3e6', cc ? cc[1] : dusk ? '#5a3258' : '#e9c9b4'); }
     if (LK.house) {   // tiny far-off lighthouse on the horizon (sheet 14)
       const lx = w * .13, lb = hy + 1, lh = 26; x.fillStyle = 'rgba(255,238,170,.5)'; const gl = x.createRadialGradient(lx, lb - lh, 1, lx, lb - lh, 22); gl.addColorStop(0, 'rgba(255,236,160,.8)'); gl.addColorStop(1, 'rgba(255,236,160,0)'); x.fillStyle = gl; x.fillRect(lx - 24, lb - lh - 24, 48, 48);
       x.fillStyle = '#f3ead0'; x.beginPath(); x.moveTo(lx - 4.5, lb); x.lineTo(lx - 2.8, lb - lh); x.lineTo(lx + 2.8, lb - lh); x.lineTo(lx + 4.5, lb); x.fill(); x.fillStyle = '#E8664A'; x.fillRect(lx - 3.9, lb - 9, 7.8, 4); x.fillRect(lx - 3.3, lb - 19, 6.6, 3.4); x.fillStyle = '#12203A'; x.fillRect(lx - 3.6, lb - lh - 3, 7.2, 3); x.fillStyle = '#ffe9a0'; x.fillRect(lx - 2, lb - lh - 1, 4, 3);
@@ -38,14 +38,20 @@ const moonTex = canvasTex(256, 256, (x) => {
   const n = 14, r = 40; for (let i = 0; i < n; i++) { const a0 = i / n * 6.283, a1 = (i + 1) / n * 6.283; x.fillStyle = `hsl(48,${85 - (i % 3) * 6}%,${90 - (i % 4) * 2.5}%)`; x.beginPath(); x.moveTo(128, 128); x.lineTo(128 + Math.cos(a0) * r, 128 + Math.sin(a0) * r); x.lineTo(128 + Math.cos(a1) * r, 128 + Math.sin(a1) * r); x.closePath(); x.fill(); }
   x.fillStyle = 'rgba(214,200,160,.45)'; x.beginPath(); x.arc(116, 118, 8, 0, 6.3); x.arc(138, 140, 5, 0, 6.3); x.arc(140, 112, 4, 0, 6.3); x.fill();
 });
+const sunTex = canvasTex(256, 256, (x) => {
+  const g = x.createRadialGradient(128, 128, 20, 128, 128, 128); g.addColorStop(0, 'rgba(255,236,170,.75)'); g.addColorStop(.4, 'rgba(255,190,120,.22)'); g.addColorStop(1, 'rgba(255,170,120,0)'); x.fillStyle = g; x.fillRect(0, 0, 256, 256);
+  const n = 16, r = 38; for (let i = 0; i < n; i++) { const a0 = i / n * 6.283, a1 = (i + 1) / n * 6.283; x.fillStyle = `hsl(${40 - (i % 3) * 3},100%,${78 - (i % 4) * 3}%)`; x.beginPath(); x.moveTo(128, 128); x.lineTo(128 + Math.cos(a0) * r, 128 + Math.sin(a0) * r); x.lineTo(128 + Math.cos(a1) * r, 128 + Math.sin(a1) * r); x.closePath(); x.fill(); }
+});
 const moon = new THREE.Sprite(new THREE.SpriteMaterial({ map: moonTex, depthTest: false, depthWrite: false, fog: false }));
 moon.renderOrder = -1; scene.add(moon);
-let moonNdcX = .42, moonNdcY = .7;
+let moonNdcX = .42, moonNdcY = .7; const moonP0 = new THREE.Vector3(), moonP1 = new THREE.Vector3();
+function sunRise(k) { moon.position.lerpVectors(moonP0, moonP1, k); }
 function ndcToWorld(nx, ny, dist) { _v.set(nx, ny, .5).unproject(cam).sub(cam.position).normalize(); return cam.position.clone().addScaledVector(_v, dist); }
 function placeMoon() {
   placeCamAt(baseFocusZ, camDist);
   moonNdcY = Math.min(.82, horizonY + LK.disc[1]);
   moon.position.copy(ndcToWorld(moonNdcX, moonNdcY, 150)); moon.scale.setScalar(150 * .15 * LK.disc[2] * (844 / Math.max(H, 400)));
+  moonP0.copy(moon.position); moonP1.copy(ndcToWorld(moonNdcX, Math.min(.92, moonNdcY + .17), 150));
   // stars live in a band above the horizon
   const p = starGeo.attributes.position, base = [];
   const fr = (v) => { const s = Math.sin(v) * 43758.5453; return s - Math.floor(s); };
@@ -129,7 +135,7 @@ function placeGlitter() {
 }
 
 /* ---------- vegetation: instanced, swaying in the shader ---------- */
-const SWAY = 'float hh = max(transformed.y, 0.0); wPos.x += sin(uTime*1.6 + wPos.x*.8 + wPos.z*.6) * hh * .28; wPos.z += cos(uTime*1.1 + wPos.x*.5) * hh * .1;';
+const SWAY = 'float hh = max(transformed.y, 0.0); wPos.x += (sin(uTime*1.6*uWind + wPos.x*.8 + wPos.z*.6) * .28 + (uWind - 1.0) * .22) * hh; wPos.z += cos(uTime*1.1 + wPos.x*.5) * hh * .1;';
 (function grass() {
   const blade = new THREE.ConeGeometry(.05, .75, 3, 1, true); blade.translate(0, .375, 0);
   const mat = curved(new THREE.MeshLambertMaterial({ color: 0xffffff, side: THREE.DoubleSide }), 'grass', SWAY);
@@ -261,5 +267,50 @@ function applyLook(mood, terrain) {
   stars.visible = LK.stars > 0; stars.material.opacity = LK.stars;
   moon.material.color.setHex(LK.disc[0]); moon.material.opacity = LK.disc[3];
   for (const m of glitMats) { m.color.setHex(LK.glit[0]); m.opacity = LK.glit[1]; }
+  scene.fog.near = LK.fogN || 30; scene.fog.far = LK.fogF || 66;
+  moon.material.map = LK.sun ? sunTex : moonTex; moon.material.needsUpdate = true;
+  windU.value = LK.gale ? 2.3 : LK.rain ? 1.35 : 1;
+  for (const m of [foam1, foam2, foam3, washFoam]) m.material.color.setHex(LK.glow ? 0xb4fff0 : 0xeefaf6);
   buildSky(); setRain(!!LK.rain);
 }
+
+/* ---------- big waves: a sheet of water rushes up the beach, pushes hatchlings back, then pulls away ---------- */
+function stripMesh(n, color, op, key) {
+  const P = new Float32Array(n * 2 * 3), idx = []; for (let i = 0; i < n - 1; i++) { const a = i * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.setIndex(idx);
+  const m = new THREE.Mesh(g, curved(new THREE.MeshBasicMaterial({ color, transparent: true, opacity: op, depthWrite: false, side: THREE.DoubleSide }), key)); m.frustumCulled = false; m.visible = false; m.renderOrder = 1; m.userData.n = n; scene.add(m); return m;
+}
+function gridMesh(n, m, color, op, key) {
+  const P = new Float32Array(n * m * 3), idx = []; for (let j = 0; j < m - 1; j++) for (let i = 0; i < n - 1; i++) { const a = j * n + i; idx.push(a, a + n, a + 1, a + 1, a + n, a + n + 1); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.setIndex(idx);
+  const ms = new THREE.Mesh(g, curved(new THREE.MeshBasicMaterial({ color, transparent: true, opacity: op, depthWrite: false, side: THREE.DoubleSide }), key)); ms.frustumCulled = false; ms.visible = false; ms.renderOrder = 1; ms.userData.n = n; ms.userData.m = m; scene.add(ms); return ms;
+}
+const washSheet = gridMesh(72, 7, 0x63d4d2, .6, 'wash'), washFoam = stripMesh(72, 0xeefaf6, .95, 'washf'), crest = stripMesh(72, 0xeefaf6, .92, 'crest'), crestB = stripMesh(72, 0x2fa3ad, .75, 'crestb');
+const waveFront = (x, front, t) => front + Math.sin(x * 1.3 + t * 2.2) * .14 + Math.sin(x * .45 + 1.7) * .25;
+function drawWave(front, k, crestZ, crestK, t) {
+  washSheet.visible = washFoam.visible = k > .01; crest.visible = crestB.visible = crestK > .01;
+  if (k > .01) {
+    const A = washSheet.geometry.attributes.position.array, B = washFoam.geometry.attributes.position.array, n = washSheet.userData.n;
+    for (let i = 0; i < n; i++) {
+      const x = -13 + i / (n - 1) * 26, zf = waveFront(x, front, t), zb = shore(x, t) - .6, yf = Math.max(groundH(x, zf), -.05) + .035, j = i * 6;
+      for (let r = 0, M = washSheet.userData.m; r < M; r++) { const z = lerp(zb, zf, r / (M - 1)), q = (r * n + i) * 3; A[q] = x; A[q + 1] = Math.max(groundH(x, z), -.05) + .035; A[q + 2] = z; }
+      const w = .22 + .08 * Math.sin(x * 2.1 + t * 3); B[j] = x; B[j + 1] = yf + .01; B[j + 2] = zf; B[j + 3] = x; B[j + 4] = Math.max(groundH(x, zf - w), -.05) + .045; B[j + 5] = zf - w;
+    }
+    washSheet.geometry.attributes.position.needsUpdate = washFoam.geometry.attributes.position.needsUpdate = true;
+    washSheet.material.opacity = .6 * k; washFoam.material.opacity = .95 * k;
+  }
+  if (crestK > .01) {
+    for (const [m, h, w, off] of [[crest, .22, .3, 0], [crestB, .1, .7, .3]]) {
+      const A = m.geometry.attributes.position.array, n = m.userData.n;
+      for (let i = 0; i < n; i++) { const x = -18 + i / (n - 1) * 36, z = crestZ + Math.sin(x * .45 + 1.7) * .25 + Math.sin(x * 1.1 + t * 2) * .1 + off, y = -.05 + h * crestK, j = i * 6; A[j] = x; A[j + 1] = y; A[j + 2] = z; A[j + 3] = x; A[j + 4] = y - h * .5 * crestK; A[j + 5] = z - w; }
+      m.geometry.attributes.position.needsUpdate = true; m.material.opacity = (m === crest ? .92 : .75) * Math.min(1, crestK * 1.5);
+    }
+  }
+}
+/* soft glow under hatchlings on full-moon nights (and for the glow skin) */
+const tglowTex = canvasTex(64, 64, (x) => { const g = x.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, 'rgba(140,255,225,.9)'); g.addColorStop(.4, 'rgba(90,240,210,.32)'); g.addColorStop(1, 'rgba(90,240,210,0)'); x.fillStyle = g; x.fillRect(0, 0, 64, 64); });
+const tglow = new Batch(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), curved(new THREE.MeshBasicMaterial({ map: tglowTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }), 'tglow'), 100);
+tglow.m.renderOrder = 2;
+const goldTex = canvasTex(64, 64, (x) => { const g = x.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, 'rgba(255,230,120,.95)'); g.addColorStop(.4, 'rgba(255,200,80,.35)'); g.addColorStop(1, 'rgba(255,200,80,0)'); x.fillStyle = g; x.fillRect(0, 0, 64, 64); });
+const gglow = new Batch(new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), curved(new THREE.MeshBasicMaterial({ map: goldTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }), 'gglow'), 8);
+gglow.m.renderOrder = 2;

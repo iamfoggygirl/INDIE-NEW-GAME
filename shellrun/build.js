@@ -2,7 +2,7 @@
 // Inlines src/*.js into one self-contained page: dist/index.html (+ dist/artifact.html for publishing).
 const fs = require('fs'), path = require('path');
 const src = path.join(__dirname, 'src');
-const order = ['core.js', 'look.js', 'world.js', 'models.js', 'game.js', 'ui.js'];
+const order = ['core.js', 'look.js', 'world.js', 'models.js', 'game.js', 'ui.js', 'playable.js'];
 const code = order.map((f) => `/* ---- ${f} ---- */\n` + fs.readFileSync(path.join(src, f), 'utf8')).join('\n');
 // fonts are embedded so the game looks right on the first frame, offline, and inside the future app
 const FONT = [['Fredoka', 600, 'fredoka-latin-600-normal'], ['Fredoka', 700, 'fredoka-latin-700-normal'], ['Nunito', 700, 'nunito-latin-700-normal'], ['Nunito', 800, 'nunito-latin-800-normal'], ['Lilita One', 400, 'lilita-one-latin-400-normal']];
@@ -15,4 +15,9 @@ const style = html.match(/<style>[\s\S]*?<\/style>/)[0];
 const body = html.match(/<body>([\s\S]*)<\/body>/)[1];
 fs.writeFileSync(path.join(__dirname, 'dist', 'artifact.html'), '<title>Shell Run</title>\n' + style + '\n' + body);
 for (const f of fs.existsSync(path.join(__dirname, 'static')) ? fs.readdirSync(path.join(__dirname, 'static')) : []) fs.copyFileSync(path.join(__dirname, 'static', f), path.join(__dirname, 'dist', f));
-console.log('built dist/index.html', (html.length / 1024).toFixed(0) + ' KB');
+// playable ad builds: one file, zero network requests (ad networks forbid them). Three.js is inlined.
+const three = fs.readFileSync(path.join(__dirname, 'vendor', 'three.min.js'), 'utf8');
+const play = (mraid) => html.replace(/<link [^>]*>/g, '').replace(/<meta property[^>]*>|<meta name="twitter[^>]*>/g, '').replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>', () => (mraid ? '<script src="mraid.js"></script>' : '') + '<script>self.PLAYABLE_AD=true</script><script>' + three + '</script>').replace('<title>Shell Run</title>', '<title>Shell Run · The Great Hatch</title>');
+const p1 = play(false), p2 = play(true);
+fs.writeFileSync(path.join(__dirname, 'dist', 'playable.html'), p1); fs.writeFileSync(path.join(__dirname, 'dist', 'playable-mraid.html'), p2);
+console.log('built dist/index.html', (html.length / 1024).toFixed(0) + ' KB', '· playable', (p1.length / 1024).toFixed(0) + ' KB');
