@@ -22,24 +22,24 @@ function levelSpec(i) {
   if (i < INTRO.length) return INTRO[i];
   if (_spec[i]) return _spec[i];
   const r = srand(i * 7919 + 101), k = i - INTRO.length, num = i + 1;
-  const mega = num % 25 === 0, boss = !mega && num % 10 === 0, easy = !mega && !boss && num % 5 === 0;
-  let D = 2.2 + k * .3 + (r() - .5) * 1.8; if (easy) D -= 2.4; if (boss) D += 1.4; D = clamp(D, 1.2, 12);
+  const mega = num % 25 === 0, boss = !mega && num % 10 === 0, easy = !mega && !boss && num % 10 === 5;   // one breather per chapter, not every fifth level
+  let D = 2.2 + Math.min(k, 23) * .3 + Math.max(0, k - 23) * .08 + (r() - .5) * 1.8; if (easy) D -= 2.4; if (boss) D += 1.4; D = clamp(D, 1.2, 16);   // steep to ~30, then keeps climbing gently
   const S = { name: mega ? 'Big hatch' : boss ? ['Busy night', 'Crowded cove', 'Rush hour', 'Full moon rush'][(num / 10 | 0) % 4] : easy ? 'Easy breezy' : LNAMES[(i * 7) % LNAMES.length], big: mega, fact: FACTS[(i * 5) % FACTS.length] };
   S.fresh = Math.round(7 + D * .8 + r() * 3); S.spawn = 0;
-  if (mega) { S.fresh = 22 + Math.floor(D); S.spawn = .16; }
+  S.fresh = Math.min(24, S.fresh); if (mega) { S.fresh = Math.min(32, 22 + Math.floor(D)); S.spawn = Math.max(.13, .17 - D * .002); }
   S.nests = S.fresh <= 8 ? 2 : 3;
   S.litter = Math.round(3 + D * .55 + r() * 2) - (easy ? 1 : 0); S.tangle = Math.min(4, 1 + Math.floor(D / 2.8) + (r() < .3 ? 1 : 0));
   S.rocks = r() < .5 ? 1 : (r() < .5 ? 2 : 0);
   S.castles = r() < .65 ? 1 + (D > 6 && r() < .5 ? 1 : 0) : 0;
   S.umbrellas = r() < .5 ? 1 + (D > 8 && r() < .4 ? 1 : 0) : 0;
   S.holes = i >= 9 && r() < .6 ? 1 + (D > 7 && r() < .5 ? 1 : 0) : 0;
-  S.crabs = Math.min(4, 1 + Math.floor(D / 2.6)); S.crabSpd = Math.min(1.8, 1.1 + D * .06); S.burrow = clamp(.3 + D * .05 + (r() - .5) * .3, .2, .85); S.crabT = 3 + r() * 3;
-  S.gulls = D >= 2.4 ? (D >= 6.5 && r() < .55 ? 2 : 1) : 0;
-  S.tourists = D >= 3.4 ? (D >= 7.5 && r() < .5 ? 2 : 1) : 0; S.tourT = 8 + r() * 6;
+  S.crabs = Math.min(4, 1 + Math.floor(D / 2.6)); S.crabSpd = Math.min(2, 1.1 + D * .06); S.burrow = clamp(.3 + D * .05 + (r() - .5) * .3, .2, .9); S.crabT = Math.max(1.6, 3 + r() * 3 - Math.max(0, D - 9) * .3);
+  S.gulls = D >= 2.4 ? (D >= 6.5 && r() < .55 ? (D >= 11 && r() < .5 ? 3 : 2) : 1) : 0;
+  S.tourists = D >= 3.4 ? (D >= 7.5 && r() < .5 + Math.max(0, D - 10) * .06 ? 2 : 1) : 0; S.tourT = Math.max(5, 8 + r() * 6 - Math.max(0, D - 9) * .4);
   S.balls = r() < .65 ? (D >= 6 && r() < .5 ? 2 : 1) : 0;
   S.wind = r() < .4 ? 2 + Math.floor(D / 3) : 0;
   S.stream = i >= 11 && r() < .22;
-  S.pace0 = .27 + r() * .12; S.pace1 = S.pace0 + .14 + r() * .2; S.lull = r() < .45 ? .9 + r() * .9 : 0;
+  S.pace0 = Math.max(.19, .3 - Math.max(0, D - 8) * .012) + r() * .1; S.pace1 = S.pace0 + .14 + r() * .18; S.lull = r() < .45 ? .9 + r() * .9 : 0;
   // one flavour per level so they stop feeling the same
   const flav = easy ? 'chill' : boss || mega ? 'mix' : ['rush', 'crabfest', 'litterbug', 'gusty', 'birds', 'plain', 'plain'][Math.floor(r() * 7)];
   if (flav === 'rush') { S.pace0 = .2; S.pace1 = .34; S.fresh += 3; S.tag = 'Rush hour'; }
@@ -51,9 +51,12 @@ function levelSpec(i) {
   const mr = r(); S.mood = mr < .38 ? 'night' : mr < .6 ? 'dusk' : mr < .8 ? 'dawn' : 'storm'; S.rain = S.mood === 'storm'; S.terrain = CH_TERRAIN[(i / 10 | 0) % 10];
   // surprises that fire mid-level
   const kinds = ['trip', 'crabs', 'gust', 'trash']; if (S.balls) kinds.push('balls'); if (S.gulls) kinds.push('gull'); if (S.tourists) kinds.push('tourist'); if (S.holes) kinds.push('hole');
-  const ne = clamp(Math.round(D / 3 + r() * 1.3) + (boss || mega ? 1 : 0) - (easy ? 1 : 0), easy ? 0 : 1, 4), at = [];
+  const ne = clamp(Math.round(D / 3 + r() * 1.3) + (boss || mega ? 1 : 0) - (easy ? 1 : 0), easy ? 0 : 1, D > 11 ? 5 : 4), at = [];
   for (let e = 0; e < ne; e++) at.push(.22 + r() * .66); at.sort((x, y) => x - y);
   S.events = at.map((t) => ({ at: t, kind: kinds[Math.floor(r() * kinds.length)] }));
+  // from level 31 some beaches stack a second twist, so late levels keep surprising
+  if (num > 30 && !easy && !mega && r() < .45) { const f2 = ['rush', 'crabfest', 'litterbug', 'gusty', 'birds'][Math.floor(r() * 5)], T2 = { rush: 'Rush hour', crabfest: 'Crab party', litterbug: 'Litterbug', gusty: 'Gusty', birds: 'Birds and flashes' }[f2];
+    if (T2 !== S.tag) { if (f2 === 'rush') { S.pace0 = Math.max(.18, S.pace0 - .05); S.pace1 = S.pace0 + .14; } else if (f2 === 'crabfest') { S.crabs = 4; S.burrow = Math.max(S.burrow, .75); } else if (f2 === 'litterbug') { S.litter += 3; S.holes += 1; } else if (f2 === 'gusty') { S.wind = Math.max(S.wind, 4); S.balls = Math.max(S.balls, 2); } else { S.gulls = Math.max(S.gulls, 2); S.tourists = Math.max(S.tourists, 1); } S.tag = S.tag ? S.tag + ' + ' + T2 : T2; } }
   S.teach = '';
   return (_spec[i] = S);
 }
@@ -183,8 +186,8 @@ function tap(px, py) {
   else if (best.kind === 'log') { o.st = 'push'; o.vx = 9; o.vz = rnd(-.5, .5); sfx.log(); burst3(o.x, .15, o.z, ['#bfe6ff', '#ffffff', '#46b4c6'], 14); }
   else if (best.kind === 'litter') toss(o);
   else if (best.kind === 'ball') { o.st = 'pop'; o.pt = 0; sfx.boop(); sfx.rock(); burst3(o.x, o.y, o.z, ['#e8664a', '#fbf1d8', '#3f9bf0', '#E0B040'], 20, { g: 3 }); rescue('shoo', null); ui.float(o.x, 1, o.z, 'Pop!'); ui.fact('gear'); }
-  else if (best.kind === 'rock' && o.castle) { o.st = 'crumble'; o.ct = 0; sfx.rock(); burst3(o.x, .4, o.z, ['#e2c27c', '#e8cd8c', '#fff1d0', '#c9a55e'], 26, { up: 1.4 }); shake = .16; rescue('tidy', null); ui.float(o.x, 1.2, o.z, o.umb ? 'Folded!' : 'Smash!'); ui.fact(o.umb ? 'gear' : 'castle'); }
-  else if (best.kind === 'rock') { o.st = 'roll'; o.vx = (o.x < 0 ? -1 : 1) * 8.5; o.vy = 3; sfx.rock(); burst3(o.x, .15, o.z, ['#e9d3a6', '#c9ab72', '#fff1d0'], 16); shake = .12; rescue('tidy', null); }
+  else if (best.kind === 'rock' && o.castle) { o.st = 'crumble'; o.ct = 0; sfx.rock(); burst3(o.x, .4, o.z, ['#e2c27c', '#e8cd8c', '#fff1d0', '#c9a55e'], 26, { up: 1.4 }); shake = .16; rescue('tidy', null); ui.float(o.x, 1.2, o.z, o.umb ? 'Folded!' : 'Smash!'); cheer(o); ui.fact(o.umb ? 'gear' : 'castle'); }
+  else if (best.kind === 'rock') { o.st = 'roll'; o.vx = (o.x < 0 ? -1 : 1) * 8.5; o.vy = 3; sfx.rock(); burst3(o.x, .15, o.z, ['#e9d3a6', '#c9ab72', '#fff1d0'], 16); shake = .12; rescue('tidy', null); cheer(o); }
   else if (best.kind === 'boop') { if (o.boopT <= 0) { o.hop = 1; o.boopT = .45; o.look = 1; sfx.boop(); ui.fx('heart', o.x, .7, o.z); } }
   else if (best.kind === 'bin') { bin.sq = 1; bin.lidT = .5; sfx.bin(); }
   ui.ripple(px, py, best.kind === 'boop' || best.kind === 'bin' ? 'rgba(255,255,255,.5)' : 'rgba(255,209,102,.8)');
@@ -222,6 +225,7 @@ function rescue(kind, t, label) {
   combo = comboT > 0 ? combo + 1 : 1; comboT = 2.6; comboKind = kind;
   if (t && label) ui.float(t.x, .6, t.z, label);
   if (combo >= 2) { sfx.combo(combo); ui.combo(combo, kind); }
+  if (combo >= 3) shake = Math.max(shake, Math.min(.2, .04 + combo * .025));
 }
 function shoo(g) {
   if (g.st === 'carry' && g.tgt) { const t = g.tgt; t.st = 'drop'; t.vy = 0; t.hgt = g.y - .5; ui.float(t.x, t.hgt + .4, t.z, 'Got it back!'); rescue('rescue', null); slow = 1; slowT = 0; if (!taught.drop) { taught.drop = 1; ui.cap('Now flip it back!', 2.5); } }
@@ -234,12 +238,14 @@ function fillHole(l) {
   l.st = 'filled'; l.m.visible = false; sfx.sand(); burst3(l.x, .15, l.z, ['#e6cfa0', '#f1dfb6', '#d9be8c', '#fff1d0'], 20, { up: 1.2 }); ui.fact('hole');
   if (hand && hand.o === l) hand = null;
 }
+/* juice: the removed thing pops white, and any turtle it was blocking does a happy hop (visual only) */
+function cheer(o) { ui.fx('hit', o.x, .25, o.z); for (const t of T) if (t.block === o && t.st === 'walk' && t.hop <= 0) { t.hop = 1; t.look = .5; } }
 function toss(l) {
   if (!l || l.st === 'fly' || l.st === 'binned' || l.st === 'filled') return;
   if (l.hole) { fillHole(l); return; }
   if (l.t) { ui.fact('tangle'); const t = l.t; t.st = 'walk'; t.tang = null; t.flipT = 0; t.pop = 1; t.look = 1.3; l.t = null; sfx.untangle(combo); rescue('rescue', t, 'Free!'); ui.fx('sparkle', t.x, .5, t.z); burst3(t.x, .3, t.z, ['#ffd166', '#ffffff', '#8fd19e'], 12); }
   else { sfx.pickup(); rescue('tidy', l, null); ui.fact(l.kind === 'bag' || l.kind === 'line' || l.kind === 'rings' ? 'tangle' : 'litter'); }
-  l.st = 'fly'; l.ft = 0; l.fx = l.x; l.fz = l.z; l.fy = l.y; burst3(l.x, .1, l.z, ['#e6cfa0', '#f1dfb6'], 8, { size: .8 });
+  l.st = 'fly'; l.ft = 0; l.fx = l.x; l.fz = l.z; l.fy = l.y; burst3(l.x, .1, l.z, ['#e6cfa0', '#f1dfb6'], 8, { size: .8 }); cheer(l);
   if (hand && hand.o === l) hand = null;
 }
 function landInBin(l) {

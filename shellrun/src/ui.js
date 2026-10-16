@@ -29,6 +29,15 @@ const ICON = {
   crew: '<svg viewBox="0 0 32 32"><path d="M16 4c5 0 9 4 9 9 0 6-4 11-9 15-5-4-9-9-9-15 0-5 4-9 9-9z" fill="#fff3c4"/><path d="M16 9l3 2v4l-3 2-3-2v-4z" fill="#e5533a"/></svg>',
   heartS: '<svg viewBox="0 0 24 24"><path d="M12 21C5 15.5 2.5 12 2.5 8.2A5 5 0 0 1 12 6a5 5 0 0 1 9.5 2.2C21.5 12 19 15.5 12 21z" fill="#E8664A" stroke="#16243b" stroke-width="1.8" stroke-linejoin="round"/></svg>',
   leafB: '<svg viewBox="0 0 24 24"><path d="M4 20C4 9 11 4 21 4c0 10-5 16-15 16" fill="#fff4d6"/><path d="M5 19c4-5 8-8 12-11" stroke="#3f8a2c" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>',
+  chest: '<svg viewBox="0 0 40 36"><path d="M5 15h30v16a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z" fill="#b7742f" stroke="#16243b" stroke-width="2.4"/><path d="M5 15c0-6 5-10 15-10s15 4 15 10z" fill="#d68f3e" stroke="#16243b" stroke-width="2.4" stroke-linejoin="round"/><path d="M5 15h30M18 5v29M22 5v29" stroke="#16243b" stroke-width="1.6" opacity=".35"/><rect x="16" y="13" width="8" height="9" rx="2" fill="#ffd23f" stroke="#16243b" stroke-width="2"/><path d="M8 9c3-2 7-3 10-3" stroke="#f3c07e" stroke-width="2" stroke-linecap="round" fill="none"/></svg>',
+  chestOpen: '<svg viewBox="0 0 40 36"><circle cx="20" cy="14" r="13" fill="#ffe680" opacity=".55"/><path d="M5 17h30v14a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z" fill="#b7742f" stroke="#16243b" stroke-width="2.4"/><path d="M6 17L9 4h22l3 13z" fill="#7a4a1c" stroke="#16243b" stroke-width="2.4" stroke-linejoin="round"/><path d="M12 17l4-7 4 5 4-6 4 8" fill="#ffd23f" stroke="#16243b" stroke-width="1.8" stroke-linejoin="round"/><rect x="16" y="17" width="8" height="7" rx="2" fill="#ffd23f" stroke="#16243b" stroke-width="2"/></svg>',
+  crab: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="14" rx="7" ry="5" fill="#e8664a" stroke="#16243b" stroke-width="1.8"/><path d="M5 11L3 7m16 4l2-4M6 17l-3 2m15-2l3 2" stroke="#16243b" stroke-width="1.8" stroke-linecap="round"/><circle cx="9.5" cy="12" r="1.2" fill="#16243b"/><circle cx="14.5" cy="12" r="1.2" fill="#16243b"/></svg>',
+  gull: '<svg viewBox="0 0 24 24"><path d="M2 12c4-4 7-4 10 0 3-4 6-4 10 0-4-1-7 0-10 3-3-3-6-4-10-3z" fill="#fff" stroke="#16243b" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+  bottle: '<svg viewBox="0 0 24 24"><rect x="8" y="7" width="8" height="14" rx="3" fill="#5fb0f5" stroke="#16243b" stroke-width="1.8"/><rect x="10" y="3" width="4" height="5" rx="1" fill="#e8664a" stroke="#16243b" stroke-width="1.6"/></svg>',
+  wind: '<svg viewBox="0 0 24 24"><path d="M3 9h11a3 3 0 1 0-3-3M3 14h15a3 3 0 1 1-3 3M3 19h6" fill="none" stroke="#2f8be0" stroke-width="2.8" stroke-linecap="round"/></svg>',
+  bolt: '<svg viewBox="0 0 24 24"><path d="M13 2L5 14h6l-2 8 9-13h-6z" fill="#ffd23f" stroke="#16243b" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+  castle: '<svg viewBox="0 0 24 24"><path d="M4 21V10h3v2h2v-2h6v2h2v-2h3v11z" fill="#e6c27e" stroke="#16243b" stroke-width="1.8" stroke-linejoin="round"/><rect x="10" y="15" width="4" height="6" fill="#b88a45"/></svg>',
+  rain: '<svg viewBox="0 0 24 24"><path d="M6 14a4 4 0 0 1 .5-8 5 5 0 0 1 9.5 1 3.5 3.5 0 0 1 1 7z" fill="#dfe9f5" stroke="#16243b" stroke-width="1.8"/><path d="M8 17l-1 3M12 17l-1 3M16 17l-1 3" stroke="#5fb0f5" stroke-width="2" stroke-linecap="round"/></svg>',
   leaf: '<svg viewBox="0 0 24 24"><path d="M4 20C4 9 11 4 21 4c0 10-5 16-15 16" fill="#7DB05A"/><path d="M5 19c4-5 8-8 12-11" stroke="#4f7d36" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>'
 };
 const ui = {};
@@ -51,16 +60,17 @@ ui.night = function () {
   levelFacts = []; ui.hud(); if (!started) return;
   const L = spec; if (L.attract) return; $('#bannerT').className = 'ribbon' + (L.big ? ' coral' : '');
   $('#bannerT').innerHTML = `<small>${L.big ? 'BIG HATCH · LEVEL ' + (night + 1) : 'LEVEL ' + (night + 1)}</small><i class="place">${L.place || CHAPTERS[(night / 10 | 0) % CHAPTERS.length]}</i>${L.name}${L.new ? `<span class="new">NEW · ${L.new}</span>` : L.tag ? `<span class="new tag">${L.tag}</span>` : ''}`;
-  $('#banner').classList.add('on'); clearTimeout(bannerTO); bannerTO = setTimeout(() => $('#banner').classList.remove('on'), L.new ? 3800 : 2400); if (L.big) { buzz([30, 40, 30]); }
+  ui.boostTip(); $('#banner').classList.add('on'); clearTimeout(bannerTO); bannerTO = setTimeout(() => $('#banner').classList.remove('on'), L.new ? 3800 : 2400); if (L.big) { buzz([30, 40, 30]); }
 };
 let capT = 0;
 ui.danger = (on) => { const d = $('#dng'); if (d) d.classList.toggle('on', !!on); };
+ui.boostTip = function () { if (!powerKind || attract || PROG.boostTip || PROG.boosts <= 0) return; PROG.boostTip = 1; saveProg(); setTimeout(() => { if (!hand && running) ui.cap(`You have ${PROG.boosts} boost${PROG.boosts > 1 ? 's' : ''}! Tap BOOST to use one`, 3); }, 3600); };
 ui.cap = function (s, d) { if (attract) return; const c = $('#cap'); c.textContent = s; c.classList.add('on'); capT = d; };
 ui.capOff = function () { $('#cap').classList.remove('on'); capT = 0; };
 
 /* ---------- overlay effects (crisp 2D on top of 3D) ---------- */
 const fx = [], floats = []; let comboFx = null;
-ui.fx = (kind, x, y, z, sx, sy) => fx.push({ kind, x, y, z, sx, sy, t: 0, life: { sparkle: .7, heart: .9, recycle: .9, twinkle: .8, splash: .9, ring: .6, flash: .4 }[kind] || .7, r: Math.random() * 6 });
+ui.fx = (kind, x, y, z, sx, sy) => fx.push({ kind, x, y, z, sx, sy, t: 0, life: { hit: .24, sparkle: .7, heart: .9, recycle: .9, twinkle: .8, splash: .9, ring: .6, flash: .4 }[kind] || .7, r: Math.random() * 6 });
 ui.float = (x, y, z, s) => floats.push({ x, y, z, s, t: 0 });
 ui.ripple = (px, py, c) => fx.push({ kind: 'tap', sx: px, sy: py, t: 0, life: .4, c });
 ui.combo = (n, kind) => { comboFx = { n, kind, t: 0 }; };
@@ -126,6 +136,7 @@ function overlay() {
     else if (p.kind === 'recycle') { const sc = u < .25 ? ease(u / .25) * 1.25 : 1.25 - (u - .25) * .35; recycleP(s.x, s.y - u * 20 * K, 15 * K * sc); }
     else if (p.kind === 'twinkle') { oc.fillStyle = '#FFF3C4'; star4(s.x, s.y, (6 + Math.sin(u * 3.1) * 10) * K, u * 1.5); }
     else if (p.kind === 'splash' || p.kind === 'ring') { oc.strokeStyle = p.kind === 'splash' ? '#eaf9f6' : 'rgba(255,255,255,.7)'; oc.lineWidth = 2.5 * K; for (const off of p.kind === 'splash' ? [0, .25] : [0]) { const v = clamp(u - off, 0, 1); if (v <= 0) continue; oc.beginPath(); oc.ellipse(s.x, s.y, (6 + v * 34) * K, (2.5 + v * 12) * K, 0, 0, 6.3); oc.stroke(); } }
+    else if (p.kind === 'hit') { const r = (8 + u * 30) * K; oc.globalAlpha = (1 - u) * .95; oc.fillStyle = '#fffbe8'; oc.beginPath(); oc.arc(s.x, s.y, r * (1 - u) * .7, 0, 7); oc.fill(); oc.strokeStyle = '#ffffff'; oc.lineWidth = 3.5 * K * (1 - u); oc.beginPath(); oc.arc(s.x, s.y, r, 0, 7); oc.stroke(); oc.globalAlpha = 1; }
     else if (p.kind === 'flash') { oc.globalAlpha = a * .9; const g = oc.createRadialGradient(s.x, s.y, 0, s.x, s.y, 130 * K); g.addColorStop(0, 'rgba(255,255,240,1)'); g.addColorStop(1, 'rgba(255,255,240,0)'); oc.fillStyle = g; oc.fillRect(s.x - 130 * K, s.y - 130 * K, 260 * K, 260 * K); oc.fillStyle = '#fff'; star4(s.x, s.y, 26 * K * a, 0); }
   }
   oc.globalAlpha = 1;
@@ -144,8 +155,10 @@ function overlay() {
 }
 
 /* ---------- progress (saved on the device) ---------- */
-const PROG = (() => { let d = { best: {}, unlocked: 0, done: 0, facts: {}, boosts: 0, saved: 0, streak: 0, lastDay: '', noAds: false, gift: 0 }; try { d = Object.assign(d, JSON.parse(localStorage.getItem('shellrun.v1') || '{}')); } catch (e) {} return d; })();
+const PROG = (() => { let d = { best: {}, unlocked: 0, done: 0, facts: {}, boosts: 0, saved: 0, streak: 0, lastDay: '', noAds: false, gift: 0, chests: {}, mapSeen: -1, boostTip: 0 }; try { d = Object.assign(d, JSON.parse(localStorage.getItem('shellrun.v1') || '{}')); } catch (e) {} return d; })();
 const saveProg = () => { try { localStorage.setItem('shellrun.v1', JSON.stringify(PROG)); } catch (e) {} };
+if (typeof PROG.chests !== 'object' || !PROG.chests) PROG.chests = {};
+const chDone = (c) => { let n = 0; for (let i = c * 10; i < c * 10 + 10; i++) if (PROG.best[i] > 0) n++; return n; };
 const starTotal = () => Object.values(PROG.best).reduce((a, b) => a + b, 0);
 
 /* ---------- modal state: the HUD steps aside whenever a panel is open ---------- */
@@ -170,19 +183,23 @@ function endNight() {
   ui.capOff(); hand = null; powerKind = null; ui.power();
   if (safeN === total) { sfx.win(); for (let i = 0; i < 7; i++) setTimeout(() => { burst3((Math.random() - .5) * 7, .6, SHORE_Z + .6 + Math.random() * 2, ['#ffd166', '#ffffff', '#8fd19e', '#6fd1c8', '#E8664A'], 26, { g: 2.2, up: 2.3, size: 1.1 }); tone(note(i * 2 + 4), .5, 'triangle', .1, 0, 0, .5); buzz(14); shake = .14; }, i * 150); } else sfx.safe(0);
   if (pass) { PROG.best[night] = Math.max(PROG.best[night] || 0, stars); PROG.unlocked = Math.max(PROG.unlocked, night + 1); }
+  const ch = night / 10 | 0, chestNow = pass && night % 10 === 9 && !PROG.chests[ch];
+  if (chestNow) { PROG.chests[ch] = 1; PROG.boosts += 2; setTimeout(() => { sfx.win(); buzz([20, 40, 20, 40, 30]); }, 900); }
   saveProg();
   const head = !pass ? 'Not this time' : safeN === total ? 'Perfect rescue!' : safeN >= total - 2 ? 'So close!' : 'Level complete!';
   const tidyPct = Math.round(tidy() * 100), back = Math.min(3, lostN), canBring = lostN > 0 && !rewardUsed;
   const nextI = night + 1, nextCh = Math.ceil(nextI / 10) * 10 || 10, toCh = nextCh - nextI;
-  const goal = pass ? (nextI % 10 === 0 ? `${ICON.pin}New beach unlocked: <b>${chapterOf(nextI)}</b>` : `${ICON.star}<b>${starTotal()}</b> stars · ${toCh} level${toCh > 1 ? 's' : ''} to <b>${chapterOf(nextCh).split(' · ')[0]}</b>`)
-    : `${ICON.turtle()}Save <b>${need}</b> of ${total} to pass`;
+  const dn = chDone(ch), left = 10 - dn;
+  const goal = !pass ? `<div class="goal">${ICON.turtle()}Save <b>${need}</b> of ${total} to pass</div>`
+    : chestNow ? `<div class="reward pop-in" style="animation-delay:1s"><div class="rc">${ICON.chestOpen}</div><div><b>Chest opened! +2 boosts</b><span>A boost fires the level's helper power right away. You have ${PROG.boosts}.</span></div></div>`
+    : `<div class="chp"><div class="chp-t"><span>${chapterOf(night).split(' · ')[0]}</span><b>${dn}/10</b></div><div class="chp-b"><div class="seg">${Array.from({ length: 10 }, (_, k) => `<i class="${k < dn ? 'on' : ''}${k === dn - 1 && night % 10 === dn - 1 ? ' new' : ''}"></i>`).join('')}</div><div class="cico ${left <= 2 ? 'near' : ''}">${PROG.chests[ch] ? ICON.chestOpen : ICON.chest}</div></div><div class="chp-s">${PROG.chests[ch] ? `${ICON.star}<b>${starTotal()}</b> stars · next: <b>${chapterOf(nextCh).split(' · ')[0]}</b>` : `${left} more level${left > 1 ? 's' : ''} to open the chest · <b>+2 boosts</b>`}</div></div>`;
   const fact = FACTCARD[levelFacts[levelFacts.length - 1]] || L.fact;
   const hearts = '';
   const btns = pass
-    ? `<button class="b-green hero pop-in" id="next" style="animation-delay:.65s">${ICON.play}Next level</button>
+    ? `<button class="b-green hero pop-in" id="next" style="animation-delay:.35s">${ICON.play}Next level</button>
        ${canBring && stars < 3 ? `<button class="b-teal" id="bring">${ICON.ad}Bring back ${back} · video</button>` : ''}
        <div class="duo"><button class="b-navy" id="retry">${ICON.retry}Play again</button><button class="b-navy" id="maps">${ICON.map}Map</button></div>`
-    : `<button class="b-green hero pop-in" id="retry" style="animation-delay:.5s">${ICON.retry}Try again</button>
+    : `<button class="b-green hero pop-in" id="retry" style="animation-delay:.3s">${ICON.retry}Try again</button>
        ${canBring ? `<button class="b-teal" id="bring">${ICON.ad}Bring back ${back} · video</button>` : ''}
        <div class="duo" style="grid-template-columns:1fr"><button class="b-navy" id="maps">${ICON.map}Level map</button></div>`;
   const v = document.createElement('div'); v.className = 'veil';
@@ -190,7 +207,7 @@ function endNight() {
     <div class="res"><div class="tu">${ICON.turtle()}</div><div><div class="big"><b>0</b><span> / ${total}</span></div><div class="lbl">made it to the sea</div></div></div>
     ${hearts}
     <div class="srow"><div class="stat">${ICON.bin}<span>${binnedN}</span><div class="bar"><i style="width:0%"></i></div><span>${tidyPct}%</span></div></div>
-    <div class="goal">${goal}</div>
+    ${goal}
     ${fieldNote(fact)}
     <div class="btns">${btns}</div></div></div>`;
   $('#ov').appendChild(v);
@@ -208,24 +225,83 @@ function endNight() {
 }
 function begin(i) { snap = { season: { ...season } }; bin.n = 0; for (const m of bin.pile.children) m.visible = false; startNight(i); }
 
-/* ---------- level map: a sand trail up the coast, level 1 at the bottom ---------- */
+/* ---------- level map: a living coastline. The beach heals as you climb ---------- */
+const LANDMARK = {
+  lighthouse: '<g class="lh"><path d="M-9 18l3-34h12l3 34z" fill="#fbf1d8" stroke="#16243b" stroke-width="2.2" stroke-linejoin="round"/><path d="M-8 6h16M-7-6h14" stroke="#e5533a" stroke-width="5"/><rect x="-8" y="-24" width="16" height="9" rx="2" fill="#ffd23f" stroke="#16243b" stroke-width="2.2"/><path d="M-10-24h20l-10-8z" fill="#e5533a" stroke="#16243b" stroke-width="2.2" stroke-linejoin="round"/><path class="beam" d="M0-20L70-38v36z" fill="#fff3c4" opacity=".28"/></g>',
+  palms: '<g><path d="M-6 18c0-12 2-22 8-30" stroke="#8a5a34" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M8 18c0-10-2-18-8-24" stroke="#7a4a28" stroke-width="4.5" fill="none" stroke-linecap="round"/><g fill="#4f9a3a" stroke="#16243b" stroke-width="1.8"><ellipse cx="-6" cy="-14" rx="13" ry="5" transform="rotate(-25 -6 -14)"/><ellipse cx="12" cy="-12" rx="13" ry="5" transform="rotate(25 12 -12)"/><ellipse cx="3" cy="-18" rx="5" ry="12"/><ellipse cx="-8" cy="-6" rx="10" ry="4" transform="rotate(30 -8 -6)"/></g><circle cx="3" cy="-11" r="3" fill="#8a5a34"/></g>',
+  nest: '<g><ellipse cx="0" cy="8" rx="22" ry="10" fill="#c9a160" stroke="#16243b" stroke-width="2"/><g fill="#fbf6ea" stroke="#16243b" stroke-width="1.5"><circle cx="-9" cy="4" r="5"/><circle cx="0" cy="2" r="5"/><circle cx="9" cy="4" r="5"/><circle cx="-4" cy="-4" r="5"/><circle cx="5" cy="-4" r="5"/></g></g>',
+  hut: '<g><rect x="-14" y="-4" width="28" height="20" fill="#b7742f" stroke="#16243b" stroke-width="2.2"/><path d="M-19-4L0-20 19-4z" fill="#e5533a" stroke="#16243b" stroke-width="2.2" stroke-linejoin="round"/><rect x="-4" y="4" width="8" height="12" fill="#5a3518"/><path d="M14-14v-14" stroke="#16243b" stroke-width="2"/><path d="M14-28l12 4-12 4z" fill="#7DB05A" stroke="#16243b" stroke-width="1.6"/></g>',
+  reef: '<g><ellipse cx="0" cy="6" rx="40" ry="22" fill="#62dcd2" opacity=".45"/><ellipse cx="0" cy="6" rx="28" ry="14" fill="#8ff0e4" opacity=".35"/><g stroke="#16243b" stroke-width="1.6" stroke-linejoin="round"><path d="M-16 12v-10l-5-6m5 6l5-8m-5 4" fill="none" stroke="#ff8a6b" stroke-width="3.4" stroke-linecap="round"/><ellipse cx="4" cy="6" rx="9" ry="7" fill="#ffb3c7"/><path d="M-1 5c3-2 7-2 10 0M0 8c3-2 6-2 8 0" stroke="#e57f9d" stroke-width="1.2" fill="none"/><circle cx="17" cy="10" r="5" fill="#ffd23f"/><path d="M-6 14l3-6 3 6z" fill="#9b7be0"/></g><path class="fish" d="M24-14l8 4-8 4 2-4z" fill="#ffd23f" stroke="#16243b" stroke-width="1.2"/></g>',
+  dock: '<g><rect x="-26" y="-3" width="40" height="8" fill="#a8763f" stroke="#16243b" stroke-width="2"/><path d="M-20 5v10M-6 5v10M8 5v10" stroke="#5a3518" stroke-width="3"/><path d="M12-10h22l-4 9H16z" fill="#e5533a" stroke="#16243b" stroke-width="2" stroke-linejoin="round"/><path d="M23-10v-14l8 10z" fill="#fbf1d8" stroke="#16243b" stroke-width="1.6" stroke-linejoin="round"/></g>'
+};
+const LM_ORDER = ['lighthouse', 'palms', 'nest', 'hut', 'reef', 'dock'];
+const HAZ = (i) => { if (i < 7) return [ICON.bottle, ICON.castle, ICON.crab, ICON.wind, ICON.gull, ICON.rain, null][i]; const t = (levelSpec(i).tag || ''); return t === 'Crab party' ? ICON.crab : t === 'Rush hour' ? ICON.bolt : t === 'Litterbug' ? ICON.bottle : t === 'Gusty' ? ICON.wind : t === 'Birds and flashes' ? ICON.gull : null; };
 function showMap() {
-  running = false; const cur = PROG.unlocked, N = Math.max(cur + 10, 24), RH = 104, Wd = 340, Ht = N * RH + 260;
-  const px = (i) => Wd / 2 + Math.sin(i * .95) * 92, py = (i) => Ht - 120 - i * RH;
-  let path = `M${px(0)} ${py(0) + 60}L${px(0)} ${py(0)}`; for (let i = 1; i < N; i++) { const cx = (px(i - 1) + px(i)) / 2; path += ` Q${px(i - 1)} ${(py(i - 1) + py(i)) / 2} ${cx} ${(py(i - 1) + py(i)) / 2} T${px(i)} ${py(i)}`; }
-  let nodes = '';
-  const lockI = '<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="3" fill="#a9b8d6" stroke="#16243b" stroke-width="1.8"/><path d="M8 10V8a4 4 0 0 1 8 0v2" fill="none" stroke="#a9b8d6" stroke-width="2.6"/></svg>';
+  running = false; const cur = PROG.unlocked, N = Math.max(cur + 10, 24), RH = 108;
+  const Wd = Math.min(560, $('#app').clientWidth || 390), AMP = Math.min(104, Wd * .26), Ht = N * RH + 260;
+  const px = (i) => Wd / 2 + Math.sin(i * .95) * AMP, py = (i) => Ht - 130 - i * RH;
+  let path = `M${px(0)} ${Ht + 40}L${px(0)} ${py(0)}`; for (let i = 1; i < N; i++) { const cx = (px(i - 1) + px(i)) / 2; path += ` Q${px(i - 1)} ${(py(i - 1) + py(i)) / 2} ${cx} ${(py(i - 1) + py(i)) / 2} T${px(i)} ${py(i)}`; }
+  path += ` L${px(N - 1)} -60`;
+  const R = srand(4242); let deco = '', isl = '', swim = '';
+  const svgT = (c = '#7DB05A', s = '#3E6B3A') => `<g><ellipse cx="0" cy="0" rx="6" ry="7.5" fill="${s}" stroke="#16243b" stroke-width="1.4"/><ellipse cx="0" cy="-.5" rx="4" ry="5" fill="${c}"/><circle cx="0" cy="-9.5" r="3" fill="${c}" stroke="#16243b" stroke-width="1.2"/><g fill="${c}" stroke="#16243b" stroke-width="1"><ellipse cx="-7" cy="-3" rx="3.6" ry="1.8" transform="rotate(-30 -7 -3)"/><ellipse cx="7" cy="-3" rx="3.6" ry="1.8" transform="rotate(30 7 -3)"/></g></g>`;
   for (let i = 0; i < N; i++) {
-    const st = i < cur ? 'done' : i === cur ? 'cur' : 'lock', b = PROG.best[i] || 0, big = (i + 1) % 25 === 0, boss = !big && (i + 1) % 10 === 0;
-    if (i % 10 === 0) nodes += `<div class="chap" style="top:${py(i) + 56}px"><small>Chapter ${i / 10 + 1}</small>${chapterOf(i)}</div>`;
-    nodes += `<button class="node ${st}${big ? ' big boss' : boss ? ' boss' : ''}" data-i="${i}" style="left:${px(i) - 32}px;top:${py(i) - 32}px">${st === 'lock' ? lockI : `<span>${i + 1}</span>`}${(big || boss) && st !== 'cur' ? `<i class="crown">${ICON.crown}</i>` : ''}${st === 'cur' ? `<i class="me">${ICON.turtle()}</i>` : ''}<em>${st === 'done' ? [0, 1, 2].map((s) => `<i class="${s < b ? 'on' : ''}"></i>`).join('') : ''}</em></button>`;
+    const x = px(i), y = py(i), done = i < cur;
+    for (let k = 0; k < 3; k++) {
+      const side = k % 2 ? 1 : -1, dx = side * (34 + R() * 20), dy = (R() - .5) * RH * .7, X = x + dx, Y = y + dy;
+      if (done) { const f = ['#ff8fb1', '#ffd23f', '#fff4d6'][k]; deco += `<g transform="translate(${X.toFixed(1)} ${Y.toFixed(1)})"><path d="M-6 3l6-5 6 5" stroke="#4f9a3a" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle r="3.6" cx="0" cy="-3" fill="${f}" stroke="#16243b" stroke-width="1.3"/><circle r="1.4" cx="0" cy="-3" fill="#e8a020"/></g>`; }
+      else if (i > cur) { const lit = [`<rect x="-3" y="-7" width="6" height="12" rx="2" fill="#7fb3d6" stroke="#16243b" stroke-width="1.2" transform="rotate(${(R() * 120 - 60) | 0})"/>`, `<rect x="-3.5" y="-4" width="7" height="8" rx="1.5" fill="#d97a6a" stroke="#16243b" stroke-width="1.2" transform="rotate(${(R() * 90) | 0})"/>`, `<path d="M-6 2c0-5 4-7 6-6s6 1 6 6-12 4-12 0z" fill="#e8eef2" stroke="#16243b" stroke-width="1.1" opacity=".85"/>`][k]; deco += `<g transform="translate(${X.toFixed(1)} ${Y.toFixed(1)})" opacity=".9">${lit}</g>`; }
+    }
+    if (i % 5 === 2) {
+      const side = Math.sin(i * .95) > 0 ? -1 : 1, lx = clamp(Wd / 2 + side * Math.min(132, Wd * .34), 44, Wd - 44), ly = y + RH * .15, kind = LM_ORDER[((i / 10 | 0) * 2 + (i / 5 | 0)) % LM_ORDER.length];
+      isl += kind === 'reef' ? `<g transform="translate(${lx.toFixed(1)} ${ly.toFixed(1)})">${LANDMARK.reef}</g>` : `<g transform="translate(${lx.toFixed(1)} ${ly.toFixed(1)})"><ellipse cx="0" cy="12" rx="44" ry="20" fill="#bff3ee" opacity=".55"/><ellipse cx="0" cy="12" rx="38" ry="16" fill="#e9cf98" stroke="#16243b" stroke-width="2.2"/><ellipse cx="-6" cy="9" rx="24" ry="8" fill="#f3dcab"/>${LANDMARK[kind]}</g>`;
+    }
+    if (done && i >= cur - 7) { const side = i % 2 ? 1 : -1, sx = clamp(x + side * (AMP * .4 + 70), 16, Wd - 16); swim += `<g transform="translate(${sx.toFixed(1)} ${(y + 18).toFixed(1)})"><g class="sw" style="animation-delay:${(-i * .7).toFixed(1)}s">${svgT()}</g></g>`; }
   }
+  const lockI = '<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="3" fill="#ffd23f" stroke="#16243b" stroke-width="2.2"/><path d="M8 10V8a4 4 0 0 1 8 0v2" fill="none" stroke="#16243b" stroke-width="2.6"/></svg>';
+  let nodes = '';
+  for (let i = 0; i < N; i++) {
+    const st = i < cur ? 'done' : i === cur ? 'cur' : 'lock', b = PROG.best[i] || 0, big = (i + 1) % 25 === 0, boss = !big && (i + 1) % 10 === 0, hz = st !== 'done' ? HAZ(i) : null;
+    if (i % 10 === 0 && i > 0) nodes += `<div class="chapmark" style="top:${py(i) + RH * .5 - 13}px"><span>Chapter ${i / 10 + 1} · ${chapterOf(i).split(' · ')[0]}</span></div>`;
+    nodes += `<button class="node ${st}${big ? ' big boss' : boss ? ' boss' : ''}" data-i="${i}" style="left:${px(i) - 32}px;top:${py(i) - 32}px"><span>${i + 1}</span>${st === 'lock' ? `<i class="lk">${lockI}</i>` : ''}${hz ? `<i class="hz">${hz}</i>` : ''}${big ? `<i class="crown">${ICON.crown}</i>` : boss ? `<i class="crown chest">${PROG.chests[i / 10 | 0] ? ICON.chestOpen : ICON.chest}</i>` : ''}<em>${st === 'done' ? [0, 1, 2].map((s) => `<i class="${s < b ? 'on' : ''}"></i>`).join('') : ''}</em></button>`;
+  }
+  const dimY = py(cur) - RH * .6;
   const v = document.createElement('div'); v.className = 'map';
-  v.innerHTML = `<div class="maptop"><div class="pill">${ICON.star.replace('<svg', '<svg style="width:26px;height:26px"')}<span>${starTotal()}</span></div><div class="maptitle">Shell Run</div><button class="iconbtn" id="mhome" aria-label="Home">${ICON.gear}</button></div>
-    <div class="scroller"><div class="track" style="width:${Wd}px;height:${Ht}px"><svg width="${Wd}" height="${Ht}" viewBox="0 0 ${Wd} ${Ht}"><path d="${path}" fill="none" stroke="#16243b" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/><path d="${path}" fill="none" stroke="#e9cf98" stroke-width="33" stroke-linecap="round" stroke-linejoin="round"/><path d="${path}" fill="none" stroke="#d4b276" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 16" transform="translate(-7 0)"/><path d="${path}" fill="none" stroke="#d4b276" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 16" stroke-dashoffset="9" transform="translate(7 0)"/></svg>${nodes}</div></div>
-    <div class="mapbot"><button class="b-gold sq" id="mshop" aria-label="Shop">${ICON.shop}</button><button class="b-green hero" id="mplay">${ICON.play}Level ${cur + 1}</button><button class="b-coral sq" id="mcrew" aria-label="Crew">${ICON.turtle('#fff4d6', '#e8a08e')}</button></div>`;
+  v.innerHTML = `<div class="maptop"><div class="pill">${ICON.star.replace('<svg', '<svg style="width:26px;height:26px"')}<span>${starTotal()}</span></div><div class="maptitle">Shell Run</div><button class="iconbtn" id="mhome" aria-label="Settings">${ICON.gear}</button></div>
+    <div class="chapbar" id="chapbar"></div>
+    <div class="scroller"><div class="track" style="width:${Wd}px;height:${Ht}px"><svg width="${Wd}" height="${Ht}" viewBox="0 0 ${Wd} ${Ht}">
+      <defs><linearGradient id="dim" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#091226" stop-opacity="0"/><stop offset=".12" stop-color="#091226" stop-opacity=".38"/><stop offset="1" stop-color="#091226" stop-opacity=".5"/></linearGradient></defs>
+      <path d="${path}" fill="none" stroke="#1d7f93" stroke-width="210" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>
+      <path d="${path}" fill="none" stroke="#2bb3c4" stroke-width="160" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>
+      ${swim}
+      <path d="${path}" fill="none" stroke="#e8fbff" stroke-width="132" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+      <path class="foam" d="${path}" fill="none" stroke="#ffffff" stroke-width="146" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="10 26" opacity=".55"/>
+      <path d="${path}" fill="none" stroke="#c9a463" stroke-width="120" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 4)"/>
+      <path d="${path}" fill="none" stroke="#e9cf98" stroke-width="116" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="${path}" fill="none" stroke="#f3dcab" stroke-width="54" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/>
+      ${deco}
+      <path d="${path}" fill="none" stroke="#c9a463" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="2 15" transform="translate(-6 0)"/><path d="${path}" fill="none" stroke="#c9a463" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="2 15" stroke-dashoffset="8.5" transform="translate(6 0)"/>
+      ${isl}
+      <rect x="0" y="0" width="${Wd}" height="${Math.max(0, dimY)}" fill="url(#dim)" pointer-events="none"/>
+    </svg>${nodes}<i class="meT">${ICON.turtle()}</i></div></div>
+    <div class="mapbot"><div class="dkm"><button class="b-gold sq" id="mshop" aria-label="Shop">${ICON.shop}</button><span>Shop</span></div><button class="b-green hero" id="mplay">${ICON.play}Level ${cur + 1}</button><div class="dkm"><button class="b-coral sq" id="mcrew" aria-label="Crew">${ICON.turtle('#fff4d6', '#e8a08e')}</button><span>Crew</span></div></div>`;
   $('#app').appendChild(v);
-  const sc = v.querySelector('.scroller'); sc.scrollTop = Math.max(0, py(cur) - sc.clientHeight * .58);
+  const sc = v.querySelector('.scroller'), me = v.querySelector('.meT'), bar = v.querySelector('#chapbar');
+  const placeMe = (i) => { me.style.left = (px(i) - 4) + 'px'; me.style.top = (py(i) - 76) + 'px'; };
+  const from = PROG.mapSeen >= 0 && PROG.mapSeen < cur ? PROG.mapSeen : cur;
+  placeMe(from); sc.scrollTop = Math.max(0, py(from) - sc.clientHeight * .58);
+  const drawBar = () => { const mid = sc.scrollTop + sc.clientHeight * .55, i = clamp(Math.round((Ht - 130 - mid) / RH), 0, N - 1), c = i / 10 | 0, dn = chDone(c); bar.innerHTML = `<small>Chapter ${c + 1}</small><b>${chapterOf(c * 10)}</b><div class="cb"><div class="seg">${Array.from({ length: 10 }, (_, k) => `<i class="${k < dn ? 'on' : ''}"></i>`).join('')}</div><span class="cico">${PROG.chests[c] ? ICON.chestOpen : ICON.chest}</span></div>`; };
+  let raf = 0; sc.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; drawBar(); }); }, { passive: true }); drawBar();
+  if (from !== cur) {   // you unlocked something: the turtle walks there and the lock pops
+    const node = v.querySelector(`.node[data-i="${cur}"]`);
+    setTimeout(() => {
+      sc.scrollTo({ top: Math.max(0, py(cur) - sc.clientHeight * .58), behavior: 'smooth' });
+      const a = { l: px(from) - 4, t: py(from) - 76 }, b = { l: px(cur) - 4, t: py(cur) - 76 };
+      const anim = me.animate([{ left: a.l + 'px', top: a.t + 'px' }, { left: (a.l + b.l) / 2 + 'px', top: Math.min(a.t, b.t) - 46 + 'px' }, { left: b.l + 'px', top: b.t + 'px' }], { duration: 760, easing: 'cubic-bezier(.45,0,.3,1)' });
+      tone(note(5), .08, 'triangle', .05); setTimeout(() => tone(note(7), .08, 'triangle', .05), 380);
+      anim.onfinish = () => { placeMe(cur); if (node) { node.classList.add('unlocked'); sfx.ready(); buzz([14, 30, 20]); } };
+    }, 520);
+  }
+  PROG.mapSeen = cur; saveProg();
   const startAt = (i) => { au(); v.remove(); $('#app').classList.add('playing'); begin(i); running = true; ui.night(); };
   v.querySelectorAll('.node').forEach((n) => { n.onclick = () => { const i = +n.dataset.i; if (i <= cur) startAt(i); else { n.classList.remove('shake'); void n.offsetWidth; n.classList.add('shake'); sfx.uhoh && sfx.uhoh(); buzz(20); } }; });
   v.querySelector('#mplay').onclick = () => startAt(cur);
@@ -263,7 +339,7 @@ ui.pause = function () {
   const need = Math.ceil(total * .7);
   const draw = () => {
     v.innerHTML = panel('Paused', `<div class="lbl">Level ${night + 1} · ${spec.name}</div>
-      <div class="prog"><div class="bar"><i style="width:${Math.round(safeN / total * 100)}%"></i></div><b>${safeN} / ${total}</b></div>
+      <div class="prog"><div class="bar"><i style="width:${Math.round(safeN / total * 100)}%"></i><em style="left:${(need / total * 100).toFixed(1)}%"></em></div><b>${safeN} / ${total}</b></div>
       <div class="goal">Save <b>${need}</b> to pass · <b>${Math.max(0, allowedLoss() - lostN)}</b> heart${allowedLoss() - lostN === 1 ? '' : 's'} left</div>
       ${fieldNote(FACTCARD[levelFacts[levelFacts.length - 1]] || 'You can\'t steer the turtles. The obstacles are man-made, so we can remove them.', levelFacts.length ? 'Turtle fact' : 'Remember')}
       <div class="btns"><button class="b-green hero" id="pr">${ICON.play}Resume</button>
@@ -287,7 +363,7 @@ const POWER_ICON = { clean: ICON.clean, surge: ICON.surge, ranger: ICON.ranger }
 ui.power = function () {
   const b = $('#power'); if (!powerKind || attract || !started) { b.classList.remove('on', 'ready'); return; }
   b.classList.add('on'); b.classList.toggle('ready', powerReady); b.style.setProperty('--p', Math.round((powerReady ? 1 : charge) * 100));
-  $('#powerIn').innerHTML = POWER_ICON[powerKind]; const c = $('#powerCnt'); c.textContent = '+' + PROG.boosts; c.style.display = PROG.boosts > 0 ? 'grid' : 'none';
+  $('#powerIn').innerHTML = POWER_ICON[powerKind]; const c = $('#powerCnt'); c.textContent = '×' + PROG.boosts; c.style.display = PROG.boosts > 0 ? 'grid' : 'none';
 };
 $('#power').onclick = (e) => { e.stopPropagation(); au(); if (paused) return; if (!usePower()) { ui.cap('Help turtles to fill the ring', 1.6); buzz(20); sfx.uhoh(); } };
 
@@ -315,7 +391,7 @@ function showShop() {
   const v = document.createElement('div'); v.className = 'veil'; v.style.zIndex = 14;
   const draw = () => {
     const offer = (id, ic, bg, t, sub, btn, cls, off, best) => `<div class="offer"><div class="ic" style="background:${bg}">${ic}</div><div style="flex:1;min-width:0"><b>${t}${best ? '<i class="best">BEST VALUE</i>' : ''}</b><span>${sub}</span></div><button class="${cls}" id="${id}" ${off ? 'disabled' : ''}>${btn}</button></div>`;
-    v.innerHTML = panel('Shop', `<div class="lbl">Your boosts: <b style="color:var(--txt)">${PROG.boosts}</b></div>
+    v.innerHTML = panel('Shop', `<div class="lbl">Your boosts: <b style="color:var(--txt)">${PROG.boosts}</b></div><div class="goal" style="margin-top:4px">A boost fires a level's helper power instantly</div>
       ${offer('b0', ICON.ad, 'linear-gradient(#63e1d5,#1a95a8)', 'Free boost', 'Watch a short video', 'Watch', 'b-teal', false)}
       ${offer('b1', ICON.clean, 'linear-gradient(#3a5a8e,#1d3558)', '5 boosts', 'Use any time in a level', '$0.99', 'b-gold', false)}
       ${offer('b2', ICON.surge, 'linear-gradient(#3a5a8e,#1d3558)', '20 boosts', 'Clean, surge or ranger', '$2.99', 'b-gold', false, true)}
@@ -347,6 +423,8 @@ function loop(ts) {
   requestAnimationFrame(loop);
 }
 self.onHorizon = buildSky;
+['gesturestart', 'gesturechange', 'dblclick', 'contextmenu'].forEach((ev) => document.addEventListener(ev, (e) => e.preventDefault(), { passive: false }));
+document.addEventListener('touchmove', (e) => { if (e.touches && e.touches.length > 1) e.preventDefault(); }, { passive: false });
 resize();
 $('#title').innerHTML = ICON.turtle() + 'Shell Run';
 $('#go').innerHTML = ICON.play + (PROG.unlocked ? 'Continue' : 'Play');
