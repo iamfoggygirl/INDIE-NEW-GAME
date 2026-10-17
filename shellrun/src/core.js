@@ -1,5 +1,5 @@
-const LOGO_SRC = '%%LOGO%%';
-{ const l = document.getElementById('loadLogo'); if (l) l.src = LOGO_SRC; }
+// the logo lives once, in the page markup (so the loading screen shows it before any script runs); everything else reuses it
+const LOGO_SRC = (document.getElementById('loadLogo') || {}).src || '';
 /* ===================== CORE: helpers, palette, audio, renderer, curved world ===================== */
 const $ = (s) => document.querySelector(s);
 if (!self.THREE) { $('#load').textContent = 'Could not load 3D. Check your connection and reload.'; return; }
