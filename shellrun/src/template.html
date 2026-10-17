@@ -504,6 +504,62 @@ button.wide{width:100%;margin-top:10px}
 @keyframes swban{0%{transform:scale(.3);opacity:0}14%{transform:scale(1.08);opacity:1}24%{transform:scale(1)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:translateY(-30px) scale(.92)}}
 .sw-cap{position:absolute;left:12px;right:12px;bottom:calc(16% + env(safe-area-inset-bottom,0px));text-align:center;z-index:2;pointer-events:none;font-family:var(--mark);font-size:28px;line-height:1.1;color:#fff;-webkit-text-stroke:7px #0d2a4a;paint-order:stroke fill;opacity:0;transform:translateY(8px);transition:opacity .25s,transform .25s}.sw-cap.on{opacity:1;transform:none}
 .swim .veil{z-index:3}
+
+/* ===== Oct 17 update ===== */
+/* home: one type voice (the outlined game captions), three clear bands, the beach alive behind the logo */
+#start{justify-content:space-between;padding:calc(7vh + env(safe-area-inset-top,0px)) 16px calc(18px + env(safe-area-inset-bottom,0px))}
+#start .top{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
+#start .tag{margin-top:-8px;font-size:14px;letter-spacing:.14em;-webkit-text-stroke:4px var(--o)}
+#start .stats{margin-top:0;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+#start .lore{margin-top:2px;max-width:300px;font-family:var(--disp);font-weight:700;font-size:17px;line-height:1.25;letter-spacing:.005em;color:#fff;-webkit-text-stroke:4px var(--o);paint-order:stroke fill;text-shadow:0 2px 0 var(--o),0 6px 14px rgba(5,12,30,.35)}
+#start .bot{gap:12px}
+#start .where{font-size:16px}
+#start .dock{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;width:100%;max-width:380px}
+#start .dk i{width:56px;height:56px;border-radius:17px}
+#start .dk span{font-size:12.5px;--sw:3.2px;white-space:nowrap}
+#hsanct i{background:linear-gradient(rgba(255,255,255,.26),rgba(255,255,255,0) 50%),linear-gradient(#c9b0ff,#7a52d8);--lip:#4a2d96}
+#hsanct i svg{width:38px;height:38px}
+@media (max-width:350px){#start .dk i{width:50px;height:50px}#start .dk span{font-size:11px}#start .lore{font-size:15.5px}}
+#moodveil{position:absolute;inset:0;z-index:11;pointer-events:none;opacity:0;transition:opacity .9s ease}
+#moodveil.on{opacity:.92;transition:opacity .6s ease}
+/* level card: what this level's boost does, and the bonus that follows it */
+.lvx{display:flex;align-items:center;gap:10px;text-align:left;background:#efe5cc;border:2px solid #d8c69d;border-radius:16px;padding:8px 10px;margin:0 0 10px;box-shadow:inset 0 3px 5px rgba(22,36,59,.08),0 2px 0 rgba(255,255,255,.85)}
+.lvx .lvi{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(#2c4673,#1b2e50);border:2.5px solid var(--o)}.lvx .lvi svg{width:28px;height:28px}
+.lvx b{display:block;font-family:var(--disp);font-weight:700;font-size:15.5px;color:var(--txt);line-height:1.15}
+.lvx span{display:block;font-family:var(--body);font-weight:800;font-size:12.5px;color:var(--sub);line-height:1.3}
+.lvx.sea{background:linear-gradient(#d9f6f2,#bfeee8);border-color:#8fd6cf}.lvx.sea .lvi{background:linear-gradient(#3cc8d8,#1a7fb0)}
+/* sanctuary */
+.sanct .card{max-width:370px;width:100%}.sanct .inner{padding-top:34px}
+.sa-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.sa-top .lbl{text-align:left;font-size:11.5px}
+.sa-map{border-radius:18px;overflow:hidden;border:3px solid var(--o);box-shadow:0 4px 0 var(--o2),inset 0 0 0 2px rgba(255,255,255,.3);background:#2fb0c8;line-height:0}
+.sa-svg{width:100%;height:auto;display:block}
+.sa-p{cursor:pointer;transition:filter .2s}.sa-p.lock{filter:saturate(.25) brightness(.95)}.sa-p.sel{filter:drop-shadow(0 0 6px rgba(255,255,255,.9))}
+.sa-in{transform-box:fill-box;transform-origin:50% 100%}.sa-p.built .sa-in{animation:sabuild .7s var(--spring)}
+@keyframes sabuild{0%{transform:scale(.4,.2)}60%{transform:scale(1.1,1.15)}100%{transform:none}}
+.sa-ring{animation:saring 1.6s linear infinite}@keyframes saring{to{stroke-dashoffset:-26}}
+.sa-up{animation:saup 1.2s ease-in-out infinite}@keyframes saup{50%{transform:translateY(-4px)}}
+.sa-w1{animation:saw 3s ease-in-out infinite}.sa-w2{animation:saw 3.6s ease-in-out infinite reverse}@keyframes saw{50%{transform:translateX(6px)}}
+.sa-info{display:flex;gap:10px;align-items:center;text-align:left;margin-top:10px;background:#efe5cc;border:2px solid #d8c69d;border-radius:16px;padding:8px 10px}
+.sa-info.boom{animation:pipop .45s var(--spring)}
+.sa-ic{flex:none;width:64px;height:54px;border-radius:14px;background:linear-gradient(#bff0ea,#8fd6cf);border:2.5px solid var(--o);display:grid;place-items:center}.sa-ic svg{width:60px;height:48px}
+.sa-tx{min-width:0}.sa-tx b{font-family:var(--disp);font-weight:700;font-size:17px;color:var(--txt)}
+.sa-lv{display:inline-flex;gap:4px;margin-left:8px;vertical-align:2px}.sa-lv i{width:13px;height:13px;border-radius:50%;background:#d8c69d;border:2px solid rgba(22,36,59,.35)}.sa-lv i.on{background:linear-gradient(#ffe27a,#ee9c12);border-color:var(--o);box-shadow:0 0 6px rgba(255,200,40,.8)}
+.sa-now,.sa-nx{display:block;font-family:var(--body);font-weight:800;font-size:12.5px;line-height:1.3;color:var(--txt)}.sa-nx{color:var(--sub);display:flex;gap:4px;align-items:center}.sa-nx svg{width:12px;height:12px;flex:none}
+.sanct .btns{display:grid;gap:10px;margin-top:12px}.sa-why{display:block;margin-top:3px;font-family:var(--body);font-weight:700;font-style:italic;font-size:11.5px;line-height:1.3;color:#3f8a2c}
+.b-purple{background:linear-gradient(rgba(255,255,255,.24),rgba(255,255,255,0) 48%),linear-gradient(#c9b0ff,#9a74ee 62%,#7a52d8);--lip:#4a2d96;color:#fff}
+.mapbot .b-purple svg{width:40px;height:40px}.mapbot .sq{position:relative}
+.mapbot .nb{position:absolute;top:-11px;right:-3px;font-style:normal;font-family:var(--disp);font-weight:700;font-size:10.5px;color:#fff;background:#ef4c3c;border:2px solid var(--o);border-radius:99px;padding:1px 6px;-webkit-text-stroke:0;text-shadow:none;letter-spacing:.04em;animation:pulseBtn 1.4s infinite}
+.sanct .duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}.sanct .duo button svg{width:26px;height:26px}
+.gsec{font-family:var(--disp);font-weight:700;font-size:15px;color:var(--txt);text-align:left;margin:12px 2px 6px}.gsec small{display:block;font-family:var(--body);font-weight:800;font-size:12px;color:var(--sub);margin-top:1px}.gboost .gic{background:linear-gradient(#2c4673,#1b2e50)}
+/* swim frenzy: a clear goal, a clear skip */
+.swim .sw-n{gap:4px;padding-right:12px}.swim .sw-n em{font-style:normal;font-family:var(--disp);font-weight:700;font-size:14px;opacity:.85;-webkit-text-stroke:2.5px var(--o);paint-order:stroke fill}
+.swim .sw-n .sw-bo{display:grid;place-items:center;width:22px;height:22px;opacity:.35;filter:grayscale(1);transition:opacity .3s,filter .3s}.swim .sw-n .sw-bo svg{width:20px;height:20px}
+.swim .sw-n.got .sw-bo{opacity:1;filter:none;animation:pipop .45s var(--spring)}
+.swim .sw-n .sw-bo[data-n="2"]::after{content:'×2';font-family:var(--disp);font-weight:700;font-size:11px;color:#fff;-webkit-text-stroke:2.5px var(--o);paint-order:stroke fill;position:relative;left:12px;top:-14px;grid-area:1/1}
+.swim .sw-skip{display:flex;align-items:center;gap:2px;height:40px;padding:0 10px 0 14px;border-radius:99px;font-family:var(--disp);font-weight:700;font-size:16px;color:#fff;-webkit-text-stroke:3px var(--o);paint-order:stroke fill;cursor:pointer;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.swim .sw-skip svg{width:20px;height:20px;filter:drop-shadow(0 2px 0 rgba(13,23,38,.8))}.swim .sw-skip:active{transform:scale(.94)}
+.sw-ban{flex-direction:column;align-items:center;gap:14px}
+.sw-sub{display:flex;align-items:center;gap:6px;font-family:var(--disp);font-weight:700;font-size:17px;color:#fff;-webkit-text-stroke:4px #0d2a4a;paint-order:stroke fill;text-shadow:0 3px 0 #0d2a4a;padding:0 20px;text-align:center}.sw-sub svg{width:24px;height:24px;flex:none}
 </style>
 </head>
 <body>
@@ -526,7 +582,7 @@ button.wide{width:100%;margin-top:10px}
   <div id="cap"></div>
   <div id="toast"></div>
   <button id="power" aria-label="Boost"><div class="in" id="powerIn"></div><span class="cnt" id="powerCnt"></span></button>
-  <div id="start"><button class="iconbtn" id="gear" aria-label="Settings"></button><div class="top"><h1 id="title">Shell Run</h1><div class="tag">Guide the hatchlings home</div><div class="stats" id="tagstats"></div><div class="lore">We can't control the turtles.<br>We can clear what people left behind.</div></div><div class="bot"><div class="where" id="where"></div><button class="b-green hero" id="go"></button><div class="dock"><button class="dk" id="hmap"><i></i><span>Map</span></button><button class="dk" id="hcrew"><i></i><span>Crew</span><em style="display:none">NEW</em></button><button class="dk" id="hguide"><i></i><span>Guide</span><em style="display:none">NEW</em></button><button class="dk" id="hshop"><i></i><span>Shop</span></button></div></div><button class="iconbtn" id="daily" aria-label="Daily beach" style="display:none"></button></div>
+  <div id="start"><button class="iconbtn" id="gear" aria-label="Settings"></button><div class="top"><h1 id="title">Shell Run</h1><div class="tag">Guide the hatchlings home</div><div class="stats" id="tagstats"></div><div class="lore">We can't control the turtles.<br>We can clear what people left behind.</div></div><div class="bot"><div class="where" id="where"></div><button class="b-green hero" id="go"></button><div class="dock"><button class="dk" id="hmap"><i></i><span>Map</span></button><button class="dk" id="hcrew"><i></i><span>Crew</span><em style="display:none">NEW</em></button><button class="dk" id="hsanct"><i></i><span>Sanctuary</span><em style="display:none">NEW</em></button><button class="dk" id="hguide"><i></i><span>Guide</span><em style="display:none">NEW</em></button><button class="dk" id="hshop"><i></i><span>Shop</span></button></div></div><button class="iconbtn" id="daily" aria-label="Daily beach" style="display:none"></button></div>
   <div id="ov"></div>
   <div id="rot"><div><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2.5" fill="#6fd1c8" stroke="#16243b" stroke-width="1.6"/><circle cx="12" cy="18.5" r="1.1" fill="#16243b"/></svg>Turn your phone upright<br>to guide the hatchlings</div></div>
   <div id="load"><img id="loadLogo" src="%%LOGO%%" alt=""><span>Loading the beach…</span></div>

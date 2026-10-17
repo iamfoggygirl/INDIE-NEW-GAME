@@ -2,7 +2,7 @@
 // Inlines src/*.js into one self-contained page: dist/index.html (+ dist/artifact.html for publishing).
 const fs = require('fs'), path = require('path');
 const src = path.join(__dirname, 'src');
-const order = ['core.js', 'look.js', 'world.js', 'models.js', 'game.js', 'ui.js', 'swim.js', 'playable.js'];
+const order = ['core.js', 'look.js', 'world.js', 'models.js', 'game.js', 'sanct.js', 'ui.js', 'swim.js', 'playable.js'];
 const code = order.map((f) => `/* ---- ${f} ---- */\n` + fs.readFileSync(path.join(src, f), 'utf8')).join('\n');
 // fonts are embedded so the game looks right on the first frame, offline, and inside the future app
 const FONT = [['Fredoka', 600, 'fredoka-latin-600-normal'], ['Fredoka', 700, 'fredoka-latin-700-normal'], ['Nunito', 700, 'nunito-latin-700-normal'], ['Nunito', 800, 'nunito-latin-800-normal'], ['Lilita One', 400, 'lilita-one-latin-400-normal']];

@@ -3,10 +3,42 @@
    Same rule as the beach: we never steer them, we clear what people left behind. Tap the plastic before
    they swim into it. Jellyfish are their food, so leave those alone. Nothing dies: a tangled hatchling
    that isn't freed in time washes back to the beach to try again. */
+const SW_GOAL = [10, 20];   // plastic cleared for one boost, then a second
+/* the swimming hatchling is the same 3D model as on the beach: rendered once, top-down, into a strip of stroke frames */
+const SWIM_SPR = {};
+function swimSprites(id) {
+  if (id in SWIM_SPR) return SWIM_SPR[id];
+  const N = 10, S = 192, out = [];
+  try {
+    const sc = new THREE.Scene(), mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .5, metalness: 0 });
+    sc.add(new THREE.HemisphereLight(0xfff6e4, 0x3f6f6a, .62));
+    const key = new THREE.DirectionalLight(0xfff0d6, .95); key.position.set(-2.5, 6, 3); sc.add(key);
+    const rim = new THREE.DirectionalLight(0xa8f0ff, .38); rim.position.set(3, 2, -3); sc.add(rim);
+    const g = new THREE.Group(); sc.add(g); g.add(new THREE.Mesh(skinGeo(id), mat));
+    const part = (geo, piv) => { const pv = new THREE.Group(); pv.position.set(piv[0], piv[1], piv[2]); pv.add(new THREE.Mesh(geo, mat)); g.add(pv); return pv; };
+    const head = part(GEO.tHead, PIV.head), fr = part(GEO.fFR, PIV.fr), fl = part(GEO.fFL, PIV.fl), br = part(GEO.fBR, PIV.br), bl = part(GEO.fBL, PIV.bl);
+    const cam = new THREE.OrthographicCamera(-.64, .64, .64, -.64, .1, 20); cam.position.set(0, 6, 0); cam.up.set(0, 0, 1); cam.lookAt(0, 0, 0);
+    const rt = new THREE.WebGLRenderTarget(S, S);
+    const px = new Uint8Array(S * S * 4), pc = R.getClearColor(new THREE.Color()).clone(), pa = R.getClearAlpha();
+    R.setClearColor(0x000000, 0);
+    for (let f = 0; f < N; f++) {
+      const w = Math.sin(f / N * Math.PI * 2);   // sea turtles stroke both front flippers together; the back ones steer
+      fr.rotation.set(0, w * .85, .3); fl.rotation.set(0, -w * .85, -.3); br.rotation.set(0, -w * .3, 0); bl.rotation.set(0, w * .3, 0); head.rotation.set(-.1, 0, 0);
+      R.setRenderTarget(rt); R.clear(); R.render(sc, cam); R.readRenderTargetPixels(rt, 0, 0, S, S, px);
+      const c = document.createElement('canvas'); c.width = c.height = S; const c2 = c.getContext('2d'), im = c2.createImageData(S, S);
+      for (let y = 0; y < S; y++) im.data.set(px.subarray((S - 1 - y) * S * 4, (S - y) * S * 4), y * S * 4);
+      c2.putImageData(im, 0, 0); out.push(c);
+    }
+    R.setRenderTarget(null); R.setClearColor(pc, pa); rt.dispose(); mat.dispose();
+    if (!out[0].getContext('2d').getImageData(S / 2, S / 2, 1, 1).data[3]) throw new Error('empty sprite');
+  } catch (e) { console.warn('swim sprites', e); R.setRenderTarget(null); return (SWIM_SPR[id] = null); }
+  return (SWIM_SPR[id] = out);
+}
 function swimFrenzy(opt) {
   const app = $('#app'), el = document.createElement('div'); el.className = 'swim';
-  el.innerHTML = `<canvas></canvas><div class="sw-top"><div class="pill sw-n">${ICON.bin}<span>0</span></div><div class="sw-bar"><i></i><b>${TURT(skinNow)}</b></div><button class="iconbtn sw-skip" aria-label="Skip">${ICON.play}</button></div><div class="sw-ban"><div class="ribbon">Swim Frenzy!</div></div><div class="sw-cap"></div>`;
+  el.innerHTML = `<canvas></canvas><div class="sw-top"><div class="pill sw-n">${ICON.bin}<span>0</span><em>/${SW_GOAL[0]}</em><i class="sw-bo">${ICON.bolt}</i></div><div class="sw-bar"><i></i><b>${TURT(skinNow)}</b></div><button class="sw-skip" aria-label="Skip the bonus"><span>Skip</span><svg viewBox="0 0 24 24"><path d="M5 6l6 6-6 6M12 6l6 6-6 6" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div><div class="sw-ban"><div class="ribbon">Swim Frenzy!</div><div class="sw-sub">${ICON.bolt}Clear ${SW_GOAL[0]} pieces of plastic to win a boost</div></div><div class="sw-cap"></div>`;
   app.appendChild(el); swimOn = true; running = false;
+  const SPR = swimSprites(skinNow), SN = SPR ? SPR.length : 0, gEm = el.querySelector('.sw-n em'), gBo = el.querySelector('.sw-bo');
   const cv = el.querySelector('canvas'), cx = cv.getContext('2d'), cap = el.querySelector('.sw-cap'), cntEl = el.querySelector('.sw-n'), cnt = cntEl.querySelector('span'), bar = el.querySelector('.sw-bar i'), barT = el.querySelector('.sw-bar b');
   let W = 0, H = 0, DPR = 1;
   const size = () => { W = app.clientWidth; H = app.clientHeight; DPR = Math.min(2, devicePixelRatio || 1); cv.width = W * DPR | 0; cv.height = H * DPR | 0; };
@@ -19,10 +51,11 @@ function swimFrenzy(opt) {
   { const t = tile.getContext('2d'), im = t.createImageData(128, 128); for (let y = 0; y < 128; y++) for (let x = 0; x < 128; x++) { const a = x / 128 * Math.PI * 2, b = y / 128 * Math.PI * 2, v = Math.abs(Math.sin(a * 2 + Math.sin(b * 3) * 1.3) + Math.sin(b * 2 + Math.sin(a * 3 + 1) * 1.3)), al = Math.max(0, 1 - v * 2.4), o = (y * 128 + x) * 4; im.data[o] = 230; im.data[o + 1] = 255; im.data[o + 2] = 250; im.data[o + 3] = al * al * 150; } t.putImageData(im, 0, 0); }
   const pat = cx.createPattern(tile, 'repeat');
   // world: y grows downward like the screen; the school swims up (toward the open sea)
-  let hintAge = 0, t = 0, wy = 0, spd = SPD0, cleared = 0, tangles = 0, combo = 0, comboT = 0, slow = 1, flash = 1, spawnT = 2.2, jellyT = 3.4, raft = null, endT = -1, shown = false, skipped = false, hintL = null, toldJelly = 0, toldTangle = 0, bubT = 0, capTO = 0, raf = 0, lastTs = 0, gone = false;
+  let earned = 0, hintAge = 0, t = 0, wy = 0, spd = SPD0, cleared = 0, tangles = 0, combo = 0, comboT = 0, slow = 1, flash = 1, spawnT = 2.2, jellyT = 3.4, raft = null, endT = -1, shown = false, skipped = false, hintL = null, toldJelly = 0, toldTangle = 0, bubT = 0, capTO = 0, raf = 0, lastTs = 0, gone = false;
   const lesson = !PROG.swimSeen, camTop = () => wy - H * .64, SY = (y) => y - camTop();
   const lx = (tt) => W / 2 + Math.sin(tt * .35) * W * .17 + Math.sin(tt * .93 + 1) * W * .05;
-  const school = []; for (let k = 0; k < opt.n; k++) { const row = k / 4 | 0, col = k % 4; school.push({ ox: (col - 1.5) * 58 * U + rnd(-8, 8) * U, oy: row * 62 * U + rnd(-6, 6) * U, x: W / 2 + (col - 1.5) * 40 * U, y: H * .5 + 300 * U + row * 46 * U, vx: 0, vy: 0, ph: rnd(0, 6), a: -Math.PI / 2, st: 'swim', hold: null, tt: 0, eat: 0, fade: 1 }); }
+  // a loose school, not a grid: sunflower spacing, each hatchling with its own drift and stroke rhythm
+  const school = []; for (let k = 0; k < opt.n; k++) { const r = 30 * U * Math.sqrt(k + .5), an = k * 2.39996 + rnd(-.25, .25), ox = Math.cos(an) * r * 1.25, oy = Math.sin(an) * r * .85 + r * .45; school.push({ ox, oy, x: W / 2 + ox * .7, y: H * .5 + 300 * U + oy, vx: 0, vy: 0, ph: rnd(0, 6), p0: rnd(0, 6), rate: rnd(.88, 1.12), a: -Math.PI / 2, st: 'swim', hold: null, tt: 0, eat: 0, fade: 1, sx: 0, sy: 0 }); }
   const L = [], J = [], P = [], F = [];
   // the sea floor near the beach: sand ripples, seagrass and rocks, fading as the water gets deep
   const floor = []; for (let k = 0; k < 40; k++) floor.push({ x: rnd(0, W), y: H * .9 - k * rnd(36, 60) * U, k: Math.random() < .6 ? 'grass' : 'rock', s: rnd(.7, 1.3) });
@@ -51,10 +84,11 @@ function swimFrenzy(opt) {
     if (!raft && t >= DUR - 2.4) raft = { x: cl(lx(t + 3), W * .3, W * .7), y: wy - H * .55 - spd * 1.2 };
     if (raft && endT < 0 && wy <= raft.y + 20 * U) { endT = 0; sfx.win(); buzz([20, 40, 20]); for (let i = 0; i < 24; i++) bubble(raft.x + rnd(-60, 60) * U, raft.y + rnd(-20, 30) * U, rnd(2, 6)); }
     const LX = lx(t);
+    for (const s of school) { let sx = 0, sy = 0; if (s.st === 'swim') for (const o of school) if (o !== s && o.st !== 'lost') { const dx = s.x - o.x, dy = s.y - o.y, d = Math.hypot(dx, dy); if (d > .1 && d < 46 * U) { const k = 1 - d / (46 * U); sx += dx / d * k * k * 40 * U; sy += dy / d * k * k * 30 * U; } } s.sx += (sx - s.sx) * Math.min(1, dt * 4); s.sy += (sy - s.sy) * Math.min(1, dt * 4); }
     for (const s of school) {
-      s.ph += dt * (s.st === 'tang' ? 16 : 7 + Math.hypot(s.vx, s.vy) / (40 * U)); s.eat = Math.max(0, s.eat - dt);
+      s.ph += dt * (s.st === 'tang' ? 16 : (5.2 + Math.hypot(s.vx, s.vy) / (60 * U)) * s.rate); s.eat = Math.max(0, s.eat - dt);
       if (s.st === 'swim') {
-        const tx = endT >= 0 && raft ? raft.x + s.ox * .7 : LX + s.ox + Math.sin(t * 1.3 + s.ph * .1) * 6 * U, ty = endT >= 0 && raft ? raft.y + s.oy * .45 - 10 * U : wy + s.oy;
+        const tx = (endT >= 0 && raft ? raft.x + s.ox * .7 : LX + s.ox + Math.sin(t * .8 + s.p0) * 12 * U) + s.sx, ty = (endT >= 0 && raft ? raft.y + s.oy * .45 - 10 * U : wy + s.oy + Math.cos(t * .65 + s.p0 * 1.7) * 9 * U) + s.sy;
         s.vx += ((tx - s.x) * 4.2 - s.vx * 3) * dt; s.vy += ((ty - s.y) * 4.2 - (s.vy + spd) * 3) * dt;
         s.x += s.vx * dt; s.y += s.vy * dt;
         const ta = Math.atan2(s.vy, s.vx); let da = ta - s.a; while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2; s.a += da * Math.min(1, dt * 6);
@@ -80,7 +114,7 @@ function swimFrenzy(opt) {
   function hit(l) {
     if (l.gone) return;
     if (l.k === 'net' && --l.hp > 0) { l.shk = .25; tone(500 + (3 - l.hp) * 120, .08, 'triangle', .08); buzz(10); burst(l.x, l.y, 5, ['#9fe8d8', '#fff']); return; }
-    l.gone = .01; cleared++; cnt.textContent = cleared; cntEl.classList.remove('pop'); void cntEl.offsetWidth; cntEl.classList.add('pop');
+    l.gone = .01; cleared++; cnt.textContent = cleared; { const g = cleared >= SW_GOAL[1] ? 2 : cleared >= SW_GOAL[0] ? 1 : 0; gEm.textContent = '/' + (g ? SW_GOAL[1] : SW_GOAL[0]); if (g > earned) { earned = g; cntEl.classList.add('got'); gBo.dataset.n = g; sfx.ready(); buzz([14, 30, 14]); floater(l.x, l.y - 46 * U, g > 1 ? 'Another boost!' : 'Boost won!', '#fff3a0'); for (let i = 0; i < 14; i++) bubble(l.x + rnd(-30, 30) * U, l.y + rnd(-20, 20) * U, rnd(2, 5)); } } cntEl.classList.remove('pop'); void cntEl.offsetWidth; cntEl.classList.add('pop');
     combo = comboT > 0 ? combo + 1 : 1; comboT = 1.3; tone(note(3 + Math.min(combo, 9)), .14, 'triangle', .1, 0, 0, .3); sfx.bin(); buzz(12);
     burst(l.x, l.y, 12, ['#ffffff', '#bff6f0', '#ffe9a8']); for (let i = 0; i < 6; i++) bubble(l.x + rnd(-10, 10) * U, l.y, rnd(2, 4));
     if (combo >= 3) floater(l.x, l.y - 24 * U, '×' + combo, '#ffe680');
@@ -97,6 +131,7 @@ function swimFrenzy(opt) {
     if (best[0] === 'l') hit(best[1]);
     else { const j = best[1]; j.wob = .5; sfx.boop(); if (toldJelly < 3) { toldJelly = 3; floater(j.x, j.y - 24 * U, "That's food!", '#ffe0f0'); } }
   });
+  el.querySelector('.sw-skip').onpointerdown = (e) => e.stopPropagation();
   el.querySelector('.sw-skip').onclick = () => { au(); skipped = true; result(); };
 
   /* ---------- drawing ---------- */
@@ -145,6 +180,12 @@ function swimFrenzy(opt) {
     if (flash > 0) { c.fillStyle = `rgba(230,255,252,${flash.toFixed(3)})`; c.fillRect(0, 0, W, H); }
   }
   function drawTurtle(s) {
+    if (SN) {
+      const c = cx, y = SY(s.y), D = 84 * U * (s.eat > 0 ? 1 + Math.sin(s.eat * 20) * .06 : 1), f = SPR[(((s.ph / (Math.PI * 2)) % 1 + 1) % 1 * SN | 0) % SN];
+      c.save(); c.globalAlpha = s.fade; c.translate(s.x, y); c.rotate(s.a + Math.PI / 2 + (s.st === 'tang' ? Math.sin(s.ph * .7) * .35 : 0)); c.drawImage(f, -D / 2, -D / 2, D, D); c.restore();
+      if (s.st === 'tang') { const k = (t * 3) % 1; c.strokeStyle = `rgba(255,120,90,${(1 - k).toFixed(2)})`; c.lineWidth = 3 * U; c.beginPath(); c.arc(s.x, y, (18 + k * 14) * U, 0, Math.PI * 2); c.stroke(); }
+      return;
+    }
     const c = cx, y = SY(s.y), z = U * 1.3 * (s.eat > 0 ? 1 + Math.sin(s.eat * 20) * .06 : 1), fl = Math.sin(s.ph);
     c.save(); c.globalAlpha = s.fade; c.translate(s.x, y); c.rotate(s.a + Math.PI / 2); c.scale(z, z);
     c.lineWidth = 1.6; c.strokeStyle = '#2f5a2c';
@@ -205,14 +246,15 @@ function swimFrenzy(opt) {
   }
   function result() {
     if (shown) return; shown = true; slow = 1; cap.classList.remove('on');
-    const reached = school.filter((s) => s.st !== 'lost').length, shells = Math.min(6, cleared / 2 | 0) + (!skipped && tangles === 0 ? 2 : 0);
-    PROG.shells = (PROG.shells || 0) + shells; PROG.swimSeen = 1; saveProg(); ui.fact('sea');
-    track('swim_end', { n: opt.n, reached, cleared, tangles, shells, skipped, t: Math.round(t) });
+    const reached = school.filter((s) => s.st !== 'lost').length, shells = Math.min(6, cleared / 2 | 0) + (!skipped && tangles === 0 ? 2 : 0), boosts = earned;
+    PROG.shells = (PROG.shells || 0) + shells; PROG.boosts = (PROG.boosts || 0) + boosts; PROG.swimSeen = 1; saveProg(); ui.fact('sea');
+    track('swim_end', { n: opt.n, reached, cleared, tangles, shells, boosts, skipped, t: Math.round(t) });
     const v = document.createElement('div'); v.className = 'veil';
     v.innerHTML = `<div class="card"><div class="ribbon">Out to sea!</div><div class="inner">
       <div class="res"><div class="tu">${ICON.turtle(skinNow)}</div><div><div class="big"><b>0</b><span> / ${opt.n}</span></div><div class="lbl">reached the open sea</div></div></div>
       <div class="srow"><div class="stat">${ICON.bin}<span>${cleared} plastic cleared</span></div><div class="stat sh">${ICON.shell}<span>+<b>0</b></span></div></div>
       ${!skipped && tangles === 0 ? `<div class="bonus met">${ICON.check}<span>Nobody got tangled</span><b>+2</b></div>` : ''}
+      ${boosts ? `<div class="reward pop-in" style="animation-delay:.7s"><div class="rc">${ICON.bolt}</div><div><b>+${boosts} boost${boosts > 1 ? 's' : ''} saved</b><span>On any level, tap the glowing boost button to use it</span></div></div>` : `<div class="goal">${ICON.bolt}Clear ${SW_GOAL[0]} pieces next time to win a boost</div>`}
       ${fieldNote(FACTCARD.sea)}
       <div class="btns"><button class="b-green hero pop-in" id="swc" style="animation-delay:.35s">${ICON.play}Continue</button></div></div></div>`;
     el.appendChild(v); countUp(v.querySelector('.big b'), reached, 600); if (shells) setTimeout(() => { countUp(v.querySelector('.stat.sh b'), shells, 500); sfx.coin(); }, 600);

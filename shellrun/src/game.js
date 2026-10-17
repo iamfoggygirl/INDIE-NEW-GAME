@@ -102,13 +102,15 @@ function dailySpec(i) {
 const isDaily = (i) => i >= 100000;
 const BIN_CAP = 6;
 const POWERS = ['clean', 'surge', 'ranger', 'flip'];
+/* what each boost does, in a few words: shown the first time it is ready, on the level card and in the guide */
+const BOOST_INFO = { clean: ['Beach clean', 'Clears every bit of litter at once'], surge: ['Moon rush', 'Your hatchlings hurry to the sea'], ranger: ['Ranger patrol', 'A ranger chases off crabs and switches lights off'], flip: ['Flip guard', 'Flipped hatchlings right themselves'] };
 
 /* ---------- state ---------- */
 let night = 0, crew = 0, carry = 0, spec = INTRO[0], attract = false, paused = false, charge = 0, powerReady = false, powerKind = null, surgeT = 0, rangerT = 0, introT = 0, introMax = 1, rainT = 0, boltT = 9, bolt = 0;
 const season = { met: 0, saved: 0, spawned: 0, binned: 0 };
 let T = [], litter = [], rocks = [], crabs = [], gulls = [], tourists = [], logs = [], nests = [], balls = [], lamps = [], dogs = [], pickups = [];
 const wave = { st: 'off', t: 0, front: SHORE_Z, crestZ: SHORE_Z - 7, reach: 2.6, k: 0, ck: 0, tideT: 0, at: [], done: [], big: false };
-let playHold = false, heatK = 0, flipGuardT = 0, goldIdx = -1, goldSaved = false, lvSp = 0, lvBin = 0, maxCombo = 0, bites = 0, grabs = 0, pickN = 0, pickCool = 0, shellsGot = 0, goal = null, lastHit = { x: 0, z: 0 };
+let volT = 12, playHold = false, heatK = 0, flipGuardT = 0, goldIdx = -1, goldSaved = false, lvSp = 0, lvBin = 0, maxCombo = 0, bites = 0, grabs = 0, pickN = 0, pickCool = 0, shellsGot = 0, goal = null, lastHit = { x: 0, z: 0 };
 let spawnLeft = 0, spawnT = 0, safeN = 0, lostN = 0, total = 0, binnedN = 0, running = false, ended = false, time = 0, nightT = 0, windLeft = 0, windT = 0;
 let evDone = [], lastTapT = 0, idleHeartT = 8, dangerOn = false, dangerT = 0, passed = false, taught = {}, hand = null, combo = 0, comboT = 0, comboKind = 'tidy', slow = 1, slowT = 0, freeze = 0, lastOne = false, tidyNow = 0;
 const surfLog = [];
@@ -148,7 +150,7 @@ function freeSpot(minD, zmin, zmax, L) {
   return [rnd(-3.5, 3.5), rnd(zmin, zmax)];
 }
 function startNight(i) {
-  clearNight(); night = i; const L = spec = levelSpec(i); ended = false; applyLook(L.mood, L.terrain); powerKind = i >= 2 ? POWERS[i % 4] : null; charge = powerKind ? .25 : 0; powerReady = false; surgeT = rangerT = 0; paused = false; if (vol.st === 'patrol') { vol.st = 'idle'; vol.g.visible = false; }
+  clearNight(); night = i; const L = spec = levelSpec(i); ended = false; applyLook(L.mood, L.terrain); powerKind = i >= 2 ? POWERS[i % 4] : null; charge = powerKind ? .25 + perk('hatch') * .12 : 0; volT = 12; powerReady = false; surgeT = rangerT = 0; paused = false; if (vol.st === 'patrol') { vol.st = 'idle'; vol.g.visible = false; }
   introMax = introT = attract ? 0 : (i === 0 ? 1.5 : 1.1); evDone = []; lastTapT = 0; idleHeartT = 8; dangerOn = false; passed = false; ui.danger(false); rainT = 4; boltT = rnd(5, 9);
   total = L.fresh; season.met += L.fresh; spawnLeft = total; spawnT = attract ? .9 : (i === 0 ? 1.6 : 1.1); safeN = 0; lostN = 0; binnedN = 0; running = true; nightT = 0; lastOne = false; combo = 0; slow = 1; hand = null;
   windLeft = L.wind || 0; windT = 4; streamG.visible = !!L.stream;
@@ -282,7 +284,7 @@ function surfaceTap(px, py) {
 }
 function addCharge(v) {
   if (!powerKind || powerReady) return; charge = Math.min(1, charge + v);
-  if (charge >= 1) { powerReady = true; sfx.ready(); if (!taught.power) { taught.power = 1; ui.cap('Boost ready! Tap the glowing button', 3.2); } }
+  if (charge >= 1) { powerReady = true; sfx.ready(); const bi = BOOST_INFO[powerKind], bs = PROG.bseen || (PROG.bseen = {}); if (bi && !bs[powerKind] && !attract) { bs[powerKind] = 1; saveProg(); taught.power = 1; ui.cap(`${bi[0]} ready! ${bi[1]}. Tap the glowing button`, 4); } else if (!taught.power) { taught.power = 1; ui.cap('Boost ready! Tap the glowing button', 3.2); } }
   ui.power();
 }
 function usePower() {
@@ -336,13 +338,24 @@ function firePower(kind) {
     let n = 0; for (const l of litter.slice()) if (l.st === 'lie' || l.st === 'drift' || l.st === 'tangle') { setTimeout(() => { if (l.st !== 'fly' && l.st !== 'binned' && l.st !== 'filled') toss(l); }, n * 70); n++; }
     for (const r of rocks) if (r.st === 'idle') { if (r.net) { r.hp = 1; netTap(r); } else if (r.castle) { r.st = 'crumble'; r.ct = 0; } else { r.st = 'roll'; r.vx = (r.x < 0 ? -1 : 1) * 8.5; r.vy = 3; } burst3(r.x, .4, r.z, ['#e2c27c', '#fff1d0'], 14); }
     ui.cap('Beach clean!', 1.8);
-  } else if (kind === 'surge') { surgeT = 6.5; ui.cap(sunny() ? 'Sun rush! They hurry home' : 'Moon rush! They hurry home', 1.8); }
-  else if (kind === 'flip') { flipGuardT = 9; for (const t of T) if (t.st === 'flip') { t.st = 'walk'; t.flipT = 0; t.pop = 1; } ui.cap('Flip guard! They right themselves', 1.8); }
-  else { rangerT = 9; vol.st = 'patrol'; vol.x = 8.5; vol.z = NEST_Z - 3.2; vol.dir = -1; vol.g.visible = true; for (const lp of lamps) if (lp.on) lampOff(lp); ui.cap('Ranger on patrol!', 1.8); }
+  } else if (kind === 'surge') { surgeT = 6.5 * boostLen(); ui.cap(sunny() ? 'Sun rush! They hurry home' : 'Moon rush! They hurry home', 1.8); }
+  else if (kind === 'flip') { flipGuardT = 9 * boostLen(); for (const t of T) if (t.st === 'flip') { t.st = 'walk'; t.flipT = 0; t.pop = 1; } ui.cap('Flip guard! They right themselves', 1.8); }
+  else { rangerT = 9 * boostLen(); vol.st = 'patrol'; vol.x = 8.5; vol.z = NEST_Z - 3.2; vol.dir = -1; vol.g.visible = true; for (const lp of lamps) if (lp.on) lampOff(lp); ui.cap('Ranger on patrol!', 1.8); }
   ui.power();
 }
 /* juice: the removed thing pops white, and any turtle it was blocking does a happy hop (visual only) */
 function cheer(o) { ui.fx('hit', o.x, .25, o.z); for (const t of T) if (t.block === o && t.st === 'walk' && t.hop <= 0) { t.hop = 1; t.look = .5; } }
+const boostLen = () => 1 + perk('tower') * .15;
+/* Volunteer hut (Sanctuary): now and then a volunteer bins one piece of litter, the one closest to the turtles */
+function volunteer(dt) {
+  const n = perk('vol'); if (!n || !running || ended) return;
+  if ((volT -= dt) > 0) return; volT = [0, 26, 21, 16][n];
+  let best = null, bd = 1e9;
+  for (const l of litter) if (l.st === 'lie' && !l.hole) { let d = 9; for (const t of T) if (t.st === 'walk' || t.st === 'tangle') d = Math.min(d, Math.hypot(t.x - l.x, t.z - l.z)); if (d < bd) { bd = d; best = l; } }
+  if (!best) { volT = 3; return; }
+  const c0 = combo, c1 = comboT; toss(best); combo = c0; comboT = c1;
+  ui.float(best.x, .9, best.z, 'Volunteer!'); ui.fx && ui.fx('sparkle', best.x, .5, best.z); track('volunteer', { lv: night + 1 });
+}
 function toss(l) {
   if (!l || l.st === 'fly' || l.st === 'binned' || l.st === 'filled') return;
   if (l.hole) { fillHole(l); return; }
@@ -372,7 +385,7 @@ function update(dt) {
     if ((boltT -= dt) <= 0) { boltT = rnd(9, 16); bolt = 1; setTimeout(() => sfx.thunder(), 380 + Math.random() * 500); }
   }
   if (bolt > 0) bolt = Math.max(0, bolt - dt * 2.4);
-  if (surgeT > 0) surgeT -= dt; if (flipGuardT > 0) flipGuardT -= dt; if (pickCool > 0) pickCool -= dt;
+  if (surgeT > 0) surgeT -= dt; if (flipGuardT > 0) flipGuardT -= dt; volunteer(dt); if (pickCool > 0) pickCool -= dt;
   updateWave(dt); updateLamps(dt); updateDogs(dt);
   for (let i = pickups.length - 1; i >= 0; i--) { const p = pickups[i]; p.t += dt; if (p.t > p.life) { pickups.splice(i, 1); if (hand && hand.o === p) { hand = null; ui.capOff(); } } }
   if (L.heat && running && !attract) { const h0 = heatK; heatK = clamp((nightT - 8) / 38, 0, 1); if (h0 < .45 && heatK >= .45 && !hand) ui.cap('The sand is heating up. Hurry!', 2); sunRise(heatK); }
@@ -407,7 +420,15 @@ function update(dt) {
       const sp = t.sp * rush * (lured ? .55 : 1) * (inStream ? .55 : 1) * (surgeT > 0 ? 1.75 : 1) * (1 - .32 * heatK) * (LK.glow ? 1.12 : 1) * (t.tumble > 0 ? .3 : 1);
       let vx = dx / d * sp, vz = dz / d * sp;
       if (inStream) vx += .55;
-      for (const o of T) if (o !== t && (o.st === 'walk' || o.st === 'flip' || o.st === 'tangle')) { const ox = t.x - o.x, oz = t.z - o.z, od = Math.hypot(ox, oz); if (od > 0 && od < .66) { vx += ox / od * .9; vz += oz / od * .35; } }
+      // personal space: a soft push that fades in as two hatchlings get close (no snapping), and the one behind gives way
+      let px = 0, pz = 0;
+      for (const o of T) if (o !== t && (o.st === 'walk' || o.st === 'flip' || o.st === 'tangle')) {
+        let ox = t.x - o.x, oz = t.z - o.z, od = Math.hypot(ox, oz);
+        if (od < .74) { if (od < .001) { ox = t.ph > o.ph ? 1 : -1; oz = 0; od = 1; } const k = 1 - Math.min(od, .74) / .74, f = k * 1.1 + k * k * 4.4, yieldK = o.z < t.z ? 1.25 : (o.st === 'walk' ? .5 : 1.1); px += ox / od * f * yieldK; pz += oz / od * f * .4 * yieldK; }
+      }
+      const pm = Math.hypot(px, pz), pmax = sp * 1.4; if (pm > pmax) { px *= pmax / pm; pz *= pmax / pm; }
+      t.px = (t.px || 0) + (px - (t.px || 0)) * Math.min(1, dt * 12); t.pz = (t.pz || 0) + (pz - (t.pz || 0)) * Math.min(1, dt * 12);
+      vx += t.px; vz += t.pz;
       const nx = t.x + vx * dt, nz = t.z + vz * dt; let blk = null;
       for (const r of rocks) if (r.st === 'idle' && d2(nx, nz, r.x, r.z) < r.r + .22 && t.z > r.z - .1) blk = r;
       for (const l of litter) if (l.st === 'lie') { const dd = d2(nx, nz, l.x, l.z); if (l.tang && (l.rw ? Math.abs(nx - l.x) < l.rw && Math.abs(nz - l.z) < .28 : dd < .38)) { tangle(t, l); break; } if (!l.tang && dd < l.r + .2 && t.z > l.z - .1) blk = l; }
@@ -419,7 +440,9 @@ function update(dt) {
         t.blockT = (t.blockT || 0) + dt;
         if (t.blockT > 3.2 && !blk.w) { const side = Math.sign(t.x - blk.x) || (Math.random() < .5 ? -1 : 1); t.tx = clamp(blk.x + side * ((blk.r || .4) + .75), -3.9, 3.9); t.x += side * .12; t.blockT = 0; }   // after a while it finds its own way around
         if (t.stuck > .35) teachBlock(blk, t);
-      } else { t.stuck = 0; t.block = null; t.x = nx; t.z = nz; t.hd = Math.atan2(vx, vz); if (Math.random() < dt * .2) sfx.squeak(); if ((t.printT -= dt) <= 0) { t.printT = .17; t.step *= -1; const px = Math.cos(t.hd) * .14 * t.step, pz = -Math.sin(t.hd) * .14 * t.step; addPrint(t.x + px, t.z + pz, t.hd); } }
+      } else { t.stuck = 0; t.block = null; t.x = nx; t.z = nz; { let da = Math.atan2(vx, vz) - t.hd; while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2; t.hd += da * Math.min(1, dt * 7); } if (Math.random() < dt * .2) sfx.squeak(); if ((t.printT -= dt) <= 0) { t.printT = .17; t.step *= -1; const px = Math.cos(t.hd) * .14 * t.step, pz = -Math.sin(t.hd) * .14 * t.step; addPrint(t.x + px, t.z + pz, t.hd); } }
+      // shells never sink into each other, even in a queue behind a rock
+      for (const o of T) if (o !== t && o.st === 'walk') { const ox = t.x - o.x, oz = t.z - o.z, od = Math.hypot(ox, oz); if (od > .001 && od < .34) { const c = (.34 - od) * .5 / od; t.x += ox * c; t.z += oz * c * .6; } }
       if (t.x < -5.3 || t.x > 5.3) loseTurtle(t, 'Lost its way');
       if (t.st === 'walk' && t.z <= shore(t.x, time) + .1) reachSea(t);
     } else if (t.st === 'flip' || t.st === 'tangle') { t.flipT -= dt; if (t.flipT <= 0) loseTurtle(t, t.st === 'tangle' ? 'Tangled' : 'Stranded'); }
@@ -527,8 +550,8 @@ function teachBlock(blk, t) {
   else if (blk.umb && !taught.umb) { taught.umb = 1; hand = { o: blk, y: 1.2, kind: 'rock' }; ui.cap('Fold the umbrella!', 99); }
   else if (rocks.includes(blk) && !blk.castle && !taught.rock) { taught.rock = 1; hand = { o: blk, y: .2, kind: 'rock' }; ui.cap('Kick the rock away!', 99); }
 }
-function tangle(t, l) { t.st = 'tangle'; t.flipT = 5.5; t.tang = l; l.st = 'tangle'; l.t = t; sfx.uhoh(); burst3(t.x, .1, t.z, ['#e9d3a6'], 6); if (!taught.tangle) { taught.tangle = 1; hand = { o: t, y: .25, kind: 'tangle' }; ui.cap('Tap to free it!', 99); } }
-function flip(t) { if (t.st === 'flip') return; if (flipGuardT > 0) { t.pop = 1; t.hop = 1; ui.float(t.x, .8, t.z, 'Boing!'); sfx.boop(); return; } t.st = 'flip'; t.flipT = 5; sfx.uhoh(); burst3(t.x, .1, t.z, ['#e9d3a6'], 6); if (!taught.flip) { taught.flip = 1; hand = { o: t, y: .25, kind: 'flip' }; ui.cap('Tap to flip it back!', 99); } }
+function tangle(t, l) { t.st = 'tangle'; t.flipT = 5.5 * (1 + perk('vet') * .2); t.tang = l; l.st = 'tangle'; l.t = t; sfx.uhoh(); burst3(t.x, .1, t.z, ['#e9d3a6'], 6); if (!taught.tangle) { taught.tangle = 1; hand = { o: t, y: .25, kind: 'tangle' }; ui.cap('Tap to free it!', 99); } }
+function flip(t) { if (t.st === 'flip') return; if (flipGuardT > 0) { t.pop = 1; t.hop = 1; ui.float(t.x, .8, t.z, 'Boing!'); sfx.boop(); return; } t.st = 'flip'; t.flipT = 5 * (1 + perk('vet') * .2); sfx.uhoh(); burst3(t.x, .1, t.z, ['#e9d3a6'], 6); if (!taught.flip) { taught.flip = 1; hand = { o: t, y: .25, kind: 'flip' }; ui.cap('Tap to flip it back!', 99); } }
 function reachSea(t) { t.st = 'swim'; t.safe = true; safeN++; if (t.helped && !attract) { ui.fx('heart', t.x, .9, t.z); buzz([8, 40, 8]); }
   if (t.gold && !attract) { goldSaved = true; shellsGot += 3; sfx.gold(); ui.float(t.x, 1.2, t.z, 'Golden! +3 shells'); for (let i = 0; i < 3; i++) ui.fx('sparkle', t.x + rnd(-.4, .4), .5, t.z); burst3(t.x, .3, t.z, ['#ffd23f', '#fff3c4', '#ffffff'], 22, { up: 1.6 }); if (night >= 3) dropPickup(t.x, SHORE_Z + 2.6); } if (!attract && !passed && safeN >= Math.ceil(total * .7)) { passed = true; sfx.ready(); if (!hand) ui.cap('Level passed! Save them all for 3 stars', 2.4); } if (!attract) PROG.saved++; season.saved++; ui.hud('safe'); sfx.safe(safeN); burst3(t.x, .1, t.z, ['#eaf7ff', '#bfe8e0', '#ffffff'], 14); ui.fx('splash', t.x, 0, t.z); ui.float(t.x, .5, t.z, '+1'); }
 function loseTurtle(t, why) {
