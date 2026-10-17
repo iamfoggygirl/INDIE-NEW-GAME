@@ -19,7 +19,7 @@ if (PLAY) (function () {
   const st0 = $('#start'); if (st0) st0.remove();
   started = true; attract = false; Object.assign(season, { met: 0, saved: 0, spawned: 0, binned: 0 });
   let stage = 'hook', tStage = 0, tAll = 0, firstTap = false, hookT = null, cardShown = false, idle = 0;
-  const brand = document.createElement('div'); brand.className = 'pbrand'; brand.innerHTML = `${TURT('classic')}<span>Shell Run</span>`; app.appendChild(brand);
+  const brand = document.createElement('div'); brand.className = 'pbrand'; brand.innerHTML = `<img src="${LOGO_SRC}" alt="Shell Run">`; app.appendChild(brand);
   const cta = document.createElement('button'); cta.className = 'b-green pcta'; cta.innerHTML = 'Get it free'; cta.onclick = (e) => { e.stopPropagation(); triggerAdCTA('pill'); }; app.appendChild(cta);
   const release = (k, spawnGap) => { for (let i = 0; i < k; i++) nests[i % nests.length].left++; spawnLeft += k; spec.spawn = spawnGap; spawnT = Math.min(spawnT, .2); };
   const start = () => {
@@ -72,7 +72,7 @@ if (PLAY) (function () {
     setTimeout(() => {
       const v = document.createElement('div'); v.className = 'veil pend';
       v.innerHTML = `<div class="card"><div class="stars"><div class="glow"></div>${[0, 1, 2].map((i) => i < (safeN >= total - 1 ? 3 : safeN >= total * .8 ? 2 : 1) ? ICON.star : ICON.starOff).join('')}</div><div class="ribbon">You saved ${safeN}!</div><div class="inner">
-        <div class="ptop">${TURT('classic')}${TURT('gold', { shine: 1 })}${TURT('classic')}</div>
+        <div class="ptop"><img src="${LOGO_SRC}" alt="Shell Run"></div>
         <div class="ptitle">A whole coast is waiting</div>
         <div class="goal">100 beaches · crabs, gulls, waves and storms · real turtle facts</div>
         <div class="btns"><button class="b-green hero pcta2" id="pg">${ICON.play}Play Shell Run · Free</button><button class="b-navy" id="pr">${ICON.retry}Replay</button></div></div></div>`;

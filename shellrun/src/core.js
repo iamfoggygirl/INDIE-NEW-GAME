@@ -1,3 +1,5 @@
+const LOGO_SRC = '%%LOGO%%';
+{ const l = document.getElementById('loadLogo'); if (l) l.src = LOGO_SRC; }
 /* ===================== CORE: helpers, palette, audio, renderer, curved world ===================== */
 const $ = (s) => document.querySelector(s);
 if (!self.THREE) { $('#load').textContent = 'Could not load 3D. Check your connection and reload.'; return; }

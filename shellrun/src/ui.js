@@ -327,7 +327,7 @@ function endNight() {
     : `<div class="chp"><div class="chp-t"><span>${chapterOf(night).split(' · ')[0]}</span><b>${dn}/10</b></div><div class="chp-b"><div class="seg">${Array.from({ length: 10 }, (_, k) => `<i class="${k < dn ? 'on' : ''}${k === dn - 1 && night % 10 === dn - 1 ? ' new' : ''}"></i>`).join('')}</div><div class="cico ${left <= 2 ? 'near' : ''}">${PROG.chests[ch] ? ICON.chestOpen : ICON.chest}</div></div><div class="chp-s">${PROG.chests[ch] ? `${ICON.star}<b>${starTotal()}</b> stars · next: <b>${chapterOf(nextCh).split(' · ')[0]}</b>` : `${left} more level${left > 1 ? 's' : ''} to open the chest`}</div></div>`;
   const fact = FACTCARD[levelFacts[levelFacts.length - 1]] || L.fact;
   const btns = pass
-    ? `<button class="b-green hero pop-in" id="next" style="animation-delay:.35s">${ICON.play}${daily || last ? 'Level map' : 'Next level'}</button>
+    ? `<button class="b-green hero pop-in" id="next" style="animation-delay:.35s">${ICON.play}${daily || last ? 'Level map' : 'Continue'}</button>
        ${canBring && stars < 3 ? `<button class="b-teal" id="bring">${ICON.ad}Bring back ${back} · video</button>` : ''}
        <div class="duo"><button class="b-navy" id="retry">${ICON.retry}Play again</button><button class="b-navy" id="maps">${ICON.map}Map</button></div>`
     : `<button class="b-green hero pop-in" id="retry" style="animation-delay:.3s">${ICON.retry}Try again</button>
@@ -350,10 +350,29 @@ function endNight() {
   card.addEventListener('pointerdown', () => card.classList.add('skip'), { once: true });
   const b = v.querySelector('#bring');
   if (b) b.onclick = () => { b.disabled = true; Ads.rewarded('bring_back', () => { rewardUsed = true; safeN += back; lostN -= back; season.saved += back; v.remove(); endNight(); }); setTimeout(() => { b.disabled = false; }, 4000); };
+  const W = pass && !daily ? { i: night, prev, stars } : null, bonus = pass && !daily && prev === 0 && (night + 1) % 5 === 0;
+  const proceed = (ad) => { const toMap = () => showMap(W ? { won: W } : null); const go = () => (bonus ? wipe(() => swimFrenzy({ n: Math.max(3, Math.min(12, safeN)), onDone: toMap })) : wipe(toMap)); if (ad && night >= 5 && wins % 3 === 0) Ads.interstitial('level_end', go); else go(); };
   const nx = v.querySelector('#next');
-  if (nx) nx.onclick = () => { au(); dismiss(v); rewardUsed = false; wins++; if (daily || last) { showMap(); return; } const go = () => begin(night + 1); if (night >= 5 && wins % 3 === 0) Ads.interstitial('level_end', go); else go(); };
+  if (nx) nx.onclick = () => { au(); dismiss(v); rewardUsed = false; wins++; proceed(true); };
   v.querySelector('#retry').onclick = () => { au(); dismiss(v); rewardUsed = false; Object.assign(season, snap.season); begin(night); };
-  v.querySelector('#maps').onclick = () => { au(); dismiss(v); rewardUsed = false; showMap(); };
+  v.querySelector('#maps').onclick = () => { au(); dismiss(v); rewardUsed = false; if (pass) proceed(false); else showMap(); };
+}
+// level card (Candy Crush style): opens after the map walk, or when you tap a level
+function lvCard(i, play) {
+  const L = levelSpec(i), best = PROG.best[i] || 0, hz = HAZ(i);
+  const v = document.createElement('div'); v.className = 'veil lvc'; v.style.zIndex = 13;
+  v.innerHTML = `<div class="card"><div class="ribbon">Level ${i + 1}</div><div class="inner"><div class="lvn">${hz ? `<i>${hz}</i>` : ''}<b>${L.name || chapterOf(i).split(' · ')[0]}</b></div><div class="lvs">${[0, 1, 2].map((s) => (s < best ? ICON.star : ICON.starOff)).join('')}</div><div class="btns"><button class="b-green hero" id="lvp">${ICON.play}Play</button><button class="b-navy" id="lvx">${ICON.map}Map</button></div></div></div>`;
+  $('#app').appendChild(v); tone(note(6), .07, 'triangle', .05);
+  v.querySelector('#lvx').onclick = () => { au(); dismiss(v); };
+  v.addEventListener('pointerdown', (e) => { if (e.target === v) dismiss(v); });
+  v.querySelector('#lvp').onclick = () => { dismiss(v); play(i); };
+}
+// a wave sweeps across the screen; the next screen is swapped in while it covers everything
+function wipe(mid) {
+  const w = document.createElement('div'); w.className = 'wwipe'; $('#app').appendChild(w);
+  noise(.7, .07, 650, 0, .6); setTimeout(() => noise(.5, .05, 1200, 0, .8), 380); buzz(10);
+  setTimeout(() => { try { mid && mid(); } catch (e) { console.error(e); } }, 440);
+  setTimeout(() => w.remove(), 1100);
 }
 function begin(i) { snap = { season: { ...season } }; bin.n = 0; for (const m of bin.pile.children) m.visible = false; startNight(i); if (!attract && i >= 0) track('level_start', { lv: isDaily(i) ? 'daily' : i + 1 }); }
 
@@ -391,6 +410,12 @@ const MAPDRAW = {
   drift(x, y, s, r) { return `<g transform="rotate(${r} ${x} ${y})">${MAPDRAW.shadow(x + 3, y + 4, 22 * s, 4 * s)}<rect x="${x - 22 * s}" y="${y - 3.5 * s}" width="${44 * s}" height="${7 * s}" rx="${3.5 * s}" fill="#9a7048"/><rect x="${x - 22 * s}" y="${y - 3.5 * s}" width="${44 * s}" height="${2.5 * s}" rx="${1.2 * s}" fill="#b98a5c"/><path d="M${x + 6 * s} ${y - 3 * s}l${8 * s} ${-9 * s}" stroke="#8a6040" stroke-width="${3.4 * s}" stroke-linecap="round"/></g>`; },
   bottle(x, y, s, r) { return `<g transform="rotate(${r} ${x} ${y})"><rect x="${x - 7 * s}" y="${y - 3 * s}" width="${14 * s}" height="${6 * s}" rx="${3 * s}" fill="#3a8fe0"/><rect x="${x + 6 * s}" y="${y - 1.6 * s}" width="${4 * s}" height="${3.2 * s}" fill="#1f5fae"/><rect x="${x - 3 * s}" y="${y - 3 * s}" width="${5 * s}" height="${6 * s}" fill="#fff4d6" opacity=".9"/></g>`; },
   flower(x, y, s, c) { return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${s.toFixed(2)})"><path d="M0 4v6" stroke="#3f8a2c" stroke-width="1.6"/><circle r="2.6" cx="0" cy="-2.4" fill="${c}"/><circle r="2.6" cx="2.3" cy="-.6" fill="${c}"/><circle r="2.6" cx="1.4" cy="2" fill="${c}"/><circle r="2.6" cx="-1.4" cy="2" fill="${c}"/><circle r="2.6" cx="-2.3" cy="-.6" fill="${c}"/><circle r="1.3" fill="#ffd23f"/></g>`; },
+  // the start of the journey: the nest the hatchlings come from, and a wooden sign
+  nest(x, y) {
+    const eggs = [[-17, -6], [-5, -10], [8, -8], [18, -3], [-9, 0], [4, -1], [-1, -5]];
+    return `${MAPDRAW.shadow(x + 8, y + 12, 70, 16)}<ellipse cx="${x}" cy="${y + 2}" rx="62" ry="24" fill="#c99a5c"/><ellipse cx="${x}" cy="${y - 2}" rx="52" ry="18" fill="#e7c487"/><ellipse cx="${x}" cy="${y - 3}" rx="38" ry="12" fill="#a67c46" opacity=".5"/>${eggs.map(([dx, dy]) => `<ellipse cx="${x + dx}" cy="${y + dy}" rx="7.5" ry="9" fill="#fffaf0" stroke="#d9c9a8" stroke-width="1"/><ellipse cx="${x + dx - 2.4}" cy="${y + dy - 3.4}" rx="2.2" ry="2.8" fill="#fff"/>`).join('')}<g class="peep"><ellipse cx="${x + 36}" cy="${y - 6}" rx="9" ry="11" fill="#4d7a40"/><ellipse cx="${x + 36}" cy="${y - 7}" rx="6" ry="7.5" fill="#6fb04a"/><circle cx="${x + 36}" cy="${y - 20}" r="5" fill="#86c75a"/><circle cx="${x + 34.2}" cy="${y - 21}" r="1.2" fill="#14161c"/><circle cx="${x + 37.8}" cy="${y - 21}" r="1.2" fill="#14161c"/></g>`;
+  },
+  sign(x, y) { return `${MAPDRAW.shadow(x + 6, y + 3, 18, 5)}<rect x="${x - 3}" y="${y - 40}" width="6" height="42" rx="2" fill="#7a4e28"/><rect x="${x - 34}" y="${y - 60}" width="68" height="27" rx="7" fill="#b9864f" stroke="#6a4424" stroke-width="3"/><rect x="${x - 30}" y="${y - 57}" width="60" height="5" rx="2.5" fill="#d4a06a"/><text x="${x}" y="${y - 40}" text-anchor="middle" font-family="Lilita One, Fredoka, sans-serif" font-size="15" fill="#fff4d6" stroke="#4a2c14" stroke-width="3" paint-order="stroke">START</text>`; },
   // heroes: one or two per chapter, big, hand placed on the side with room
   lighthouse(x, y, s) { return `${MAPDRAW.shadow(x + 26 * s, y + 4, 44 * s, 12 * s)}<ellipse cx="${x}" cy="${y}" rx="${28 * s}" ry="${10 * s}" fill="#b9b2a6"/><rect x="${x + 6 * s}" y="${y - 20 * s}" width="${30 * s}" height="${20 * s}" fill="#f2ead8"/><path d="M${x + 2 * s} ${y - 18 * s}L${x + 21 * s} ${y - 32 * s}L${x + 40 * s} ${y - 18 * s}z" fill="#d8453a"/><path d="M${x - 13 * s} ${y}L${x - 9 * s} ${y - 78 * s}H${x + 9 * s}L${x + 13 * s} ${y}z" fill="#fbf4e4"/><path d="M${x + 1 * s} ${y}L${x + 3 * s} ${y - 78 * s}H${x + 9 * s}L${x + 13 * s} ${y}z" fill="#e2d6be"/><path d="M${x - 12 * s} ${y - 18 * s}H${x + 12 * s}L${x + 11.5 * s} ${y - 30 * s}H${x - 11.5 * s}z" fill="#e5533a"/><path d="M${x - 10.4 * s} ${y - 50 * s}H${x + 10.4 * s}L${x + 10 * s} ${y - 60 * s}H${x - 10 * s}z" fill="#e5533a"/><rect x="${x - 13 * s}" y="${y - 82 * s}" width="${26 * s}" height="${5 * s}" rx="${2 * s}" fill="#24304a"/><rect x="${x - 8 * s}" y="${y - 96 * s}" width="${16 * s}" height="${14 * s}" fill="#ffe48a"/><path d="M${x - 11 * s} ${y - 96 * s}H${x + 11 * s}L${x} ${y - 110 * s}z" fill="#24304a"/><circle cx="${x}" cy="${y - 89 * s}" r="${16 * s}" fill="#fff3b0" opacity=".45" class="lamp"/><path class="beam" d="M${x} ${y - 89 * s}L${x + 150 * s} ${y - 120 * s}V${y - 58 * s}z" fill="#fff6c8" opacity=".22" style="transform-origin:${x}px ${y - 89 * s}px"/></g>`.replace('</g>', ''); },
   dock(x, y, s, dir) { const L = 80 * s * dir; return `${MAPDRAW.shadow(x + L / 2 + 6, y + 10 * s, Math.abs(L) / 2 + 8, 6 * s)}${[0, .33, .66, 1].map((u) => `<rect x="${x + L * u - 2.5 * s}" y="${y - 2 * s}" width="${5 * s}" height="${18 * s}" fill="#5a3a20"/>`).join('')}<rect x="${Math.min(x, x + L)}" y="${y - 7 * s}" width="${Math.abs(L)}" height="${12 * s}" fill="#b9864f"/>${Array.from({ length: 9 }, (_, i) => `<path d="M${x + L * i / 8} ${y - 7 * s}v${12 * s}" stroke="#8a5e34" stroke-width="${1.2 * s}"/>`).join('')}<rect x="${Math.min(x, x + L)}" y="${y - 7 * s}" width="${Math.abs(L)}" height="${2.5 * s}" fill="#d4a06a"/>${MAPDRAW.boat(x + L + 18 * s * dir, y + 14 * s, s * .8, dir)}`; },
@@ -399,10 +424,10 @@ const MAPDRAW = {
   tower(x, y, s) { return `${MAPDRAW.shadow(x + 14 * s, y + 4, 30 * s, 8 * s)}${[-12, 12].map((dx) => `<path d="M${x + dx * s} ${y}l${-dx * .2 * s} ${-34 * s}" stroke="#7a4e28" stroke-width="${3.4 * s}"/>`).join('')}<path d="M${x - 10 * s} ${y - 8 * s}L${x + 10 * s} ${y - 24 * s}M${x + 10 * s} ${y - 8 * s}L${x - 10 * s} ${y - 24 * s}" stroke="#8a5e34" stroke-width="${2 * s}"/><rect x="${x - 17 * s}" y="${y - 52 * s}" width="${34 * s}" height="${20 * s}" fill="#d9b27c"/><rect x="${x - 11 * s}" y="${y - 47 * s}" width="${9 * s}" height="${8 * s}" fill="#24304a"/><rect x="${x + 3 * s}" y="${y - 47 * s}" width="${9 * s}" height="${8 * s}" fill="#ffe48a"/><path d="M${x - 22 * s} ${y - 50 * s}L${x} ${y - 66 * s}L${x + 22 * s} ${y - 50 * s}z" fill="#3e8a5a"/><path d="M${x + 14 * s} ${y - 58 * s}v${-14 * s}" stroke="#24304a" stroke-width="${1.6 * s}"/><path d="M${x + 14 * s} ${y - 72 * s}l${12 * s} ${4 * s}-${12 * s} ${4 * s}z" fill="#ffd23f" class="flag" style="transform-origin:${x + 14 * s}px ${y - 70 * s}px"/>`; },
   falls(x, y, s, c) { return `${MAPDRAW.rock(x - 20 * s, y - 34 * s, 1.6 * s, c)}${MAPDRAW.rock(x + 22 * s, y - 30 * s, 1.4 * s, c)}<rect x="${x - 9 * s}" y="${y - 46 * s}" width="${18 * s}" height="${44 * s}" fill="#9be8f2"/><rect class="fall" x="${x - 9 * s}" y="${y - 46 * s}" width="${18 * s}" height="${44 * s}" fill="url(#mfall)"/><ellipse cx="${x}" cy="${y}" rx="${24 * s}" ry="${9 * s}" fill="#4fd0dc"/><ellipse cx="${x}" cy="${y - 1 * s}" rx="${16 * s}" ry="${5 * s}" fill="#fff" opacity=".7"/>`; }
 };
-function showMap() {
-  running = false; if (CLEAN) $('#app').classList.add('clean');
+function showMap(opts) {
+  running = false; const W = opts && opts.won; if (CLEAN) $('#app').classList.add('clean');
   const done100 = PROG.unlocked >= LAST_LEVEL, cur = Math.min(PROG.unlocked, LAST_LEVEL - 1), curCh = cur / 10 | 0, showCh = Math.min(9, curCh + 1), N = (showCh + 1) * 10;
-  const Wd = Math.min(560, $('#app').clientWidth || 390), RH = 100, BR = 96, BOT = 170, TOPZ = 470, Ht = BOT + (N - 1) * RH + showCh * BR + TOPZ;
+  const Wd = Math.min(560, $('#app').clientWidth || 390), RH = 100, BR = 96, BOT = 360, TOPZ = 470, Ht = BOT + (N - 1) * RH + showCh * BR + TOPZ;
   const py = (i) => Ht - BOT - i * RH - (i / 10 | 0) * BR, span = Math.min(Wd - 110, 340);
   const px = (i) => Wd / 2 + (TPL[(i / 10 | 0) % TPL.length][i % 10] - .5) * span * 1.6;
   const pathX = (y) => { if (y >= py(0)) return px(0); if (y <= py(N - 1)) return px(N - 1); let i = 0; while (i < N - 1 && py(i + 1) > y) i++; const u = (py(i) - y) / (py(i) - py(i + 1)); return lerp(px(i), px(i + 1), u * u * (3 - 2 * u)); };
@@ -410,7 +435,7 @@ function showMap() {
   const bandTop = (c) => c >= showCh ? -60 : (py(c * 10 + 9) + py(c * 10 + 10)) / 2, bandBot = (c) => c === 0 ? Ht + 60 : (py(c * 10 - 1) + py(c * 10)) / 2;
   const R = srand(4242), f1 = (v) => v.toFixed(1);
   // path: Catmull-Rom through every node, from below the screen into the clouds
-  const P = [[px(0), Ht + 60], ...Array.from({ length: N }, (_, i) => [px(i), py(i)]), [px(N - 1) + 30, py(N - 1) - 260], [px(N - 1) + 40, -80]];
+  const P = [[px(0), Ht - 200], ...Array.from({ length: N }, (_, i) => [px(i), py(i)]), [px(N - 1) + 30, py(N - 1) - 260], [px(N - 1) + 40, -80]];
   let path = `M${f1(P[0][0])} ${f1(P[0][1])}`; for (let i = 0; i < P.length - 1; i++) { const a = P[Math.max(0, i - 1)], b = P[i], c = P[i + 1], d = P[Math.min(P.length - 1, i + 2)]; path += `C${f1(b[0] + (c[0] - a[0]) / 6)} ${f1(b[1] + (c[1] - a[1]) / 6)} ${f1(c[0] - (d[0] - b[0]) / 6)} ${f1(c[1] - (d[1] - b[1]) / 6)} ${f1(c[0])} ${f1(c[1])}`; }
   // land: a ribbon that follows the trail, with noisy coasts; plateau (grass) sits inside it on a rocky cliff
   const L = [], Rr = [], GL = [], GR = [];
@@ -458,6 +483,7 @@ function showMap() {
   // fences along a couple of switchbacks per chapter
   let fence = '';
   for (let i = 1; i < N - 1; i += 3) { const y0 = py(i), y1 = py(i + 1); for (const sd of [-1, 1]) { if ((i + sd) % 2) continue; let pts = []; for (let u = .15; u <= .85; u += .14) { const y = lerp(y0, y1, u), x = pathX(y) + sd * 31; pts.push([x, y]); } fence += pts.map(([x, y]) => `<rect x="${f1(x - 2)}" y="${f1(y - 11)}" width="4" height="13" rx="1.4" fill="#7a4e28"/>`).join('') + `<path d="M${pts.map(([x, y]) => `${f1(x)} ${f1(y - 8)}`).join('L')}" stroke="#a87444" stroke-width="2.6" fill="none"/>`; } }
+  { const sd = px(0) > Wd / 2 ? -1 : 1; topProps.push([Ht - 200, MAPDRAW.nest(px(0), Ht - 200)]); topProps.push([Ht - 140, MAPDRAW.sign(clamp(px(0) + sd * 96, 44, Wd - 44), Ht - 140)]); }
   const sorted = (A) => A.sort((a, b) => a[0] - b[0]).map((a) => a[1]).join('');
   // clouds: a bank over the beaches still to come, with a peek card
   const topY = py(N - 1) - 150; let bank = '';
@@ -467,7 +493,7 @@ function showMap() {
   const lockI = ICON.lock;
   let nodes = '';
   for (let i = 0; i < N; i++) {
-    const st = i < cur || (done100 && i === cur) ? 'done' : i === cur ? 'cur' : 'lock', b = PROG.best[i] || 0, big = (i + 1) % 25 === 0, boss = !big && (i + 1) % 10 === 0, hz = st !== 'done' ? HAZ(i) : null;
+    const st = i < cur || (done100 && i === cur) ? 'done' : i === cur ? 'cur' : 'lock', b = W && i === W.i ? W.prev : PROG.best[i] || 0, big = (i + 1) % 25 === 0, boss = !big && (i + 1) % 10 === 0, hz = st !== 'done' ? HAZ(i) : null;
     if (i % 10 === 0 && i > 0) nodes += `<div class="chapmark" style="top:${f1(bandBot(i / 10) - 14)}px;${pathX(bandBot(i / 10)) > Wd / 2 ? 'left:10px' : 'right:10px'}"><small>Chapter ${i / 10 + 1}</small>${chapterOf(i).split(' · ')[0]}</div>`;
     nodes += `<button class="node ${st}${big ? ' big boss' : boss ? ' boss' : ''} pre" data-i="${i}" style="left:${f1(px(i) - 32)}px;top:${f1(py(i) - 32)}px"><span>${i + 1}</span>${st === 'lock' ? `<i class="lk">${lockI}</i>` : ''}${hz ? `<i class="hz">${hz}</i>` : ''}${PROG.goals[i] ? `<i class="gk">${ICON.check}</i>` : ''}${big ? `<i class="crown">${ICON.crown}</i>` : boss ? `<i class="crown chest">${PROG.chests[i / 10 | 0] ? ICON.chestOpen : ICON.chest}</i>` : ''}<em>${st === 'done' ? [0, 1, 2].map((s) => `<i class="${s < b ? 'on' : ''}"></i>`).join('') : ''}</em></button>`;
   }
@@ -492,8 +518,11 @@ function showMap() {
   $('#app').appendChild(v);
   const sc = v.querySelector('.scroller'), me = v.querySelector('.meT'), bar = v.querySelector('#chapbar'), clouds = v.querySelector('.mclouds'), front = v.querySelector('.mfront');
   const placeMe = (i) => { me.style.left = (px(i) - 26) + 'px'; me.style.top = (py(i) - 84) + 'px'; };
-  const from = PROG.mapSeen >= 0 && PROG.mapSeen < cur ? PROG.mapSeen : cur;
-  placeMe(from); sc.scrollTop = Math.max(0, py(from) - sc.clientHeight * .58);
+  const from = W ? (cur === W.i + 1 ? W.i : cur) : PROG.mapSeen >= 0 && PROG.mapSeen < cur ? PROG.mapSeen : cur;
+  placeMe(from); sc.scrollTop = Math.max(0, py(W ? W.i : from) - sc.clientHeight * .55);
+  // a finished chapter: the new beach starts under clouds that part
+  const newCh = W && W.i % 10 === 9 && cur === W.i + 1;
+  const cover = newCh ? (() => { const d = document.createElement('div'); d.className = 'cover'; d.style.top = (bandTop(curCh) - 70) + 'px'; d.style.height = (bandBot(curCh) - bandTop(curCh) + 20) + 'px'; d.innerHTML = '<i class="cl"></i><i class="cr"></i>'; v.querySelector('.track').appendChild(d); return d; })() : null;
   let lastC = -1;
   const drawBar = () => { const mid = sc.scrollTop + sc.clientHeight * .55, c = chOf(mid), dn = chDone(c); if (c === lastC) return; if (lastC >= 0) { buzz(8); tone(note(4 + c), .06, 'triangle', .04); bar.classList.remove('swap'); void bar.offsetWidth; bar.classList.add('swap'); } lastC = c; bar.innerHTML = `<small>Chapter ${c + 1}</small><b>${chapterOf(c * 10)}</b><div class="cb"><div class="seg">${Array.from({ length: 10 }, (_, k) => `<i class="${k < dn ? 'on' : ''}"></i>`).join('')}</div><span class="cico">${PROG.chests[c] ? ICON.chestOpen : ICON.chest}</span></div>`; };
   // scroll impact: parallax clouds, foreground fronds lean with the swipe and spring back
@@ -503,19 +532,54 @@ function showMap() {
   // nodes pop in as they scroll into view (springy, staggered)
   const io = 'IntersectionObserver' in self ? new IntersectionObserver((es) => { let n = 0; for (const e of es) if (e.isIntersecting) { const el = e.target; el.style.animationDelay = (n++ * 40) + 'ms'; el.classList.remove('pre'); el.classList.add('in'); io.unobserve(el); } }, { root: sc, rootMargin: '60px 0px' }) : null;
   v.querySelectorAll('.node').forEach((n) => { if (io) io.observe(n); else n.classList.remove('pre'); });
-  if (from !== cur) {   // you unlocked something: the turtle hops there and the lock pops
-    const node = v.querySelector(`.node[data-i="${cur}"]`);
-    setTimeout(() => {
-      sc.scrollTo({ top: Math.max(0, py(cur) - sc.clientHeight * .58), behavior: 'smooth' });
-      const a = { l: px(from) - 26, t: py(from) - 84 }, b = { l: px(cur) - 26, t: py(cur) - 84 };
-      const anim = me.animate([{ left: a.l + 'px', top: a.t + 'px' }, { left: (a.l + b.l) / 2 + 'px', top: Math.min(a.t, b.t) - 46 + 'px' }, { left: b.l + 'px', top: b.t + 'px' }], { duration: 760, easing: 'cubic-bezier(.45,0,.3,1)' });
-      tone(note(5), .08, 'triangle', .05); setTimeout(() => tone(note(7), .08, 'triangle', .05), 380);
-      anim.onfinish = () => { placeMe(cur); if (node) { node.classList.add('unlocked'); sfx.ready(); buzz([14, 30, 20]); } };
-    }, 520);
+  let fast = false; const anims = [];
+  const wait = (ms) => new Promise((r) => { const t0 = performance.now(), chk = () => (fast || performance.now() - t0 >= ms ? r() : setTimeout(chk, 30)); chk(); });
+  const trail = (a, b) => { const pts = []; for (let y = py(a); y > py(b); y -= 9) pts.push([pathX(y), y]); pts.push([px(b), py(b)]); return pts; };
+  const walk = (a, b, ms) => {
+    const pts = trail(a, b), k = Math.max(1, Math.floor(pts.length / 16)), fr = pts.filter((_, j) => j % k === 0 || j === pts.length - 1).map(([x, y]) => ({ left: (x - 26) + 'px', top: (y - 84) + 'px' }));
+    // little flipper tracks appear in the sand just behind the walker
+    const ns = 'http://www.w3.org/2000/svg', g = document.createElementNS(ns, 'g'); v.querySelector('.track svg').appendChild(g);
+    pts.forEach(([x, y], j) => { if (j % 2) return; for (const sd of [-1, 1]) { const c = document.createElementNS(ns, 'ellipse'); c.setAttribute('cx', (x + sd * 7).toFixed(1)); c.setAttribute('cy', (y + sd * 2).toFixed(1)); c.setAttribute('rx', '3.2'); c.setAttribute('ry', '2'); c.setAttribute('fill', '#9a6e3a'); c.setAttribute('class', 'trk'); c.style.animationDelay = ((j / pts.length) * ms * .9 | 0) + 'ms'; g.appendChild(c); } });
+    const an = me.animate(fr, { duration: ms, easing: 'cubic-bezier(.45,0,.35,1)' }); anims.push(an);
+    return an.finished.catch(() => {}).then(() => placeMe(b));
+  };
+  if (W) {   // back from a win: stars fly in, the beach heals, the turtle walks on, the next level card opens
+    v.classList.add('celebrating');
+    const skip = () => { fast = true; anims.forEach((a) => { try { a.finish(); } catch (e) {} }); if (cover) cover.classList.add('part'); };
+    v.addEventListener('pointerdown', skip);
+    (async () => {
+      await wait(420);
+      const node = v.querySelector(`.node[data-i="${W.i}"]`);
+      if (node && W.stars > W.prev) {
+        node.classList.remove('pre'); node.classList.add('in');
+        const pips = node.querySelectorAll('em i'), ar = v.getBoundingClientRect();
+        for (let k = W.prev; k < W.stars; k++) {
+          const p = pips[k]; if (!p) continue;
+          const r = p.getBoundingClientRect(), s = document.createElement('i'); s.className = 'flystar'; s.innerHTML = ICON.star; v.appendChild(s);
+          const x0 = ar.width / 2 - 22 + (k - 1) * 58, y0 = ar.height * .2, x1 = r.left - ar.left + r.width / 2 - 22, y1 = r.top - ar.top + r.height / 2 - 22;
+          const an = s.animate([{ transform: `translate(${x0}px,${y0}px) scale(.4)`, opacity: 0 }, { transform: `translate(${x0}px,${y0}px) scale(1.5)`, opacity: 1, offset: .18 }, { transform: `translate(${(x0 + x1) / 2}px,${Math.min(y0, y1) - 70}px) scale(1.1)`, offset: .6 }, { transform: `translate(${x1}px,${y1}px) scale(.38)`, opacity: 1 }], { duration: 680, easing: 'cubic-bezier(.5,0,.4,1)', fill: 'forwards' });
+          anims.push(an); const kk = k;
+          an.finished.catch(() => {}).then(() => { s.remove(); p.classList.add('on', 'pop'); tone(note(4 + kk * 2), .3, 'triangle', .12, 0, 0, .5); buzz(14); });
+          await wait(240);
+        }
+        await wait(560); node.classList.add('healed'); sfx.chime();
+      }
+      if (cover) { sc.scrollTo({ top: Math.max(0, bandBot(curCh) - sc.clientHeight * .66), behavior: fast ? 'auto' : 'smooth' }); await wait(520); cover.classList.add('part'); sfx.win(); buzz([20, 40, 30]); ui.toast(`${ICON.map}<b>New beach: ${chapterOf(cur).split(' · ')[0]}</b>`); await wait(1150); }
+      if (from !== cur) {
+        sc.scrollTo({ top: Math.max(0, py(cur) - sc.clientHeight * .55), behavior: fast ? 'auto' : 'smooth' });
+        tone(note(5), .08, 'triangle', .05); await walk(from, cur, fast ? 180 : 1150);
+        const nn = v.querySelector(`.node[data-i="${cur}"]`); if (nn) { nn.classList.remove('pre'); nn.classList.add('in', 'unlocked'); } sfx.ready(); buzz([14, 30, 20]);
+        await wait(380);
+      }
+      v.classList.remove('celebrating'); v.removeEventListener('pointerdown', skip);
+      if (!done100 && v.isConnected && !v.classList.contains('out')) lvCard(cur, startAt);
+    })();
+  } else if (from !== cur) {   // came back with something new unlocked: the turtle walks the trail there
+    setTimeout(() => { sc.scrollTo({ top: Math.max(0, py(cur) - sc.clientHeight * .55), behavior: 'smooth' }); walk(from, cur, 1000).then(() => { const node = v.querySelector(`.node[data-i="${cur}"]`); if (node) { node.classList.add('unlocked'); sfx.ready(); buzz([14, 30, 20]); } }); }, 520);
   }
   PROG.mapSeen = cur; saveProg(); track('map_open', { lv: cur + 1 });
   const startAt = (i) => { au(); dismiss(v); $('#app').classList.add('playing'); begin(i); running = true; ui.night(); };
-  v.querySelectorAll('.node').forEach((n) => { n.onclick = () => { const i = +n.dataset.i; if (i <= cur) startAt(i); else { n.classList.remove('shake'); void n.offsetWidth; n.classList.add('shake'); sfx.uhoh(); buzz(20); ui.toast && ui.toast(`Finish level ${cur + 1} first`); } }; });
+  v.querySelectorAll('.node').forEach((n) => { n.onclick = () => { const i = +n.dataset.i; if (i <= cur) lvCard(i, startAt); else { n.classList.remove('shake'); void n.offsetWidth; n.classList.add('shake'); sfx.uhoh(); buzz(20); ui.toast && ui.toast(`Finish level ${cur + 1} first`); } }; });
   v.querySelector('#mplay').onclick = () => startAt(cur);
   v.querySelector('#mshop').onclick = () => { au(); showShop(); };
   v.querySelector('#mcrew').onclick = () => { au(); showCrew(); };
@@ -541,7 +605,7 @@ function showCrew() {
 }
 function burstUI(el) { if (!el) return; el.classList.remove('boom'); void el.offsetWidth; el.classList.add('boom'); }
 /* ---------- field guide: every fact you've met, collected ---------- */
-const GUIDE = [['litter', 'bottle', 'Beach trash'], ['castle', 'castle', 'Sandcastles'], ['crab', 'crab', 'Ghost crabs'], ['tangle', 'wind', 'Bags and lines'], ['hole', 'target', 'Holes'], ['wave', 'wave', 'The swim frenzy'], ['gull', 'gull', 'Seabirds'], ['light', 'lamp', 'Torches'], ['rain', 'rain', 'Storms'], ['chair', 'chair', 'Beach chairs'], ['lamp', 'lamp', 'Lights out'], ['gear', 'ball', 'Beach toys'], ['heat', 'sun', 'Hot sand'], ['net', 'net', 'Ghost nets'], ['dog', 'dog', 'Dogs'], ['tide', 'wave', 'King tides'], ['rut', 'rut', 'Tyre ruts'], ['moon', 'moon', 'Moonlight'], ['hands', 'heart', 'Hands off']];
+const GUIDE = [['litter', 'bottle', 'Beach trash'], ['castle', 'castle', 'Sandcastles'], ['crab', 'crab', 'Ghost crabs'], ['tangle', 'wind', 'Bags and lines'], ['hole', 'target', 'Holes'], ['wave', 'wave', 'The swim frenzy'], ['gull', 'gull', 'Seabirds'], ['light', 'lamp', 'Torches'], ['rain', 'rain', 'Storms'], ['chair', 'chair', 'Beach chairs'], ['lamp', 'lamp', 'Lights out'], ['gear', 'ball', 'Beach toys'], ['heat', 'sun', 'Hot sand'], ['net', 'net', 'Ghost nets'], ['dog', 'dog', 'Dogs'], ['tide', 'wave', 'King tides'], ['rut', 'rut', 'Tyre ruts'], ['moon', 'moon', 'Moonlight'], ['sea', 'wave', 'Out at sea'], ['hands', 'heart', 'Hands off']];
 function showGuide() {
   const v = document.createElement('div'); v.className = 'veil'; v.style.zIndex = 14; const got = GUIDE.filter(([k]) => PROG.facts[k]).length;
   v.innerHTML = panel('Field guide', `<div class="lbl">${got} of ${GUIDE.length} found</div><div class="gbar"><i style="width:${Math.round(got / GUIDE.length * 100)}%"></i></div>
@@ -646,7 +710,8 @@ const FACTCARD = {
   dog: 'Dogs on nesting beaches can dig up nests and chase hatchlings. Keep pets on a leash.',
   tide: 'Very high tides can wash over nests, so trained conservation teams sometimes move nests higher up the beach.',
   rut: 'Tyre ruts from vehicles driven on the sand can trap hatchlings on their way to the sea.',
-  moon: 'Hatchlings head for the brightest, lowest horizon. On a natural beach that is the moonlit sea.'
+  moon: 'Hatchlings head for the brightest, lowest horizon. On a natural beach that is the moonlit sea.',
+  sea: 'Young sea turtles spend their first years far out at sea, and many shelter in mats of floating seaweed.'
 };
 let levelFacts = [];
 ui.fact = function (key) {
@@ -682,8 +747,10 @@ let last = 0, booted = false, started = false, lastRaw = 0;
 const TS = clamp(+(Q.get('ts') || 1) | 0, 1, 8);   // test-only time scale for bots
 const PLAY = Q.get('mode') === 'playable' || !!self.PLAYABLE_AD;   // the ad build (see playable.js)
 let playTick = null;
+let swimOn = false;
 function loop(ts) {
   const raw = Math.min(.05, (ts - last) / 1000 || 0); last = ts; lastRaw = raw;
+  if (swimOn) { requestAnimationFrame(loop); return; }
   if (slowT > 0) { slowT -= raw; if (slowT <= 0) slow = 1; }
   let dt = raw * (lastOne ? .62 : 1) * slow;
   if (freeze > 0) { freeze -= raw; dt = 0; }
@@ -702,7 +769,7 @@ resize();
 setSkin(PROG.skin); if (CLEAN) $('#app').classList.add('clean');
 function refreshHome() {
   if (!$('#start')) return;
-  $('#title').innerHTML = TURT(PROG.skin) + 'Shell Run';
+  $('#title').innerHTML = `<img class="logo" src="${LOGO_SRC}" alt="Shell Run">`;
   $('#go').innerHTML = ICON.play + (PROG.unlocked ? 'Continue' : 'Play');
   $('#where').innerHTML = `${ICON.pin}${chapterOf(Math.min(PROG.unlocked, LAST_LEVEL - 1)).split(' · ')[0]} · Level ${Math.min(PROG.unlocked + 1, LAST_LEVEL)}`;
   $('#hmap i').innerHTML = ICON.map; $('#hcrew i').innerHTML = TURT(PROG.skin); $('#hguide i').innerHTML = ICON.guide; $('#hshop i').innerHTML = ICON.shop; $('#gear').innerHTML = ICON.gear; $('#daily').innerHTML = ICON.daily + '<span>Daily</span>' + (PROG.dailyDone !== today() && PROG.unlocked >= 3 ? '<b></b>' : '');
@@ -735,5 +802,5 @@ self.G = {
   get T() { return T; }, get litter() { return litter; }, get balls() { return balls; }, get rocks() { return rocks; }, get crabs() { return crabs; }, get gulls() { return gulls; }, get logs() { return logs; }, get tourists() { return tourists; }, get lamps() { return lamps; }, get dogs() { return dogs; }, get pickups() { return pickups; }, get waveSt() { return wave.st; },
   tap, scr, groundAt, surfaceTap, get running() { return running; }, get night() { return night; }, get safe() { return safeN; }, get lost() { return lostN; }, get total() { return total; }, get binned() { return binnedN; },
   get season() { return season; }, get carry() { return carry; }, get surf() { return surfLog; }, get bin() { return bin; }, get shoreZ() { return SHORE_Z; }, time: () => time,
-  info: () => ({ calls: R.info.render.calls, tris: R.info.render.triangles, geos: R.info.memory.geometries, tex: R.info.memory.textures }), levels: LAST_LEVEL, begin, levelSpec, usePower, showShop, showMap, get power() { return { kind: powerKind, charge, ready: powerReady, surge: surgeT, ranger: rangerT }; }, get paused() { return paused; }, fact: (k) => ui.fact(k), PROG, get spec() { return spec; }, get goal() { return goal; }, goalMet: () => goalMet(), setSkin
+  info: () => ({ calls: R.info.render.calls, tris: R.info.render.triangles, geos: R.info.memory.geometries, tex: R.info.memory.textures }), levels: LAST_LEVEL, swimFrenzy, lvCard, wipe, begin, levelSpec, usePower, showShop, showMap, get power() { return { kind: powerKind, charge, ready: powerReady, surge: surgeT, ranger: rangerT }; }, get paused() { return paused; }, fact: (k) => ui.fact(k), PROG, get spec() { return spec; }, get goal() { return goal; }, goalMet: () => goalMet(), setSkin
 };
