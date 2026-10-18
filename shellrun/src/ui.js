@@ -127,7 +127,7 @@ let bannerTO = 0;
 ui.night = function () {
   levelFacts = []; ui.hud(); if (!started || PLAY) return;
   const L = spec; if (L.attract) return; $('#bannerT').className = 'ribbon' + (L.big ? ' coral' : '');
-  $('#bannerT').innerHTML = `<small>${isDaily(night) ? 'DAILY BEACH' : L.big ? 'BIG HATCH · LEVEL ' + (night + 1) : 'LEVEL ' + (night + 1)}</small><i class="place">${L.place || CHAPTERS[(night / 10 | 0) % CHAPTERS.length]}</i>${L.name}${L.new ? `<span class="new">NEW · ${L.new}</span>` : L.tag ? `<span class="new tag">${L.tag}</span>` : ''}${goal ? `<span class="goalb">${ICON.target}Bonus: ${goal.t}</span>` : ''}`;
+  $('#bannerT').innerHTML = `<small>${isDaily(night) ? 'DAILY BEACH' : L.big ? 'BIG HATCH · LEVEL ' + (night + 1) : 'LEVEL ' + (night + 1)}</small><i class="place">${L.place || CHAPTERS[(night / 10 | 0) % CHAPTERS.length]}</i>${L.name}${L.new ? `<span class="new">NEW · ${L.new}</span>` : L.tag ? `<span class="new tag">${L.tag}</span>` : ''}${goal ? `<span class="goalb">${ICON.target}Bonus: ${goal.t}</span>` : ''}${sanctChips()}`;
   ui.boostTip(); $('#banner').classList.add('on'); clearTimeout(bannerTO); bannerTO = setTimeout(() => $('#banner').classList.remove('on'), L.new ? 3800 : 2400); if (L.big) { buzz([30, 40, 30]); }
 };
 let capT = 0;
@@ -368,6 +368,19 @@ function endNight() {
 // the ocean bonus: a first taste after level 3, then after every 5th level (first clear only)
 const swimAfter = (i) => i + 1 === 3 || (i + 1) % 5 === 0;
 const boostName = (k, mood) => (k === 'surge' && ['dawn', 'sunrise', 'fog'].includes(mood) ? 'Sun rush' : BOOST_INFO[k][0]);
+// bonus card: the Swim Frenzy after this level. First swim after the clear is automatic; after that, one rewarded swim a day
+function swimCard(i, leaveMap) {
+  const ok = !!PROG.best[i], fresh = ok && PROG.swimDay !== today();
+  const v = document.createElement('div'); v.className = 'veil lvc swc'; v.style.zIndex = 13;
+  v.innerHTML = `<div class="card"><div class="ribbon">Bonus round</div><button class="pclose" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" stroke="#fff" stroke-width="3.6" stroke-linecap="round"/></svg></button><div class="inner">
+    <div class="swhero">${ICON.wave}<b>Swim Frenzy</b></div>
+    <div class="lvx sea"><div class="lvi">${ICON.turtle(skinNow)}</div><div><b>Swim out with your hatchlings</b><span>Tap the plastic before they swim into it. Leave the jellyfish: that's their food.</span></div></div>
+    <div class="lvx"><div class="lvi">${ICON.bolt}</div><div><b>${fresh ? 'Win up to 2 boosts' : ok ? 'Practice swim' : 'Win up to 2 boosts'}</b><span>${fresh || !ok ? `Clear ${SW_GOAL[0]} pieces for a boost, ${SW_GOAL[1]} for two.` : 'Today\'s rewarded swim is done. Rewards return tomorrow.'}</span></div></div>
+    <div class="btns">${ok ? `<button class="b-green hero" id="swgo">${ICON.play}Swim</button>` : `<button class="b-navy" disabled>${ICON.lock}Clear level ${i + 1} first</button>`}<button class="b-navy" id="lvx">${ICON.map}Map</button></div></div></div>`;
+  $('#app').appendChild(v); tone(note(7), .07, 'triangle', .05);
+  v.querySelector('#lvx').onclick = () => { au(); dismiss(v); };
+  const go = v.querySelector('#swgo'); if (go) go.onclick = () => { au(); dismiss(v); if (fresh) PROG.swimDay = today(); saveProg(); wipe(() => { leaveMap(); swimFrenzy({ n: 10, practice: !fresh, onDone: () => showMap() }); }); };
+}
 // level card (Candy Crush style): opens after the map walk, or when you tap a level
 function lvExtras(i, L, best) {
   const k = i >= 2 ? POWERS[i % 4] : null; let h = '';
@@ -511,6 +524,7 @@ function showMap(opts) {
   for (let i = 0; i < N; i++) {
     const st = i < cur || (done100 && i === cur) ? 'done' : i === cur ? 'cur' : 'lock', b = W && i === W.i ? W.prev : PROG.best[i] || 0, big = (i + 1) % 25 === 0, boss = !big && (i + 1) % 10 === 0, hz = st !== 'done' ? HAZ(i) : null;
     if (i % 10 === 0 && i > 0) nodes += `<div class="chapmark" style="top:${f1(bandBot(i / 10) - 14)}px;${pathX(bandBot(i / 10)) > Wd / 2 ? 'left:10px' : 'right:10px'}"><small>Chapter ${i / 10 + 1}</small>${chapterOf(i).split(' · ')[0]}</div>`;
+    if (swimAfter(i)) { const sd = px(i) > Wd / 2 ? -1 : 1, bx = clamp(px(i) + sd * 64, 30, Wd - 30), by = py(i) - 30, ok = !!PROG.best[i], fresh = ok && PROG.swimDay !== today(); nodes += `<button class="bnode ${ok ? 'open' : 'lock'} ${fresh ? 'fresh' : ''} pre" data-b="${i}" style="left:${f1(bx - 26)}px;top:${f1(by - 26)}px" aria-label="Swim Frenzy bonus">${ICON.wave}<b>Bonus</b></button>`; }
     nodes += `<button class="node ${st}${big ? ' big boss' : boss ? ' boss' : ''} pre" data-i="${i}" style="left:${f1(px(i) - 32)}px;top:${f1(py(i) - 32)}px"><span>${i + 1}</span>${st === 'lock' ? `<i class="lk">${lockI}</i>` : ''}${hz ? `<i class="hz">${hz}</i>` : ''}${PROG.goals[i] ? `<i class="gk">${ICON.check}</i>` : ''}${big ? `<i class="crown">${ICON.crown}</i>` : boss ? `<i class="crown chest">${PROG.chests[i / 10 | 0] ? ICON.chestOpen : ICON.chest}</i>` : ''}<em>${st === 'done' ? [0, 1, 2].map((s) => `<i class="${s < b ? 'on' : ''}"></i>`).join('') : ''}</em></button>`;
   }
   const v = document.createElement('div'); v.className = 'map';
@@ -530,7 +544,7 @@ function showMap(opts) {
     ${nodes}<div class="tease" style="top:${f1(topY - 150)}px"><div class="tc">${showCh < 9 ? `<small>Next beach</small><b>${nextName}</b><span>${lockI}Finish chapter ${showCh + 1} to reveal</span>` : `<small>The whole coast</small><b>More beaches coming soon</b><span>${ICON.turtle()}You reached the last beach</span>`}</div></div>
     <i class="meT">${ICON.turtle(skinNow)}</i></div></div>
     <div class="mfront"><i class="fl"></i><i class="fr"></i></div>
-    <div class="mapbot"><div class="dkm"><button class="b-gold sq" id="mshop" aria-label="Shop">${ICON.shop}</button><span>Shop</span></div><button class="b-green hero" id="mplay">${ICON.play}${done100 ? 'Replay' : 'Level ' + (cur + 1)}</button><div class="dkm ${sanctNext() && !PROG.sanctIntro ? 'nudge' : ''}"><button class="b-purple sq" id="msanct" aria-label="Sanctuary">${sanctIcon()}${sanctNext() ? '<em class="nb">NEW</em>' : ''}</button><span>Sanctuary</span></div></div>`;
+    <div class="mapbot"><div class="dkm"><button class="b-gold sq" id="mshop" aria-label="Shop">${ICON.shop}</button><span>Shop</span></div><button class="b-green hero" id="mplay">${ICON.play}${done100 ? 'Replay' : 'Level ' + (cur + 1)}</button><div class="dkm"><button class="b-purple sq" id="msanct" aria-label="Sanctuary">${sanctIcon()}${sanctNext() ? '<em class="nb"></em>' : ''}</button><span>Sanctuary</span></div></div>${sanctNext() && !PROG.sanctIntro ? '<div class="mnudge">Build in your Sanctuary!</div>' : ''}`;
   $('#app').appendChild(v);
   const sc = v.querySelector('.scroller'), me = v.querySelector('.meT'), bar = v.querySelector('#chapbar'), clouds = v.querySelector('.mclouds'), front = v.querySelector('.mfront');
   const placeMe = (i) => { me.style.left = (px(i) - 26) + 'px'; me.style.top = (py(i) - 84) + 'px'; };
@@ -594,11 +608,12 @@ function showMap(opts) {
     setTimeout(() => { sc.scrollTo({ top: Math.max(0, py(cur) - sc.clientHeight * .55), behavior: 'smooth' }); walk(from, cur, 1000).then(() => { const node = v.querySelector(`.node[data-i="${cur}"]`); if (node) { node.classList.add('unlocked'); sfx.ready(); buzz([14, 30, 20]); } }); }, 520);
   }
   PROG.mapSeen = cur; saveProg(); track('map_open', { lv: cur + 1 });
-  const startAt = (i) => { au(); dismiss(v); $('#app').classList.add('playing'); begin(i); running = true; ui.night(); };
+  const startAt = (i) => { au(); dismiss(v); $('#app').classList.add('playing'); begin(i); running = true; ui.hud(); setTimeout(() => { if (running && !ended) ui.night(); }, 260); };
   v.querySelectorAll('.node').forEach((n) => { n.onclick = () => { const i = +n.dataset.i; if (i <= cur) lvCard(i, startAt); else { n.classList.remove('shake'); void n.offsetWidth; n.classList.add('shake'); sfx.uhoh(); buzz(20); ui.toast && ui.toast(`Finish level ${cur + 1} first`); } }; });
   v.querySelector('#mplay').onclick = () => startAt(cur);
   v.querySelector('#mshop').onclick = () => { au(); showShop(); };
-  v.querySelector('#msanct').onclick = () => { au(); showSanct(() => { const b = v.querySelector('#msanct .nb'); if (b && !sanctNext()) b.remove(); }); };
+  v.querySelector('#msanct').onclick = () => { au(); const n = v.querySelector('.mnudge'); if (n) n.remove(); showSanct(() => { const b = v.querySelector('#msanct .nb'); if (b && !sanctNext()) b.remove(); }); };
+  v.querySelectorAll('.bnode').forEach((n) => { n.onclick = () => swimCard(+n.dataset.b, () => { v.remove(); }); });
   v.querySelector('#mhome').onclick = () => { au(); showSettings(); };
 }
 
@@ -767,7 +782,7 @@ function showShop() {
       ${offer('b2', ICON.chestOpen, 'linear-gradient(#3a5a8e,#1d3558)', '20 boosts + 300 shells', 'The big beach bundle', '$4.99', 'b-gold', false, true)}
       ${offer('b3', ICON.ad, 'linear-gradient(#ff9c7d,#dc4f34)', 'No level ads', 'Videos stay optional', PROG.noAds ? 'Owned' : '$2.99', 'b-gold', PROG.noAds)}
       <div class="demo">DEMO STORE · NO REAL CHARGES</div>
-      <div class="btns"><button class="b-navy" id="bc">Back</button></div>`);
+      <button class="b-navy" id="bc" hidden>Back</button>`);
     v.querySelector('#bc').onclick = () => { au(); dismiss(v); };
     const add = (n, sh, id) => { PROG.boosts += n; PROG.shells = (PROG.shells || 0) + (sh || 0); saveProg(); sfx.win(); buzz([20, 30, 20]); track('purchase_tap', { id }); draw(); refreshHome(); };
     v.querySelector('#b1').onclick = () => add(5, 0, 'boost5'); v.querySelector('#b2').onclick = () => add(20, 300, 'bundle'); v.querySelector('#b4').onclick = () => add(0, 120, 'shells120');

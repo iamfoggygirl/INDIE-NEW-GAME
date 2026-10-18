@@ -548,7 +548,7 @@ button.wide{width:100%;margin-top:10px}
 .sanct .btns{display:grid;gap:10px;margin-top:12px}.sa-why{display:block;margin-top:3px;font-family:var(--body);font-weight:700;font-style:italic;font-size:11.5px;line-height:1.3;color:#3f8a2c}
 .b-purple{background:linear-gradient(rgba(255,255,255,.24),rgba(255,255,255,0) 48%),linear-gradient(#c9b0ff,#9a74ee 62%,#7a52d8);--lip:#4a2d96;color:#fff}
 .mapbot .b-purple svg{width:40px;height:40px}.mapbot .sq{position:relative}
-.mapbot .nb{position:absolute;top:-11px;right:-3px;font-style:normal;font-family:var(--disp);font-weight:700;font-size:10.5px;color:#fff;background:#ef4c3c;border:2px solid var(--o);border-radius:99px;padding:1px 6px;-webkit-text-stroke:0;text-shadow:none;letter-spacing:.04em;animation:pulseBtn 1.4s infinite}
+.mapbot .nb{position:absolute;top:4px;right:4px;width:15px;height:15px;padding:0!important;border-radius:50%;font-style:normal;font-family:var(--disp);font-weight:700;font-size:10.5px;color:#fff;background:#ef4c3c;border:2px solid var(--o);border-radius:99px;padding:1px 6px;-webkit-text-stroke:0;text-shadow:none;letter-spacing:.04em;animation:pulseBtn 1.4s infinite}
 .sanct .duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}.sanct .duo button svg{width:26px;height:26px}
 .gsec{font-family:var(--disp);font-weight:700;font-size:15px;color:var(--txt);text-align:left;margin:12px 2px 6px}.gsec small{display:block;font-family:var(--body);font-weight:800;font-size:12px;color:var(--sub);margin-top:1px}.gboost .gic{background:linear-gradient(#2c4673,#1b2e50)}
 /* swim frenzy: a clear goal, a clear skip */
@@ -570,7 +570,7 @@ button.wide{width:100%;margin-top:10px}
 .pclose{position:absolute;top:-12px;right:-10px;z-index:3;width:44px;height:44px;border-radius:50%;padding:0;display:grid;place-items:center;background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,0) 50%),linear-gradient(#ff8b7b,#ef4c3c 60%,#c43126);border:3px solid var(--o);box-shadow:0 4px 0 var(--o),inset 0 2px 0 rgba(255,255,255,.4);cursor:pointer;animation:none!important}
 .pclose svg{width:20px;height:20px;filter:drop-shadow(0 1.5px 0 rgba(13,23,38,.7))}
 .pclose:active{transform:translateY(3px);box-shadow:0 1px 0 var(--o)}
-.veil>.card>.inner .btns:last-child{position:sticky;bottom:-16px;margin:12px -16px -16px;padding:10px 16px 16px;background:linear-gradient(rgba(250,240,214,0),var(--cr,#faf0d6) 22%)}
+
 .veil>.card.wst{margin-top:100px;max-height:calc(100vh - 130px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));max-height:calc(100dvh - 130px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
 
 .gtabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:#e9dcbb;border:2px solid #d8c69d;border-radius:14px;padding:3px;margin-bottom:6px}
@@ -589,11 +589,41 @@ button.wide{width:100%;margin-top:10px}
 .sa-how i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--disp);font-weight:700;font-size:14px;color:#fff;background:linear-gradient(#a4ee70,#329a25);border:2px solid var(--o)}
 .sa-how span{font-family:var(--body);font-weight:800;font-size:11.5px;line-height:1.2;color:var(--txt);text-align:center}
 
-.dkm{position:relative}.dkm.nudge::before{content:'Build here!';position:absolute;bottom:calc(100% + 12px);right:-4px;white-space:nowrap;font-family:var(--disp);font-weight:700;font-size:14px;color:var(--txt);background:#fffaf0;border:2.5px solid var(--o);border-radius:12px;padding:5px 10px;box-shadow:0 4px 0 var(--o);animation:nudgeB 1.3s ease-in-out infinite}
-.dkm.nudge::after{content:'';position:absolute;bottom:calc(100% + 4px);right:22px;width:12px;height:12px;background:#fffaf0;border-right:2.5px solid var(--o);border-bottom:2.5px solid var(--o);transform:rotate(45deg);animation:nudgeB 1.3s ease-in-out infinite}
 @keyframes nudgeB{50%{translate:0 -5px}}
 @media (max-width:350px){.gtab{font-size:11px}}
 .inner>.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.inner>.duo button{font-size:15px;min-height:48px;padding:6px 8px;gap:6px}.inner>.duo button svg{width:22px;height:22px}
+
+/* ===== Oct 18 (phone fixes) ===== */
+.card>.ribbon{z-index:5}
+.mapbot .nb{box-sizing:border-box;min-width:0}
+.mnudge{position:absolute;right:16px;bottom:calc(104px + env(safe-area-inset-bottom,0px));z-index:6;pointer-events:none;font-family:var(--disp);font-weight:700;font-size:14px;color:var(--txt);background:#fffaf0;border:2.5px solid var(--o);border-radius:14px;padding:6px 12px;box-shadow:0 4px 0 var(--o);animation:nudgeB 1.3s ease-in-out infinite}
+.mnudge::after{content:'';position:absolute;bottom:-9px;right:28px;width:13px;height:13px;background:#fffaf0;border-right:2.5px solid var(--o);border-bottom:2.5px solid var(--o);transform:rotate(45deg)}
+/* bonus swim bubbles on the map trail */
+.bnode{position:absolute;width:52px;height:52px;border-radius:50%;padding:0;display:grid;place-items:center;z-index:2;cursor:pointer;background:radial-gradient(circle at 35% 30%,#bff8f2,#38c6d8 55%,#1576b0);border:3px solid var(--o);box-shadow:0 4px 0 var(--o),0 0 0 4px rgba(255,255,255,.5);transition:transform .2s}
+.bnode svg{width:30px;height:30px;filter:drop-shadow(0 2px 0 rgba(13,23,38,.6))}
+.bnode b{position:absolute;bottom:-15px;left:50%;transform:translateX(-50%);font-family:var(--disp);font-weight:700;font-size:11.5px;color:#fff;-webkit-text-stroke:3px var(--o);paint-order:stroke fill;white-space:nowrap}
+.bnode.lock{filter:saturate(.25) brightness(.92)}.bnode.lock b{opacity:.8}
+.bnode.fresh{animation:bfresh 1.6s ease-in-out infinite}@keyframes bfresh{50%{transform:scale(1.08);box-shadow:0 4px 0 var(--o),0 0 0 8px rgba(143,243,232,.55)}}
+.bnode:active{transform:scale(.92)}
+.swc .swhero{display:flex;flex-direction:column;align-items:center;gap:2px;margin:0 0 10px}.swc .swhero svg{width:56px;height:56px;filter:drop-shadow(0 3px 0 rgba(13,23,38,.4))}.swc .swhero b{font-family:var(--disp);font-weight:700;font-size:23px;color:var(--txt)}
+/* level banner: the Sanctuary help that is on this level */
+.ribbon .perks{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px;margin-top:6px;-webkit-text-stroke:0;text-shadow:none}
+.ribbon .perks svg{width:22px;height:22px;flex:none}
+.ribbon .perks em{font-style:normal;font-family:var(--body);font-weight:800;font-size:11px;color:#fff;background:rgba(106,75,216,.92);border:1.5px solid rgba(22,36,59,.5);border-radius:99px;padding:2px 8px;white-space:nowrap;letter-spacing:0}
+/* sanctuary fits a phone without scrolling */
+.sanct .sa-map{max-height:34vh}.sanct .sa-svg{max-height:34vh}
+.sanct .sa-how{margin-bottom:6px}.sanct .sa-how div{padding:4px 3px}
+.sanct .sa-info{margin-top:8px;padding:6px 9px}
+.sanct .btns{margin-top:10px;gap:8px}
+@media (max-height:760px){.sanct .sa-why{display:none}.sanct .sa-how span{font-size:10.5px}}
+/* shop a little tighter so all offers show on a phone */
+.offer{padding-top:6px;padding-bottom:6px}.offer span{line-height:1.25}
+.sa-crew{flex:none;width:38px;height:38px;border-radius:12px;padding:0;display:grid;place-items:center;background:linear-gradient(#ff9c7d,#dc4f34);border:2.5px solid var(--o);box-shadow:0 3px 0 var(--o);cursor:pointer}.sa-crew svg{width:30px;height:30px}
+@media (max-height:760px){.sanct .sa-map,.sanct .sa-svg{max-height:28vh}}
+@media (max-height:620px){.sanct .sa-how{display:none}}
+[hidden]{display:none!important}
+#banner.on{transition:none;animation:bannerIn .4s cubic-bezier(.2,.9,.3,1.2) both}#banner .ribbon,#banner .ribbon *{animation:none!important}@keyframes bannerIn{from{transform:translateY(-10px) scale(.96)}to{transform:none}}
+@media (max-height:740px){.wst .note{display:none}.wst .chp{margin-top:6px}}
 </style>
 </head>
 <body>

@@ -546,7 +546,7 @@ button.wide{width:100%;margin-top:10px}
 .sanct .btns{display:grid;gap:10px;margin-top:12px}.sa-why{display:block;margin-top:3px;font-family:var(--body);font-weight:700;font-style:italic;font-size:11.5px;line-height:1.3;color:#3f8a2c}
 .b-purple{background:linear-gradient(rgba(255,255,255,.24),rgba(255,255,255,0) 48%),linear-gradient(#c9b0ff,#9a74ee 62%,#7a52d8);--lip:#4a2d96;color:#fff}
 .mapbot .b-purple svg{width:40px;height:40px}.mapbot .sq{position:relative}
-.mapbot .nb{position:absolute;top:-11px;right:-3px;font-style:normal;font-family:var(--disp);font-weight:700;font-size:10.5px;color:#fff;background:#ef4c3c;border:2px solid var(--o);border-radius:99px;padding:1px 6px;-webkit-text-stroke:0;text-shadow:none;letter-spacing:.04em;animation:pulseBtn 1.4s infinite}
+.mapbot .nb{position:absolute;top:4px;right:4px;width:15px;height:15px;padding:0!important;border-radius:50%;font-style:normal;font-family:var(--disp);font-weight:700;font-size:10.5px;color:#fff;background:#ef4c3c;border:2px solid var(--o);border-radius:99px;padding:1px 6px;-webkit-text-stroke:0;text-shadow:none;letter-spacing:.04em;animation:pulseBtn 1.4s infinite}
 .sanct .duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}.sanct .duo button svg{width:26px;height:26px}
 .gsec{font-family:var(--disp);font-weight:700;font-size:15px;color:var(--txt);text-align:left;margin:12px 2px 6px}.gsec small{display:block;font-family:var(--body);font-weight:800;font-size:12px;color:var(--sub);margin-top:1px}.gboost .gic{background:linear-gradient(#2c4673,#1b2e50)}
 /* swim frenzy: a clear goal, a clear skip */
@@ -568,7 +568,7 @@ button.wide{width:100%;margin-top:10px}
 .pclose{position:absolute;top:-12px;right:-10px;z-index:3;width:44px;height:44px;border-radius:50%;padding:0;display:grid;place-items:center;background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,0) 50%),linear-gradient(#ff8b7b,#ef4c3c 60%,#c43126);border:3px solid var(--o);box-shadow:0 4px 0 var(--o),inset 0 2px 0 rgba(255,255,255,.4);cursor:pointer;animation:none!important}
 .pclose svg{width:20px;height:20px;filter:drop-shadow(0 1.5px 0 rgba(13,23,38,.7))}
 .pclose:active{transform:translateY(3px);box-shadow:0 1px 0 var(--o)}
-.veil>.card>.inner .btns:last-child{position:sticky;bottom:-16px;margin:12px -16px -16px;padding:10px 16px 16px;background:linear-gradient(rgba(250,240,214,0),var(--cr,#faf0d6) 22%)}
+
 .veil>.card.wst{margin-top:100px;max-height:calc(100vh - 130px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));max-height:calc(100dvh - 130px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
 
 .gtabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:#e9dcbb;border:2px solid #d8c69d;border-radius:14px;padding:3px;margin-bottom:6px}
@@ -587,11 +587,41 @@ button.wide{width:100%;margin-top:10px}
 .sa-how i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--disp);font-weight:700;font-size:14px;color:#fff;background:linear-gradient(#a4ee70,#329a25);border:2px solid var(--o)}
 .sa-how span{font-family:var(--body);font-weight:800;font-size:11.5px;line-height:1.2;color:var(--txt);text-align:center}
 
-.dkm{position:relative}.dkm.nudge::before{content:'Build here!';position:absolute;bottom:calc(100% + 12px);right:-4px;white-space:nowrap;font-family:var(--disp);font-weight:700;font-size:14px;color:var(--txt);background:#fffaf0;border:2.5px solid var(--o);border-radius:12px;padding:5px 10px;box-shadow:0 4px 0 var(--o);animation:nudgeB 1.3s ease-in-out infinite}
-.dkm.nudge::after{content:'';position:absolute;bottom:calc(100% + 4px);right:22px;width:12px;height:12px;background:#fffaf0;border-right:2.5px solid var(--o);border-bottom:2.5px solid var(--o);transform:rotate(45deg);animation:nudgeB 1.3s ease-in-out infinite}
 @keyframes nudgeB{50%{translate:0 -5px}}
 @media (max-width:350px){.gtab{font-size:11px}}
 .inner>.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.inner>.duo button{font-size:15px;min-height:48px;padding:6px 8px;gap:6px}.inner>.duo button svg{width:22px;height:22px}
+
+/* ===== Oct 18 (phone fixes) ===== */
+.card>.ribbon{z-index:5}
+.mapbot .nb{box-sizing:border-box;min-width:0}
+.mnudge{position:absolute;right:16px;bottom:calc(104px + env(safe-area-inset-bottom,0px));z-index:6;pointer-events:none;font-family:var(--disp);font-weight:700;font-size:14px;color:var(--txt);background:#fffaf0;border:2.5px solid var(--o);border-radius:14px;padding:6px 12px;box-shadow:0 4px 0 var(--o);animation:nudgeB 1.3s ease-in-out infinite}
+.mnudge::after{content:'';position:absolute;bottom:-9px;right:28px;width:13px;height:13px;background:#fffaf0;border-right:2.5px solid var(--o);border-bottom:2.5px solid var(--o);transform:rotate(45deg)}
+/* bonus swim bubbles on the map trail */
+.bnode{position:absolute;width:52px;height:52px;border-radius:50%;padding:0;display:grid;place-items:center;z-index:2;cursor:pointer;background:radial-gradient(circle at 35% 30%,#bff8f2,#38c6d8 55%,#1576b0);border:3px solid var(--o);box-shadow:0 4px 0 var(--o),0 0 0 4px rgba(255,255,255,.5);transition:transform .2s}
+.bnode svg{width:30px;height:30px;filter:drop-shadow(0 2px 0 rgba(13,23,38,.6))}
+.bnode b{position:absolute;bottom:-15px;left:50%;transform:translateX(-50%);font-family:var(--disp);font-weight:700;font-size:11.5px;color:#fff;-webkit-text-stroke:3px var(--o);paint-order:stroke fill;white-space:nowrap}
+.bnode.lock{filter:saturate(.25) brightness(.92)}.bnode.lock b{opacity:.8}
+.bnode.fresh{animation:bfresh 1.6s ease-in-out infinite}@keyframes bfresh{50%{transform:scale(1.08);box-shadow:0 4px 0 var(--o),0 0 0 8px rgba(143,243,232,.55)}}
+.bnode:active{transform:scale(.92)}
+.swc .swhero{display:flex;flex-direction:column;align-items:center;gap:2px;margin:0 0 10px}.swc .swhero svg{width:56px;height:56px;filter:drop-shadow(0 3px 0 rgba(13,23,38,.4))}.swc .swhero b{font-family:var(--disp);font-weight:700;font-size:23px;color:var(--txt)}
+/* level banner: the Sanctuary help that is on this level */
+.ribbon .perks{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px;margin-top:6px;-webkit-text-stroke:0;text-shadow:none}
+.ribbon .perks svg{width:22px;height:22px;flex:none}
+.ribbon .perks em{font-style:normal;font-family:var(--body);font-weight:800;font-size:11px;color:#fff;background:rgba(106,75,216,.92);border:1.5px solid rgba(22,36,59,.5);border-radius:99px;padding:2px 8px;white-space:nowrap;letter-spacing:0}
+/* sanctuary fits a phone without scrolling */
+.sanct .sa-map{max-height:34vh}.sanct .sa-svg{max-height:34vh}
+.sanct .sa-how{margin-bottom:6px}.sanct .sa-how div{padding:4px 3px}
+.sanct .sa-info{margin-top:8px;padding:6px 9px}
+.sanct .btns{margin-top:10px;gap:8px}
+@media (max-height:760px){.sanct .sa-why{display:none}.sanct .sa-how span{font-size:10.5px}}
+/* shop a little tighter so all offers show on a phone */
+.offer{padding-top:6px;padding-bottom:6px}.offer span{line-height:1.25}
+.sa-crew{flex:none;width:38px;height:38px;border-radius:12px;padding:0;display:grid;place-items:center;background:linear-gradient(#ff9c7d,#dc4f34);border:2.5px solid var(--o);box-shadow:0 3px 0 var(--o);cursor:pointer}.sa-crew svg{width:30px;height:30px}
+@media (max-height:760px){.sanct .sa-map,.sanct .sa-svg{max-height:28vh}}
+@media (max-height:620px){.sanct .sa-how{display:none}}
+[hidden]{display:none!important}
+#banner.on{transition:none;animation:bannerIn .4s cubic-bezier(.2,.9,.3,1.2) both}#banner .ribbon,#banner .ribbon *{animation:none!important}@keyframes bannerIn{from{transform:translateY(-10px) scale(.96)}to{transform:none}}
+@media (max-height:740px){.wst .note{display:none}.wst .chp{margin-top:6px}}
 </style>
 
 <div id="app">
@@ -2332,7 +2362,7 @@ const SA = {
 };
 const PLOTS = { hatch: [104, 200, 1.25], recy: [250, 206, 1.15], vol: [186, 146, 1.2], vet: [96, 128, 1.12], tower: [270, 134, 1.12] };
 function sanctScene(sel) {
-  let s = `<svg class="sa-svg" viewBox="0 0 360 250" preserveAspectRatio="xMidYMid meet">
+  let s = `<svg class="sa-svg" viewBox="0 6 360 236" preserveAspectRatio="xMidYMid meet">
     <defs><linearGradient id="saSea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fe0e0"/><stop offset="1" stop-color="#2fb0c8"/></linearGradient>
     <linearGradient id="saSand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe7b0"/><stop offset="1" stop-color="#f2c47a"/></linearGradient></defs>
     <rect width="360" height="250" rx="18" fill="url(#saSea)"/>
@@ -2358,12 +2388,12 @@ function showSanct(onClose) {
       : n >= 3 ? `<button class="b-navy" disabled>${ICON.check}Fully built</button>`
       : have >= cost ? `<button class="b-gold hero" id="sab">${ICON.shell}${n ? 'Upgrade' : 'Build'} · ${cost}</button>`
       : `<button class="b-navy" id="sas">${ICON.shell}${cost - have} more shells</button>`;
-    v.innerHTML = panel('Sanctuary', `<div class="sa-top"><button class="sa-q ${how ? 'on' : ''}" aria-label="How it works">?</button><div class="lbl">Your turtle sanctuary</div><div class="pill shp sm">${ICON.shell}<span>${have}</span></div></div>
+    v.innerHTML = panel('Sanctuary', `<div class="sa-top"><button class="sa-q ${how ? 'on' : ''}" aria-label="How it works">?</button><div class="lbl">Your turtle sanctuary</div><button class="sa-crew" id="sac" aria-label="Crew">${ICON.turtle(skinNow)}</button><div class="pill shp sm">${ICON.shell}<span>${have}</span></div></div>
       ${how ? `<div class="sa-how"><div><i>1</i><span>Earn shells on the beach</span></div><div><i>2</i><span>Build or upgrade a place</span></div><div><i>3</i><span>It helps you on every level</span></div></div>` : ''}
       <div class="sa-map">${sanctScene(sel)}</div>
       <div class="sa-info ${built ? 'boom' : ''}"><div class="sa-ic"><svg viewBox="-56 -76 112 86">${SA[b.k](Math.max(1, n))}</svg></div><div class="sa-tx"><b>${b.name}</b><div class="sa-lv">${[0, 1, 2].map((i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</div>
         <span class="sa-now">${n ? b.perk(n) : 'Not built yet'}</span>${n < 3 && open ? `<span class="sa-nx">${ICON.play}Next: ${b.perk(n + 1)}</span>` : ''}<span class="sa-why">${b.why}</span></div></div>
-      <div class="btns">${btn}<div class="duo"><button class="b-coral" id="sac">${ICON.turtle(skinNow)}Crew</button><button class="b-navy" id="sax">Back</button></div></div>`);
+      <div class="btns">${btn}<button class="b-navy" id="sax" hidden>Back</button></div>`);
     v.querySelector('.sa-q').onclick = () => { how = !how; tone(note(5), .06, 'triangle', .05); draw(); };
     v.querySelectorAll('.sa-p').forEach((g) => { g.onclick = () => { sel = g.dataset.k; tone(note(3 + SANCT.findIndex((q) => q.k === sel)), .08, 'triangle', .06); buzz(8); draw(); }; });
     const bb = v.querySelector('#sab'); if (bb) bb.onclick = () => {
@@ -2386,6 +2416,18 @@ let sanctIco = ''; const sanctIcon = () => sanctIco || (sanctIco = (() => {
     <rect x="4.5" y="15.5" width="15" height="11" rx="2" fill="url(#gN)" ${st(2)}/><path d="M2.5 17 L12 8 L21.5 17z" fill="url(#gY)" ${st(2)}/>
     <rect x="9.5" y="19.5" width="5" height="7" rx="1.2" fill="#7a471d" ${st(1.4)}/>${hl(8.5, 12.5, 3, 1, -40, .65)}`);
 })());
+
+/* the level banner lists the Sanctuary help that is active right now, so the perks are felt, not hidden */
+function sanctChips() {
+  if (PLAY || attract) return '';
+  const n = (k) => sanctLv(k), out = [];
+  if (n('hatch') && night >= 2) out.push(`Boost ${25 + n('hatch') * 12}% charged`);
+  if (n('tower') && night >= 2) out.push(`Boosts +${n('tower') * 15}%`);
+  if (n('vol')) out.push('Volunteer on duty');
+  if (n('vet')) out.push('Rescue team');
+  if (n('recy')) out.push(`+${n('recy')} recycling shells`);
+  return out.length ? `<span class="perks">${sanctIcon()}${out.map((t) => `<em>${t}</em>`).join('')}</span>` : '';
+}
 
 /* ---- ui.js ---- */
 /* ===================== UI: one icon family, glossy toy style (art ref: icon sheet) ===================== */
@@ -2517,7 +2559,7 @@ let bannerTO = 0;
 ui.night = function () {
   levelFacts = []; ui.hud(); if (!started || PLAY) return;
   const L = spec; if (L.attract) return; $('#bannerT').className = 'ribbon' + (L.big ? ' coral' : '');
-  $('#bannerT').innerHTML = `<small>${isDaily(night) ? 'DAILY BEACH' : L.big ? 'BIG HATCH · LEVEL ' + (night + 1) : 'LEVEL ' + (night + 1)}</small><i class="place">${L.place || CHAPTERS[(night / 10 | 0) % CHAPTERS.length]}</i>${L.name}${L.new ? `<span class="new">NEW · ${L.new}</span>` : L.tag ? `<span class="new tag">${L.tag}</span>` : ''}${goal ? `<span class="goalb">${ICON.target}Bonus: ${goal.t}</span>` : ''}`;
+  $('#bannerT').innerHTML = `<small>${isDaily(night) ? 'DAILY BEACH' : L.big ? 'BIG HATCH · LEVEL ' + (night + 1) : 'LEVEL ' + (night + 1)}</small><i class="place">${L.place || CHAPTERS[(night / 10 | 0) % CHAPTERS.length]}</i>${L.name}${L.new ? `<span class="new">NEW · ${L.new}</span>` : L.tag ? `<span class="new tag">${L.tag}</span>` : ''}${goal ? `<span class="goalb">${ICON.target}Bonus: ${goal.t}</span>` : ''}${sanctChips()}`;
   ui.boostTip(); $('#banner').classList.add('on'); clearTimeout(bannerTO); bannerTO = setTimeout(() => $('#banner').classList.remove('on'), L.new ? 3800 : 2400); if (L.big) { buzz([30, 40, 30]); }
 };
 let capT = 0;
@@ -2758,6 +2800,19 @@ function endNight() {
 // the ocean bonus: a first taste after level 3, then after every 5th level (first clear only)
 const swimAfter = (i) => i + 1 === 3 || (i + 1) % 5 === 0;
 const boostName = (k, mood) => (k === 'surge' && ['dawn', 'sunrise', 'fog'].includes(mood) ? 'Sun rush' : BOOST_INFO[k][0]);
+// bonus card: the Swim Frenzy after this level. First swim after the clear is automatic; after that, one rewarded swim a day
+function swimCard(i, leaveMap) {
+  const ok = !!PROG.best[i], fresh = ok && PROG.swimDay !== today();
+  const v = document.createElement('div'); v.className = 'veil lvc swc'; v.style.zIndex = 13;
+  v.innerHTML = `<div class="card"><div class="ribbon">Bonus round</div><button class="pclose" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" stroke="#fff" stroke-width="3.6" stroke-linecap="round"/></svg></button><div class="inner">
+    <div class="swhero">${ICON.wave}<b>Swim Frenzy</b></div>
+    <div class="lvx sea"><div class="lvi">${ICON.turtle(skinNow)}</div><div><b>Swim out with your hatchlings</b><span>Tap the plastic before they swim into it. Leave the jellyfish: that's their food.</span></div></div>
+    <div class="lvx"><div class="lvi">${ICON.bolt}</div><div><b>${fresh ? 'Win up to 2 boosts' : ok ? 'Practice swim' : 'Win up to 2 boosts'}</b><span>${fresh || !ok ? `Clear ${SW_GOAL[0]} pieces for a boost, ${SW_GOAL[1]} for two.` : 'Today\'s rewarded swim is done. Rewards return tomorrow.'}</span></div></div>
+    <div class="btns">${ok ? `<button class="b-green hero" id="swgo">${ICON.play}Swim</button>` : `<button class="b-navy" disabled>${ICON.lock}Clear level ${i + 1} first</button>`}<button class="b-navy" id="lvx">${ICON.map}Map</button></div></div></div>`;
+  $('#app').appendChild(v); tone(note(7), .07, 'triangle', .05);
+  v.querySelector('#lvx').onclick = () => { au(); dismiss(v); };
+  const go = v.querySelector('#swgo'); if (go) go.onclick = () => { au(); dismiss(v); if (fresh) PROG.swimDay = today(); saveProg(); wipe(() => { leaveMap(); swimFrenzy({ n: 10, practice: !fresh, onDone: () => showMap() }); }); };
+}
 // level card (Candy Crush style): opens after the map walk, or when you tap a level
 function lvExtras(i, L, best) {
   const k = i >= 2 ? POWERS[i % 4] : null; let h = '';
@@ -2901,6 +2956,7 @@ function showMap(opts) {
   for (let i = 0; i < N; i++) {
     const st = i < cur || (done100 && i === cur) ? 'done' : i === cur ? 'cur' : 'lock', b = W && i === W.i ? W.prev : PROG.best[i] || 0, big = (i + 1) % 25 === 0, boss = !big && (i + 1) % 10 === 0, hz = st !== 'done' ? HAZ(i) : null;
     if (i % 10 === 0 && i > 0) nodes += `<div class="chapmark" style="top:${f1(bandBot(i / 10) - 14)}px;${pathX(bandBot(i / 10)) > Wd / 2 ? 'left:10px' : 'right:10px'}"><small>Chapter ${i / 10 + 1}</small>${chapterOf(i).split(' · ')[0]}</div>`;
+    if (swimAfter(i)) { const sd = px(i) > Wd / 2 ? -1 : 1, bx = clamp(px(i) + sd * 64, 30, Wd - 30), by = py(i) - 30, ok = !!PROG.best[i], fresh = ok && PROG.swimDay !== today(); nodes += `<button class="bnode ${ok ? 'open' : 'lock'} ${fresh ? 'fresh' : ''} pre" data-b="${i}" style="left:${f1(bx - 26)}px;top:${f1(by - 26)}px" aria-label="Swim Frenzy bonus">${ICON.wave}<b>Bonus</b></button>`; }
     nodes += `<button class="node ${st}${big ? ' big boss' : boss ? ' boss' : ''} pre" data-i="${i}" style="left:${f1(px(i) - 32)}px;top:${f1(py(i) - 32)}px"><span>${i + 1}</span>${st === 'lock' ? `<i class="lk">${lockI}</i>` : ''}${hz ? `<i class="hz">${hz}</i>` : ''}${PROG.goals[i] ? `<i class="gk">${ICON.check}</i>` : ''}${big ? `<i class="crown">${ICON.crown}</i>` : boss ? `<i class="crown chest">${PROG.chests[i / 10 | 0] ? ICON.chestOpen : ICON.chest}</i>` : ''}<em>${st === 'done' ? [0, 1, 2].map((s) => `<i class="${s < b ? 'on' : ''}"></i>`).join('') : ''}</em></button>`;
   }
   const v = document.createElement('div'); v.className = 'map';
@@ -2920,7 +2976,7 @@ function showMap(opts) {
     ${nodes}<div class="tease" style="top:${f1(topY - 150)}px"><div class="tc">${showCh < 9 ? `<small>Next beach</small><b>${nextName}</b><span>${lockI}Finish chapter ${showCh + 1} to reveal</span>` : `<small>The whole coast</small><b>More beaches coming soon</b><span>${ICON.turtle()}You reached the last beach</span>`}</div></div>
     <i class="meT">${ICON.turtle(skinNow)}</i></div></div>
     <div class="mfront"><i class="fl"></i><i class="fr"></i></div>
-    <div class="mapbot"><div class="dkm"><button class="b-gold sq" id="mshop" aria-label="Shop">${ICON.shop}</button><span>Shop</span></div><button class="b-green hero" id="mplay">${ICON.play}${done100 ? 'Replay' : 'Level ' + (cur + 1)}</button><div class="dkm ${sanctNext() && !PROG.sanctIntro ? 'nudge' : ''}"><button class="b-purple sq" id="msanct" aria-label="Sanctuary">${sanctIcon()}${sanctNext() ? '<em class="nb">NEW</em>' : ''}</button><span>Sanctuary</span></div></div>`;
+    <div class="mapbot"><div class="dkm"><button class="b-gold sq" id="mshop" aria-label="Shop">${ICON.shop}</button><span>Shop</span></div><button class="b-green hero" id="mplay">${ICON.play}${done100 ? 'Replay' : 'Level ' + (cur + 1)}</button><div class="dkm"><button class="b-purple sq" id="msanct" aria-label="Sanctuary">${sanctIcon()}${sanctNext() ? '<em class="nb"></em>' : ''}</button><span>Sanctuary</span></div></div>${sanctNext() && !PROG.sanctIntro ? '<div class="mnudge">Build in your Sanctuary!</div>' : ''}`;
   $('#app').appendChild(v);
   const sc = v.querySelector('.scroller'), me = v.querySelector('.meT'), bar = v.querySelector('#chapbar'), clouds = v.querySelector('.mclouds'), front = v.querySelector('.mfront');
   const placeMe = (i) => { me.style.left = (px(i) - 26) + 'px'; me.style.top = (py(i) - 84) + 'px'; };
@@ -2984,11 +3040,12 @@ function showMap(opts) {
     setTimeout(() => { sc.scrollTo({ top: Math.max(0, py(cur) - sc.clientHeight * .55), behavior: 'smooth' }); walk(from, cur, 1000).then(() => { const node = v.querySelector(`.node[data-i="${cur}"]`); if (node) { node.classList.add('unlocked'); sfx.ready(); buzz([14, 30, 20]); } }); }, 520);
   }
   PROG.mapSeen = cur; saveProg(); track('map_open', { lv: cur + 1 });
-  const startAt = (i) => { au(); dismiss(v); $('#app').classList.add('playing'); begin(i); running = true; ui.night(); };
+  const startAt = (i) => { au(); dismiss(v); $('#app').classList.add('playing'); begin(i); running = true; ui.hud(); setTimeout(() => { if (running && !ended) ui.night(); }, 260); };
   v.querySelectorAll('.node').forEach((n) => { n.onclick = () => { const i = +n.dataset.i; if (i <= cur) lvCard(i, startAt); else { n.classList.remove('shake'); void n.offsetWidth; n.classList.add('shake'); sfx.uhoh(); buzz(20); ui.toast && ui.toast(`Finish level ${cur + 1} first`); } }; });
   v.querySelector('#mplay').onclick = () => startAt(cur);
   v.querySelector('#mshop').onclick = () => { au(); showShop(); };
-  v.querySelector('#msanct').onclick = () => { au(); showSanct(() => { const b = v.querySelector('#msanct .nb'); if (b && !sanctNext()) b.remove(); }); };
+  v.querySelector('#msanct').onclick = () => { au(); const n = v.querySelector('.mnudge'); if (n) n.remove(); showSanct(() => { const b = v.querySelector('#msanct .nb'); if (b && !sanctNext()) b.remove(); }); };
+  v.querySelectorAll('.bnode').forEach((n) => { n.onclick = () => swimCard(+n.dataset.b, () => { v.remove(); }); });
   v.querySelector('#mhome').onclick = () => { au(); showSettings(); };
 }
 
@@ -3157,7 +3214,7 @@ function showShop() {
       ${offer('b2', ICON.chestOpen, 'linear-gradient(#3a5a8e,#1d3558)', '20 boosts + 300 shells', 'The big beach bundle', '$4.99', 'b-gold', false, true)}
       ${offer('b3', ICON.ad, 'linear-gradient(#ff9c7d,#dc4f34)', 'No level ads', 'Videos stay optional', PROG.noAds ? 'Owned' : '$2.99', 'b-gold', PROG.noAds)}
       <div class="demo">DEMO STORE · NO REAL CHARGES</div>
-      <div class="btns"><button class="b-navy" id="bc">Back</button></div>`);
+      <button class="b-navy" id="bc" hidden>Back</button>`);
     v.querySelector('#bc').onclick = () => { au(); dismiss(v); };
     const add = (n, sh, id) => { PROG.boosts += n; PROG.shells = (PROG.shells || 0) + (sh || 0); saveProg(); sfx.win(); buzz([20, 30, 20]); track('purchase_tap', { id }); draw(); refreshHome(); };
     v.querySelector('#b1').onclick = () => add(5, 0, 'boost5'); v.querySelector('#b2').onclick = () => add(20, 300, 'bundle'); v.querySelector('#b4').onclick = () => add(0, 120, 'shells120');
@@ -3494,15 +3551,16 @@ function swimFrenzy(opt) {
   }
   function result() {
     if (shown) return; shown = true; slow = 1; cap.classList.remove('on');
-    const reached = school.filter((s) => s.st !== 'lost').length, shells = Math.min(6, cleared / 2 | 0) + (!skipped && tangles === 0 ? 2 : 0), boosts = earned;
+    const reached = school.filter((s) => s.st !== 'lost').length, shells = opt.practice ? 0 : Math.min(6, cleared / 2 | 0) + (!skipped && tangles === 0 ? 2 : 0), boosts = opt.practice ? 0 : earned;
     PROG.shells = (PROG.shells || 0) + shells; PROG.boosts = (PROG.boosts || 0) + boosts; PROG.swimSeen = 1; saveProg(); ui.fact('sea');
     track('swim_end', { n: opt.n, reached, cleared, tangles, shells, boosts, skipped, t: Math.round(t) });
     const v = document.createElement('div'); v.className = 'veil';
     v.innerHTML = `<div class="card"><div class="ribbon">Out to sea!</div><div class="inner">
       <div class="res"><div class="tu">${ICON.turtle(skinNow)}</div><div><div class="big"><b>0</b><span> / ${opt.n}</span></div><div class="lbl">reached the open sea</div></div></div>
       <div class="srow"><div class="stat">${ICON.bin}<span>${cleared} plastic cleared</span></div><div class="stat sh">${ICON.shell}<span>+<b>0</b></span></div></div>
-      ${!skipped && tangles === 0 ? `<div class="bonus met">${ICON.check}<span>Nobody got tangled</span><b>+2</b></div>` : ''}
-      ${boosts ? `<div class="reward pop-in" style="animation-delay:.7s"><div class="rc">${ICON.bolt}</div><div><b>+${boosts} boost${boosts > 1 ? 's' : ''} saved</b><span>On any level, tap the glowing boost button to use it</span></div></div>` : `<div class="goal">${ICON.bolt}Clear ${SW_GOAL[0]} pieces next time to win a boost</div>`}
+      ${opt.practice ? `<div class="goal">${ICON.wave}Practice swim · rewards return tomorrow</div>` : ''}
+      ${!skipped && tangles === 0 && !opt.practice ? `<div class="bonus met">${ICON.check}<span>Nobody got tangled</span><b>+2</b></div>` : ''}
+      ${opt.practice ? '' : boosts ? `<div class="reward pop-in" style="animation-delay:.7s"><div class="rc">${ICON.bolt}</div><div><b>+${boosts} boost${boosts > 1 ? 's' : ''} saved</b><span>On any level, tap the glowing boost button to use it</span></div></div>` : `<div class="goal">${ICON.bolt}Clear ${SW_GOAL[0]} pieces next time to win a boost</div>`}
       ${fieldNote(FACTCARD.sea)}
       <div class="btns"><button class="b-green hero pop-in" id="swc" style="animation-delay:.35s">${ICON.play}Continue</button></div></div></div>`;
     el.appendChild(v); countUp(v.querySelector('.big b'), reached, 600); if (shells) setTimeout(() => { countUp(v.querySelector('.stat.sh b'), shells, 500); sfx.coin(); }, 600);

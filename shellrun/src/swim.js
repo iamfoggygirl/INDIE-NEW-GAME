@@ -246,15 +246,16 @@ function swimFrenzy(opt) {
   }
   function result() {
     if (shown) return; shown = true; slow = 1; cap.classList.remove('on');
-    const reached = school.filter((s) => s.st !== 'lost').length, shells = Math.min(6, cleared / 2 | 0) + (!skipped && tangles === 0 ? 2 : 0), boosts = earned;
+    const reached = school.filter((s) => s.st !== 'lost').length, shells = opt.practice ? 0 : Math.min(6, cleared / 2 | 0) + (!skipped && tangles === 0 ? 2 : 0), boosts = opt.practice ? 0 : earned;
     PROG.shells = (PROG.shells || 0) + shells; PROG.boosts = (PROG.boosts || 0) + boosts; PROG.swimSeen = 1; saveProg(); ui.fact('sea');
     track('swim_end', { n: opt.n, reached, cleared, tangles, shells, boosts, skipped, t: Math.round(t) });
     const v = document.createElement('div'); v.className = 'veil';
     v.innerHTML = `<div class="card"><div class="ribbon">Out to sea!</div><div class="inner">
       <div class="res"><div class="tu">${ICON.turtle(skinNow)}</div><div><div class="big"><b>0</b><span> / ${opt.n}</span></div><div class="lbl">reached the open sea</div></div></div>
       <div class="srow"><div class="stat">${ICON.bin}<span>${cleared} plastic cleared</span></div><div class="stat sh">${ICON.shell}<span>+<b>0</b></span></div></div>
-      ${!skipped && tangles === 0 ? `<div class="bonus met">${ICON.check}<span>Nobody got tangled</span><b>+2</b></div>` : ''}
-      ${boosts ? `<div class="reward pop-in" style="animation-delay:.7s"><div class="rc">${ICON.bolt}</div><div><b>+${boosts} boost${boosts > 1 ? 's' : ''} saved</b><span>On any level, tap the glowing boost button to use it</span></div></div>` : `<div class="goal">${ICON.bolt}Clear ${SW_GOAL[0]} pieces next time to win a boost</div>`}
+      ${opt.practice ? `<div class="goal">${ICON.wave}Practice swim · rewards return tomorrow</div>` : ''}
+      ${!skipped && tangles === 0 && !opt.practice ? `<div class="bonus met">${ICON.check}<span>Nobody got tangled</span><b>+2</b></div>` : ''}
+      ${opt.practice ? '' : boosts ? `<div class="reward pop-in" style="animation-delay:.7s"><div class="rc">${ICON.bolt}</div><div><b>+${boosts} boost${boosts > 1 ? 's' : ''} saved</b><span>On any level, tap the glowing boost button to use it</span></div></div>` : `<div class="goal">${ICON.bolt}Clear ${SW_GOAL[0]} pieces next time to win a boost</div>`}
       ${fieldNote(FACTCARD.sea)}
       <div class="btns"><button class="b-green hero pop-in" id="swc" style="animation-delay:.35s">${ICON.play}Continue</button></div></div></div>`;
     el.appendChild(v); countUp(v.querySelector('.big b'), reached, 600); if (shells) setTimeout(() => { countUp(v.querySelector('.stat.sh b'), shells, 500); sfx.coin(); }, 600);

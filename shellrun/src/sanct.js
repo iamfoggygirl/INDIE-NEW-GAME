@@ -64,7 +64,7 @@ const SA = {
 };
 const PLOTS = { hatch: [104, 200, 1.25], recy: [250, 206, 1.15], vol: [186, 146, 1.2], vet: [96, 128, 1.12], tower: [270, 134, 1.12] };
 function sanctScene(sel) {
-  let s = `<svg class="sa-svg" viewBox="0 0 360 250" preserveAspectRatio="xMidYMid meet">
+  let s = `<svg class="sa-svg" viewBox="0 6 360 236" preserveAspectRatio="xMidYMid meet">
     <defs><linearGradient id="saSea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fe0e0"/><stop offset="1" stop-color="#2fb0c8"/></linearGradient>
     <linearGradient id="saSand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe7b0"/><stop offset="1" stop-color="#f2c47a"/></linearGradient></defs>
     <rect width="360" height="250" rx="18" fill="url(#saSea)"/>
@@ -90,12 +90,12 @@ function showSanct(onClose) {
       : n >= 3 ? `<button class="b-navy" disabled>${ICON.check}Fully built</button>`
       : have >= cost ? `<button class="b-gold hero" id="sab">${ICON.shell}${n ? 'Upgrade' : 'Build'} · ${cost}</button>`
       : `<button class="b-navy" id="sas">${ICON.shell}${cost - have} more shells</button>`;
-    v.innerHTML = panel('Sanctuary', `<div class="sa-top"><button class="sa-q ${how ? 'on' : ''}" aria-label="How it works">?</button><div class="lbl">Your turtle sanctuary</div><div class="pill shp sm">${ICON.shell}<span>${have}</span></div></div>
+    v.innerHTML = panel('Sanctuary', `<div class="sa-top"><button class="sa-q ${how ? 'on' : ''}" aria-label="How it works">?</button><div class="lbl">Your turtle sanctuary</div><button class="sa-crew" id="sac" aria-label="Crew">${ICON.turtle(skinNow)}</button><div class="pill shp sm">${ICON.shell}<span>${have}</span></div></div>
       ${how ? `<div class="sa-how"><div><i>1</i><span>Earn shells on the beach</span></div><div><i>2</i><span>Build or upgrade a place</span></div><div><i>3</i><span>It helps you on every level</span></div></div>` : ''}
       <div class="sa-map">${sanctScene(sel)}</div>
       <div class="sa-info ${built ? 'boom' : ''}"><div class="sa-ic"><svg viewBox="-56 -76 112 86">${SA[b.k](Math.max(1, n))}</svg></div><div class="sa-tx"><b>${b.name}</b><div class="sa-lv">${[0, 1, 2].map((i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</div>
         <span class="sa-now">${n ? b.perk(n) : 'Not built yet'}</span>${n < 3 && open ? `<span class="sa-nx">${ICON.play}Next: ${b.perk(n + 1)}</span>` : ''}<span class="sa-why">${b.why}</span></div></div>
-      <div class="btns">${btn}<div class="duo"><button class="b-coral" id="sac">${ICON.turtle(skinNow)}Crew</button><button class="b-navy" id="sax">Back</button></div></div>`);
+      <div class="btns">${btn}<button class="b-navy" id="sax" hidden>Back</button></div>`);
     v.querySelector('.sa-q').onclick = () => { how = !how; tone(note(5), .06, 'triangle', .05); draw(); };
     v.querySelectorAll('.sa-p').forEach((g) => { g.onclick = () => { sel = g.dataset.k; tone(note(3 + SANCT.findIndex((q) => q.k === sel)), .08, 'triangle', .06); buzz(8); draw(); }; });
     const bb = v.querySelector('#sab'); if (bb) bb.onclick = () => {
@@ -118,3 +118,15 @@ let sanctIco = ''; const sanctIcon = () => sanctIco || (sanctIco = (() => {
     <rect x="4.5" y="15.5" width="15" height="11" rx="2" fill="url(#gN)" ${st(2)}/><path d="M2.5 17 L12 8 L21.5 17z" fill="url(#gY)" ${st(2)}/>
     <rect x="9.5" y="19.5" width="5" height="7" rx="1.2" fill="#7a471d" ${st(1.4)}/>${hl(8.5, 12.5, 3, 1, -40, .65)}`);
 })());
+
+/* the level banner lists the Sanctuary help that is active right now, so the perks are felt, not hidden */
+function sanctChips() {
+  if (PLAY || attract) return '';
+  const n = (k) => sanctLv(k), out = [];
+  if (n('hatch') && night >= 2) out.push(`Boost ${25 + n('hatch') * 12}% charged`);
+  if (n('tower') && night >= 2) out.push(`Boosts +${n('tower') * 15}%`);
+  if (n('vol')) out.push('Volunteer on duty');
+  if (n('vet')) out.push('Rescue team');
+  if (n('recy')) out.push(`+${n('recy')} recycling shells`);
+  return out.length ? `<span class="perks">${sanctIcon()}${out.map((t) => `<em>${t}</em>`).join('')}</span>` : '';
+}

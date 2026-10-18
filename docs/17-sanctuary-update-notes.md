@@ -90,3 +90,25 @@
 - Settings → How to play, and Guide → Sanctuary, both work.
 - Fresh-player onboarding through level 1 → map → level 2 card.
 - Panels fit at 390×844, 375×667 and 320×568.
+
+## Phone fixes (18 Oct, from the owner's iPhone screenshots)
+
+**Panel fixes**
+- Panel titles were cut off on iOS because the scrolling area painted over the ribbon. The ribbon now sits on top.
+- Removed the sticky bottom buttons, which covered the Hatchery details and the Shop's last offer.
+- The Sanctuary fits a phone without scrolling: a smaller island, a Crew shortcut next to the shells, and X to close.
+- The Shop drops its duplicate Back button (X and a tap outside close it).
+- Win and fail cards hide the field note on short screens, so every button shows.
+
+**Map fixes**
+- The NEW badge on the map's Sanctuary button was clipped by the blurred glass dock (iOS clips children of blurred elements). It is now a red dot inside the button.
+- The "Build in your Sanctuary!" bubble now sits outside the dock.
+
+**Bonus rounds on the map**
+- A round wave bubble marked "Bonus" sits beside every level that has a Swim Frenzy (3, 5, 10, 15 …). It is locked until that level is cleared.
+- The first swim plays automatically after the clear.
+- After that, tapping the bubble gives one rewarded swim per day (`PROG.swimDay`). The bubble glows when it is ready. Extra swims are practice with no rewards, so it can't be farmed.
+
+**Other**
+- The level banner lists the Sanctuary help active on that level (purple chips): "Boost 37% charged", "Volunteer on duty", "Rescue team", "+N recycling shells".
+- The banner's entrance no longer depends on a fade that could start hidden; it slides in at full opacity.
