@@ -564,6 +564,40 @@ button.wide{width:100%;margin-top:10px}
 .swim .sw-skip svg{width:20px;height:20px;filter:drop-shadow(0 2px 0 rgba(13,23,38,.8))}.swim .sw-skip:active{transform:scale(.94)}
 .sw-ban{flex-direction:column;align-items:center;gap:14px}
 .sw-sub{display:flex;align-items:center;gap:6px;font-family:var(--disp);font-weight:700;font-size:17px;color:#fff;-webkit-text-stroke:4px #0d2a4a;paint-order:stroke fill;text-shadow:0 3px 0 #0d2a4a;padding:0 20px;text-align:center}.sw-sub svg{width:24px;height:24px;flex:none}
+
+/* ===== Oct 18: panels that always fit, always scroll, always close ===== */
+.veil{overflow:hidden}
+.veil>.card{display:flex;flex-direction:column;max-height:calc(100vh - 96px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));max-height:calc(100dvh - 96px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));margin-top:40px}
+.veil>.card>.inner{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;min-height:0;flex:1 1 auto;scrollbar-width:none}
+.veil>.card>.inner::-webkit-scrollbar{display:none}
+.veil>.card .glist{max-height:none;overflow:visible;margin:4px 0 0;padding:0}
+.pclose{position:absolute;top:-12px;right:-10px;z-index:3;width:44px;height:44px;border-radius:50%;padding:0;display:grid;place-items:center;background:linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,0) 50%),linear-gradient(#ff8b7b,#ef4c3c 60%,#c43126);border:3px solid var(--o);box-shadow:0 4px 0 var(--o),inset 0 2px 0 rgba(255,255,255,.4);cursor:pointer;animation:none!important}
+.pclose svg{width:20px;height:20px;filter:drop-shadow(0 1.5px 0 rgba(13,23,38,.7))}
+.pclose:active{transform:translateY(3px);box-shadow:0 1px 0 var(--o)}
+.veil>.card>.inner .btns:last-child{position:sticky;bottom:-16px;margin:12px -16px -16px;padding:10px 16px 16px;background:linear-gradient(rgba(250,240,214,0),var(--cr,#faf0d6) 22%)}
+.veil>.card.wst{margin-top:100px;max-height:calc(100vh - 130px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));max-height:calc(100dvh - 130px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
+
+.gtabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:#e9dcbb;border:2px solid #d8c69d;border-radius:14px;padding:3px;margin-bottom:6px}
+.gtab{min-height:34px;padding:0 1px;min-width:0;overflow:hidden;text-overflow:ellipsis;border:0;border-radius:10px;background:transparent;font-family:var(--disp);font-weight:700;font-size:12.5px;color:var(--sub);-webkit-text-stroke:0;text-shadow:none;box-shadow:none;cursor:pointer;white-space:nowrap}
+.gtab.on{background:linear-gradient(#fffaf0,#f6ead0);color:var(--txt);box-shadow:0 2px 0 #c9b483,inset 0 1px 0 #fff}
+.gbody{text-align:left}.gbody .gsec:first-child{margin-top:6px}
+.gi.gs .gic{background:linear-gradient(#bff0ea,#8fd6cf);width:52px}.gi.gs .gic svg{width:48px;height:38px}
+.gl{font-style:normal;font-family:var(--body);font-weight:800;font-size:11px;color:#a3762a;background:#f6e3b4;border-radius:99px;padding:1px 7px;margin-left:4px}
+.guide #gsa{margin-top:12px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:50px;font-size:17px}.guide #gsa svg{width:30px;height:30px}
+.b-navy.wide,.b-purple.wide{width:100%}
+
+.sa-top .lbl{flex:1}.sa-q{flex:none;width:34px;height:34px;border-radius:50%;padding:0;font-family:var(--disp);font-weight:700;font-size:19px;color:#fff;-webkit-text-stroke:3px var(--o);paint-order:stroke fill;background:linear-gradient(#c9b0ff,#7a52d8);border:2.5px solid var(--o);box-shadow:0 3px 0 var(--o);cursor:pointer}
+.sa-q.on{background:linear-gradient(#ffe27a,#ee9c12)}
+.sa-how{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0 0 8px;animation:pipop .4s var(--spring)}
+.sa-how div{display:flex;flex-direction:column;align-items:center;gap:4px;background:#efe5cc;border:2px solid #d8c69d;border-radius:12px;padding:6px 4px}
+.sa-how i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--disp);font-weight:700;font-size:14px;color:#fff;background:linear-gradient(#a4ee70,#329a25);border:2px solid var(--o)}
+.sa-how span{font-family:var(--body);font-weight:800;font-size:11.5px;line-height:1.2;color:var(--txt);text-align:center}
+
+.dkm{position:relative}.dkm.nudge::before{content:'Build here!';position:absolute;bottom:calc(100% + 12px);right:-4px;white-space:nowrap;font-family:var(--disp);font-weight:700;font-size:14px;color:var(--txt);background:#fffaf0;border:2.5px solid var(--o);border-radius:12px;padding:5px 10px;box-shadow:0 4px 0 var(--o);animation:nudgeB 1.3s ease-in-out infinite}
+.dkm.nudge::after{content:'';position:absolute;bottom:calc(100% + 4px);right:22px;width:12px;height:12px;background:#fffaf0;border-right:2.5px solid var(--o);border-bottom:2.5px solid var(--o);transform:rotate(45deg);animation:nudgeB 1.3s ease-in-out infinite}
+@keyframes nudgeB{50%{translate:0 -5px}}
+@media (max-width:350px){.gtab{font-size:11px}}
+.inner>.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.inner>.duo button{font-size:15px;min-height:48px;padding:6px 8px;gap:6px}.inner>.duo button svg{width:22px;height:22px}
 </style>
 </head>
 <body>
@@ -1597,7 +1631,7 @@ let night = 0, crew = 0, carry = 0, spec = INTRO[0], attract = false, paused = f
 const season = { met: 0, saved: 0, spawned: 0, binned: 0 };
 let T = [], litter = [], rocks = [], crabs = [], gulls = [], tourists = [], logs = [], nests = [], balls = [], lamps = [], dogs = [], pickups = [];
 const wave = { st: 'off', t: 0, front: SHORE_Z, crestZ: SHORE_Z - 7, reach: 2.6, k: 0, ck: 0, tideT: 0, at: [], done: [], big: false };
-let volT = 12, playHold = false, heatK = 0, flipGuardT = 0, goldIdx = -1, goldSaved = false, lvSp = 0, lvBin = 0, maxCombo = 0, bites = 0, grabs = 0, pickN = 0, pickCool = 0, shellsGot = 0, goal = null, lastHit = { x: 0, z: 0 };
+let surprise = null, volT = 12, playHold = false, heatK = 0, flipGuardT = 0, goldIdx = -1, goldSaved = false, lvSp = 0, lvBin = 0, maxCombo = 0, bites = 0, grabs = 0, pickN = 0, pickCool = 0, shellsGot = 0, goal = null, lastHit = { x: 0, z: 0 };
 let spawnLeft = 0, spawnT = 0, safeN = 0, lostN = 0, total = 0, binnedN = 0, running = false, ended = false, time = 0, nightT = 0, windLeft = 0, windT = 0;
 let evDone = [], lastTapT = 0, idleHeartT = 8, dangerOn = false, dangerT = 0, passed = false, taught = {}, hand = null, combo = 0, comboT = 0, comboKind = 'tidy', slow = 1, slowT = 0, freeze = 0, lastOne = false, tidyNow = 0;
 const surfLog = [];
@@ -1638,7 +1672,7 @@ function freeSpot(minD, zmin, zmax, L) {
 }
 function startNight(i) {
   clearNight(); night = i; const L = spec = levelSpec(i); ended = false; applyLook(L.mood, L.terrain); powerKind = i >= 2 ? POWERS[i % 4] : null; charge = powerKind ? .25 + perk('hatch') * .12 : 0; volT = 12; powerReady = false; surgeT = rangerT = 0; paused = false; if (vol.st === 'patrol') { vol.st = 'idle'; vol.g.visible = false; }
-  introMax = introT = attract ? 0 : (i === 0 ? 1.5 : 1.1); evDone = []; lastTapT = 0; idleHeartT = 8; dangerOn = false; passed = false; ui.danger(false); rainT = 4; boltT = rnd(5, 9);
+  introMax = introT = attract ? 0 : (i === 0 ? 1.5 : 1.1); evDone = []; surprise = pickSurprise(i, L); lastTapT = 0; idleHeartT = 8; dangerOn = false; passed = false; ui.danger(false); rainT = 4; boltT = rnd(5, 9);
   total = L.fresh; season.met += L.fresh; spawnLeft = total; spawnT = attract ? .9 : (i === 0 ? 1.6 : 1.1); safeN = 0; lostN = 0; binnedN = 0; running = true; nightT = 0; lastOne = false; combo = 0; slow = 1; hand = null;
   windLeft = L.wind || 0; windT = 4; streamG.visible = !!L.stream;
   heatK = 0; sunRise(0); flipGuardT = 0; goldSaved = false; lvSp = lvBin = 0; maxCombo = 0; bites = grabs = 0; pickN = 0; pickCool = 0; shellsGot = 0;
@@ -1888,6 +1922,7 @@ function update(dt) {
   // wind blows bags in from the side
   if (windLeft > 0 && (windT -= dt) <= 0) { windLeft--; windT = rnd(5, 8); const left = Math.random() < .5; addLitter('bag', left ? -6.5 : 6.5, rnd(SHORE_Z + 2, NEST_Z - 2.5), true); if (!taught.wind) { taught.wind = 1; ui.cap('The wind brings bags…', 2.2); } }
   // surprises that fire as the night goes on
+  if (surprise && running && !attract && (total - spawnLeft) / total >= surprise.at) { const k = surprise.kind; surprise = null; if (k === 'lucky') { dropPickup(rnd(-2.6, 2.6), rnd(SHORE_Z + 3, NEST_Z - 3)); if (!hand) ui.cap('Lucky find! Grab the boost', 1.8); } else doEvent(k); }
   if (running && !attract && L.events) { const fr = (total - spawnLeft) / total; L.events.forEach((ev, k) => { if (!evDone[k] && fr >= ev.at) { evDone[k] = 1; doEvent(ev.kind); } }); }
   // last heart: the screen pulses red
   const al = allowedLoss(), dg = running && !attract && al > 0 && lostN === al;
@@ -1958,6 +1993,15 @@ function update(dt) {
   if (L.stream && !taught.log && logs.some((l) => l.st === 'float' && T.some((t) => t.st === 'walk' && Math.abs(t.z - l.z) < .45 && Math.abs(t.x - l.x) < l.w / 2))) { taught.log = 1; const l = logs.find((l) => l.st === 'float'); hand = { o: l, y: .2, kind: 'log' }; ui.cap('Push the logs away!', 2.6); }
   if (hand) { const o = hand.o; const done = (hand.kind === 'pick' && (o.got || !pickups.includes(o))) || (hand.kind === 'dog' && o.st !== 'run' && o.st !== 'bounce') || (hand.kind === 'lamp' && !o.on) || (hand.kind === 'flip' && o.st !== 'flip') || (hand.kind === 'tangle' && o.st !== 'tangle') || (hand.kind === 'tourist' && o.st !== 'enter' && o.st !== 'stand') || (hand.kind === 'crab' && o.st !== 'walk' && o.st !== 'emerge') || ((hand.kind === 'litter' || hand.kind === 'drift') && o.st !== 'lie' && o.st !== 'drift') || (hand.kind === 'rock' && o.st !== 'idle') || (hand.kind === 'ball' && o.st !== 'roll') || (hand.kind === 'log' && o.st !== 'float'); if (done) { hand = null; ui.capOff(); } }
   if (running && !ended && !playHold && spawnLeft === 0 && T.every((t) => ['swim', 'gone', 'lost'].includes(t.st))) { ended = true; running = false; musicMood = 0; if (attract) setTimeout(() => { if (attract) { begin(-1); running = true; } }, 1800); else setTimeout(endNight, 1200); }
+}
+/* a surprise every time you play (not seeded): the same level never plays out exactly the same twice.
+   Drawn only from things this level already has, so it never springs something you haven't been taught. */
+function pickSurprise(i, L) {
+  if (attract || PLAY || i < 3 || i >= 100000 || L.teach || Math.random() > .8) return null;
+  const pool = [['lucky', 3], ['gust', 2], ['trash', 2], ['trip', 1.5]];
+  if (L.crabs) pool.push(['crabs', 2]); if (L.gulls) pool.push(['gull', 1.5]); if (L.balls) pool.push(['balls', 1.2]); if (L.tourists) pool.push(['tourist', 1]); if (i >= 9) pool.push(['hole', 1]);
+  let r = Math.random() * pool.reduce((a, p) => a + p[1], 0); for (const [k, w] of pool) if ((r -= w) <= 0) return { kind: k, at: rnd(.3, .78) };
+  return null;
 }
 function doEvent(kind) {
   const cap = (s) => { if (!hand) ui.cap(s, 1.7); };
@@ -2319,6 +2363,7 @@ function sanctScene(sel) {
 }
 function showSanct(onClose) {
   const v = document.createElement('div'); v.className = 'veil sanct'; v.style.zIndex = 14;
+  let how = !PROG.sanctIntro; PROG.sanctIntro = 1; saveProg();
   let sel = (sanctNext() || SANCT.find((b) => PROG.unlocked >= b.at && sanctLv(b.k) < 3) || SANCT[0]).k;
   const draw = (built) => {
     const b = SANCT.find((q) => q.k === sel), n = sanctLv(b.k), open = PROG.unlocked >= b.at, cost = SANCT_COST[n], have = PROG.shells || 0;
@@ -2326,11 +2371,13 @@ function showSanct(onClose) {
       : n >= 3 ? `<button class="b-navy" disabled>${ICON.check}Fully built</button>`
       : have >= cost ? `<button class="b-gold hero" id="sab">${ICON.shell}${n ? 'Upgrade' : 'Build'} · ${cost}</button>`
       : `<button class="b-navy" id="sas">${ICON.shell}${cost - have} more shells</button>`;
-    v.innerHTML = panel('Sanctuary', `<div class="sa-top"><div class="lbl">Build it with shells from the beach</div><div class="pill shp sm">${ICON.shell}<span>${have}</span></div></div>
+    v.innerHTML = panel('Sanctuary', `<div class="sa-top"><button class="sa-q ${how ? 'on' : ''}" aria-label="How it works">?</button><div class="lbl">Your turtle sanctuary</div><div class="pill shp sm">${ICON.shell}<span>${have}</span></div></div>
+      ${how ? `<div class="sa-how"><div><i>1</i><span>Earn shells on the beach</span></div><div><i>2</i><span>Build or upgrade a place</span></div><div><i>3</i><span>It helps you on every level</span></div></div>` : ''}
       <div class="sa-map">${sanctScene(sel)}</div>
       <div class="sa-info ${built ? 'boom' : ''}"><div class="sa-ic"><svg viewBox="-56 -76 112 86">${SA[b.k](Math.max(1, n))}</svg></div><div class="sa-tx"><b>${b.name}</b><div class="sa-lv">${[0, 1, 2].map((i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</div>
         <span class="sa-now">${n ? b.perk(n) : 'Not built yet'}</span>${n < 3 && open ? `<span class="sa-nx">${ICON.play}Next: ${b.perk(n + 1)}</span>` : ''}<span class="sa-why">${b.why}</span></div></div>
       <div class="btns">${btn}<div class="duo"><button class="b-coral" id="sac">${ICON.turtle(skinNow)}Crew</button><button class="b-navy" id="sax">Back</button></div></div>`);
+    v.querySelector('.sa-q').onclick = () => { how = !how; tone(note(5), .06, 'triangle', .05); draw(); };
     v.querySelectorAll('.sa-p').forEach((g) => { g.onclick = () => { sel = g.dataset.k; tone(note(3 + SANCT.findIndex((q) => q.k === sel)), .08, 'triangle', .06); buzz(8); draw(); }; });
     const bb = v.querySelector('#sab'); if (bb) bb.onclick = () => {
       if ((PROG.shells || 0) < cost || n >= 3) return;
@@ -2644,7 +2691,13 @@ const syncModal = () => $('#app').classList.toggle('modal', !!document.querySele
 new MutationObserver(syncModal).observe($('#app'), { childList: true, subtree: true });
 const countUp = (el, to, ms) => { const t0 = performance.now(); const step = (t) => { const u = Math.min(1, (t - t0) / ms), v = Math.round(to * (1 - Math.pow(1 - u, 3))); if (el.textContent !== String(v)) { el.textContent = v; if (v) tone(note(2 + (v % 7)), .04, 'triangle', .025); } if (u < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); };
 const chapterOf = (i) => CHAPTERS[(i / 10 | 0) % CHAPTERS.length];
-const panel = (ribbon, body, cls = '') => `<div class="card ${cls}"><div class="ribbon ${cls.includes('fail') ? 'coral' : ''}">${ribbon}</div><div class="inner">${body}</div></div>`;
+const panel = (ribbon, body, cls = '') => `<div class="card ${cls}"><div class="ribbon ${cls.includes('fail') ? 'coral' : ''}">${ribbon}</div><button class="pclose" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" stroke="#fff" stroke-width="3.6" stroke-linecap="round"/></svg></button><div class="inner">${body}</div></div>`;
+/* every panel closes the same three ways: the X, a tap outside the card, or the back key. Each one runs the panel's own Back/Done button so its tidy-up still happens */
+const BACK_IDS = ['cc', 'gx', 'dc', 'sx', 'cq', 'pr', 'bc', 'sax', 'hx', 'lvx'];
+function closeTop(v) { if (!v || v.classList.contains('out')) return; const b = BACK_IDS.map((id) => v.querySelector('#' + id)).find(Boolean); au(); if (b) b.click(); else dismiss(v); }
+document.addEventListener('click', (e) => { const x = e.target.closest && e.target.closest('.pclose'); if (x) { e.stopPropagation(); closeTop(x.closest('.veil')); } }, true);
+document.addEventListener('pointerdown', (e) => { const v = e.target; if (v.classList && v.classList.contains('veil') && v.querySelector(':scope > .card > .pclose')) closeTop(v); });
+addEventListener('keydown', (e) => { if (e.key !== 'Escape') return; const vs = [...document.querySelectorAll('.veil')].filter((v) => v.querySelector(':scope > .card > .pclose') && !v.classList.contains('out')); if (vs.length) closeTop(vs[vs.length - 1]); });
 const fieldNote = (txt, head = 'Field note') => txt ? `<div class="note"><div class="badge">${ICON.leafB}</div><div><small>${head}</small><p>${txt}</p></div></div>` : '';
 
 /* ---------- end of level ---------- */
@@ -2691,7 +2744,7 @@ function endNight() {
        ${canBring ? `<button class="b-teal" id="bring">${ICON.ad}Bring back ${back} · video</button>` : ''}
        <div class="duo" style="grid-template-columns:1fr"><button class="b-navy" id="maps">${ICON.map}Level map</button></div>`;
   const v = document.createElement('div'); v.className = 'veil';
-  v.innerHTML = `<div class="card ${pass ? '' : 'fail'}"><div class="stars"><div class="glow"></div>${[0, 1, 2].map((i) => i < stars ? ICON.star : ICON.starOff).join('')}</div><div class="ribbon ${pass ? '' : 'coral'}">${head}</div><div class="inner">
+  v.innerHTML = `<div class="card wst ${pass ? '' : 'fail'}"><div class="stars"><div class="glow"></div>${[0, 1, 2].map((i) => i < stars ? ICON.star : ICON.starOff).join('')}</div><div class="ribbon ${pass ? '' : 'coral'}">${head}</div><div class="inner">
     <div class="res"><div class="tu">${ICON.turtle(skinNow)}</div><div><div class="big"><b>0</b><span> / ${total}</span></div><div class="lbl">made it to the sea</div></div></div>
     <div class="srow"><div class="stat">${ICON.bin}<span>${binnedN}</span><div class="bar"><i style="width:0%"></i></div><span>${tidyPct}%</span></div>${earn ? `<div class="stat sh">${ICON.shell}<span>+<b>0</b></span></div>` : ''}</div>
     ${goalRow}
@@ -2728,10 +2781,9 @@ function lvExtras(i, L, best) {
 function lvCard(i, play) {
   const L = levelSpec(i), best = PROG.best[i] || 0, hz = HAZ(i);
   const v = document.createElement('div'); v.className = 'veil lvc'; v.style.zIndex = 13;
-  v.innerHTML = `<div class="card"><div class="ribbon">Level ${i + 1}</div><div class="inner"><div class="lvn">${hz ? `<i>${hz}</i>` : ''}<b>${L.name || chapterOf(i).split(' · ')[0]}</b></div><div class="lvs">${[0, 1, 2].map((s) => (s < best ? ICON.star : ICON.starOff)).join('')}</div>${lvExtras(i, L, best)}<div class="btns"><button class="b-green hero" id="lvp">${ICON.play}Play</button><button class="b-navy" id="lvx">${ICON.map}Map</button></div></div></div>`;
+  v.innerHTML = `<div class="card"><div class="ribbon">Level ${i + 1}</div><button class="pclose" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" stroke="#fff" stroke-width="3.6" stroke-linecap="round"/></svg></button><div class="inner"><div class="lvn">${hz ? `<i>${hz}</i>` : ''}<b>${L.name || chapterOf(i).split(' · ')[0]}</b></div><div class="lvs">${[0, 1, 2].map((s) => (s < best ? ICON.star : ICON.starOff)).join('')}</div>${lvExtras(i, L, best)}<div class="btns"><button class="b-green hero" id="lvp">${ICON.play}Play</button><button class="b-navy" id="lvx">${ICON.map}Map</button></div></div></div>`;
   $('#app').appendChild(v); tone(note(6), .07, 'triangle', .05);
   v.querySelector('#lvx').onclick = () => { au(); dismiss(v); };
-  v.addEventListener('pointerdown', (e) => { if (e.target === v) dismiss(v); });
   v.querySelector('#lvp').onclick = () => { dismiss(v); play(i); };
 }
 // a wave sweeps across the screen; the next screen is swapped in while it covers everything
@@ -2881,7 +2933,7 @@ function showMap(opts) {
     ${nodes}<div class="tease" style="top:${f1(topY - 150)}px"><div class="tc">${showCh < 9 ? `<small>Next beach</small><b>${nextName}</b><span>${lockI}Finish chapter ${showCh + 1} to reveal</span>` : `<small>The whole coast</small><b>More beaches coming soon</b><span>${ICON.turtle()}You reached the last beach</span>`}</div></div>
     <i class="meT">${ICON.turtle(skinNow)}</i></div></div>
     <div class="mfront"><i class="fl"></i><i class="fr"></i></div>
-    <div class="mapbot"><div class="dkm"><button class="b-gold sq" id="mshop" aria-label="Shop">${ICON.shop}</button><span>Shop</span></div><button class="b-green hero" id="mplay">${ICON.play}${done100 ? 'Replay' : 'Level ' + (cur + 1)}</button><div class="dkm"><button class="b-purple sq" id="msanct" aria-label="Sanctuary">${sanctIcon()}${sanctNext() ? '<em class="nb">NEW</em>' : ''}</button><span>Sanctuary</span></div></div>`;
+    <div class="mapbot"><div class="dkm"><button class="b-gold sq" id="mshop" aria-label="Shop">${ICON.shop}</button><span>Shop</span></div><button class="b-green hero" id="mplay">${ICON.play}${done100 ? 'Replay' : 'Level ' + (cur + 1)}</button><div class="dkm ${sanctNext() && !PROG.sanctIntro ? 'nudge' : ''}"><button class="b-purple sq" id="msanct" aria-label="Sanctuary">${sanctIcon()}${sanctNext() ? '<em class="nb">NEW</em>' : ''}</button><span>Sanctuary</span></div></div>`;
   $('#app').appendChild(v);
   const sc = v.querySelector('.scroller'), me = v.querySelector('.meT'), bar = v.querySelector('#chapbar'), clouds = v.querySelector('.mclouds'), front = v.querySelector('.mfront');
   const placeMe = (i) => { me.style.left = (px(i) - 26) + 'px'; me.style.top = (py(i) - 84) + 'px'; };
@@ -2960,7 +3012,7 @@ function showCrew() {
     const k = SKINS[sel], own = !!PROG.owned[sel], on = PROG.skin === sel, need = k.price - (PROG.shells || 0);
     v.innerHTML = panel('Crew', `<div class="crewtop"><div class="cprev">${ICON.turtle(sel)}</div><div><b>${k.name}</b><span>${own ? (on ? 'Your hatchlings wear this' : 'Owned') : `${ICON.shell}${k.price} shells`}</span></div><div class="pill shp sm">${ICON.shell}<span>${PROG.shells || 0}</span></div></div>
       <div class="crewgrid">${SKIN_ORDER.map((id) => `<button class="ct ${id === sel ? 'sel' : ''} ${PROG.owned[id] ? 'own' : ''}" data-id="${id}">${ICON.turtle(id)}${PROG.skin === id ? `<i class="eq">${ICON.check}</i>` : PROG.owned[id] ? '' : `<em>${ICON.shell}${SKINS[id].price}</em>`}</button>`).join('')}</div>
-      <div class="goal">Earn shells: new stars, bonus goals, golden hatchlings, daily beach</div>
+      <div class="goal">Earn shells: new stars, bonus goals, golden hatchlings, Swim Frenzy and the daily beach</div>
       <div class="btns">${own ? `<button class="b-green hero" id="cx" ${on ? 'disabled' : ''}>${on ? 'Equipped' : 'Wear it'}</button>` : need <= 0 ? `<button class="b-gold hero" id="cb">${ICON.shell}Unlock · ${k.price}</button>` : `<button class="b-navy" id="cs">${ICON.shell}${need} more shells · Shop</button>`}<button class="b-navy" id="cc">Back</button></div>`);
     v.querySelectorAll('.ct').forEach((b) => { b.onclick = () => { sel = b.dataset.id; tone(note(3 + SKIN_ORDER.indexOf(sel)), .08, 'triangle', .06); buzz(8); draw(); }; });
     const x = v.querySelector('#cx'); if (x) x.onclick = () => { PROG.skin = sel; setSkin(sel); saveProg(); sfx.ready(); buzz([12, 30, 12]); track('skin_equip', { skin: sel }); draw(); refreshHome(); };
@@ -2973,13 +3025,30 @@ function showCrew() {
 function burstUI(el) { if (!el) return; el.classList.remove('boom'); void el.offsetWidth; el.classList.add('boom'); }
 /* ---------- field guide: every fact you've met, collected ---------- */
 const GUIDE = [['litter', 'bottle', 'Beach trash'], ['castle', 'castle', 'Sandcastles'], ['crab', 'crab', 'Ghost crabs'], ['tangle', 'wind', 'Bags and lines'], ['hole', 'target', 'Holes'], ['wave', 'wave', 'The swim frenzy'], ['gull', 'gull', 'Seabirds'], ['light', 'lamp', 'Torches'], ['rain', 'rain', 'Storms'], ['chair', 'chair', 'Beach chairs'], ['lamp', 'lamp', 'Lights out'], ['gear', 'ball', 'Beach toys'], ['heat', 'sun', 'Hot sand'], ['net', 'net', 'Ghost nets'], ['dog', 'dog', 'Dogs'], ['tide', 'wave', 'King tides'], ['rut', 'rut', 'Tyre ruts'], ['moon', 'moon', 'Moonlight'], ['sea', 'wave', 'Out at sea'], ['hands', 'heart', 'Hands off']];
-function showGuide() {
-  const v = document.createElement('div'); v.className = 'veil'; v.style.zIndex = 14; const got = GUIDE.filter(([k]) => PROG.facts[k]).length;
-  v.innerHTML = panel('Field guide', `<div class="lbl">${got} of ${GUIDE.length} found</div><div class="gbar"><i style="width:${Math.round(got / GUIDE.length * 100)}%"></i></div>
-    <div class="gsec">Boosts<small>Help turtles to fill the boost ring, then tap it. Each level has one boost.</small></div><div class="glist gboost">${POWERS.map((k) => `<div class="gi"><div class="gic">${powerIcon(k)}</div><div><b>${BOOST_INFO[k][0]}</b><p>${BOOST_INFO[k][1]}.</p></div></div>`).join('')}</div>
-    <div class="gsec">Field notes</div><div class="glist">${GUIDE.map(([k, ic, t]) => PROG.facts[k] ? `<div class="gi"><div class="gic">${ICON[ic] || ICON.leaf}</div><div><b>${t}</b><p>${FACTCARD[k]}</p></div></div>` : `<div class="gi lock"><div class="gic">${ICON[ic] || ICON.leaf}</div><div><b>???</b><p>Meet it on the beach to unlock</p></div></div>`).join('')}</div>
-    <div class="btns"><button class="b-green hero" id="gx">Done</button></div>`);
-  $('#app').appendChild(v); v.querySelector('#gx').onclick = () => { au(); dismiss(v); }; PROG.guideSeen = got; saveProg(); refreshHome();
+function showGuide(tab) {
+  const v = document.createElement('div'); v.className = 'veil guide'; v.style.zIndex = 14; const got = GUIDE.filter(([k]) => PROG.facts[k]).length;
+  const row = (ic, t, p, cls = '') => `<div class="gi ${cls}"><div class="gic">${ic}</div><div><b>${t}</b><p>${p}</p></div></div>`;
+  const TABS = {
+    play: ['Basics', () => `<div class="gsec">Get every hatchling to the sea<small>You can't steer them. Clear what people left behind.</small></div><div class="glist">
+      ${row(ICON.bottle, 'Tap the trash', 'Bottles, cans and bags block the way or tangle turtles. Tap to bin them.')}
+      ${row(ICON.castle, 'Knock down obstacles', 'Sandcastles, chairs, holes and tyre ruts: tap them before a turtle walks in.')}
+      ${row(ICON.turtle(), 'Flip turtles back', 'A flipped or tangled hatchling waits a few seconds. Tap it to help.')}
+      ${row(ICON.crab, 'Shoo the hunters', 'Tap crabs, gulls, dogs and torch-waving tourists to send them away.')}
+      ${row(ICON.heart, 'Save 7 in 10 to pass', 'Save everyone for 3 stars. Stars and bonus goals earn shells.')}
+      ${row(ICON.wave, 'Swim Frenzy', 'After level 3 and every 5th level, swim out with your hatchlings. Tap plastic at sea to win boosts.')}</div>`],
+    boost: ['Boosts', () => `<div class="gsec">One boost per level<small>Help turtles to fill the ring at the bottom, then tap it. Saved boosts fire it any time.</small></div><div class="glist">${POWERS.map((k) => row(powerIcon(k), BOOST_INFO[k][0], BOOST_INFO[k][1] + '.')).join('')}</div>`],
+    sanct: ['Sanctuary', () => `<div class="gsec">Your home base<small>Spend shells to build places. Each one helps you on every level.</small></div><div class="glist">${SANCT.map((b) => row(`<svg viewBox="-56 -76 112 86">${SA[b.k](Math.max(1, sanctLv(b.k)))}</svg>`, b.name + (PROG.unlocked < b.at ? ` <em class="gl">after level ${b.at}</em>` : ''), b.perk(Math.max(1, sanctLv(b.k))) + '.', 'gs')).join('')}</div><button class="b-purple wide" id="gsa">${sanctIcon()}Open the Sanctuary</button>`],
+    notes: ['Notes', () => `<div class="gsec">Field notes · ${got} of ${GUIDE.length}<small>Real facts you unlock by meeting them on the beach.</small></div><div class="gbar"><i style="width:${Math.round(got / GUIDE.length * 100)}%"></i></div><div class="glist">${GUIDE.map(([k, ic, t]) => PROG.facts[k] ? row(ICON[ic] || ICON.leaf, t, FACTCARD[k]) : row(ICON[ic] || ICON.leaf, '???', 'Meet it on the beach to unlock', 'lock')).join('')}</div>`]
+  };
+  let cur = TABS[tab] ? tab : (PROG.unlocked < 2 ? 'play' : 'notes');
+  const draw = () => {
+    v.innerHTML = panel('Field guide', `<div class="gtabs">${Object.keys(TABS).map((k) => `<button class="gtab ${k === cur ? 'on' : ''}" data-t="${k}">${TABS[k][0]}</button>`).join('')}</div><div class="gbody">${TABS[cur][1]()}</div>
+      <div class="btns"><button class="b-green hero" id="gx">Done</button></div>`);
+    v.querySelectorAll('.gtab').forEach((b) => { b.onclick = () => { cur = b.dataset.t; tone(note(4 + Object.keys(TABS).indexOf(cur)), .06, 'triangle', .05); buzz(6); draw(); }; });
+    v.querySelector('#gx').onclick = () => { au(); dismiss(v); };
+    const gs = v.querySelector('#gsa'); if (gs) gs.onclick = () => { au(); dismiss(v); showSanct(); };
+  };
+  draw(); $('#app').appendChild(v); PROG.guideSeen = got; saveProg(); refreshHome();
 }
 /* ---------- daily beach ---------- */
 const dayNo = () => Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / 864e5);
@@ -2997,12 +3066,13 @@ function showSettings() {
   const draw = () => {
     v.innerHTML = panel('Settings', `<div class="tog"><button class="b-teal ${muted ? 'off' : ''}" id="st1">${muted ? ICON.sndOff : ICON.sndOn}${muted ? 'Sound off' : 'Sound on'}</button><button class="b-teal ${hapOn ? '' : 'off'}" id="st2">${ICON.vib}${hapOn ? 'Buzz on' : 'Buzz off'}</button></div>
       <div class="goal">${ICON.star}<b>${starTotal()}</b> stars · <b>${PROG.saved}</b> turtles guided home</div>
-      <button class="b-navy wide" id="st3">${ICON.save}Move my progress</button>
+      <div class="duo"><button class="b-navy" id="st4">How to play</button><button class="b-navy" id="st3">${ICON.save}Move progress</button></div>
       ${fieldNote('Facts in Shell Run come from sea turtle conservation groups such as Leave No Trace and the State of the World\'s Sea Turtles. <a href="privacy.html" target="_blank" rel="noopener">Privacy</a>', 'About')}
       <div class="btns"><button class="b-green hero" id="sx">Done</button></div>`);
     v.querySelector('#st1').onclick = () => { au(); setMuted(!muted); $('#snd').innerHTML = muted ? ICON.sndOff : ICON.sndOn; draw(); };
     v.querySelector('#st2').onclick = () => { setHaptics(!hapOn); if (hapOn) buzz(30); draw(); };
     v.querySelector('#st3').onclick = () => { au(); showSaveCode(); };
+    v.querySelector('#st4').onclick = () => { au(); dismiss(v); showGuide('play'); };
     v.querySelector('#sx').onclick = () => { au(); dismiss(v); };
   };
   draw(); $('#app').appendChild(v);

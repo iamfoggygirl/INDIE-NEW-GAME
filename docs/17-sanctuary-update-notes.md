@@ -61,3 +61,32 @@
   - "Rescue teams care for turtles in trouble, then release them."
   - "Rangers watch nesting beaches through the night."
   - "Sea turtles stroke both front flippers together."
+
+## Launch polish (18 Oct 2026)
+
+**Panels**
+- Every panel always fits the screen: the card is capped at the viewport height and its inside scrolls, with one scroll area and no nested lists.
+- The main buttons stick to the bottom of the card.
+- Every panel closes four ways: the red X (top right), a tap outside the card, Escape, or its own Back/Done button. All of them run the panel's own close logic. The result cards stay without an X on purpose.
+- The level card also has an X.
+
+**Field guide is now the help centre**
+- Four tabs: Basics, Boosts, Sanctuary, Notes.
+- Basics teaches the six things to know. Sanctuary shows every place and its perk, and links straight to it.
+- Notes keeps the "???" entries for facts not found yet.
+- Settings has a "How to play" button that opens Basics.
+
+**Sanctuary onboarding**
+- A 3-step explainer appears the first time (earn shells, build, it helps every level). The "?" button brings it back.
+- The map shows a "Build here!" bubble on the Sanctuary button the first time something is affordable.
+
+**Surprises (not seeded)**
+- From level 4 on, 80% of non-teaching plays get one surprise at a random point (30–78% of the level), drawn only from things that level already has: a lucky boost on the sand, a gust, washed-up trash, a stumble, a crab alert, a gull, a beach ball, a tourist, or a new hole (level 10 and up).
+- The same level never plays exactly the same twice.
+
+**Checked**
+- Every panel opens and closes by X, backdrop and Escape.
+- Pause X resumes play.
+- Settings → How to play, and Guide → Sanctuary, both work.
+- Fresh-player onboarding through level 1 → map → level 2 card.
+- Panels fit at 390×844, 375×667 and 320×568.

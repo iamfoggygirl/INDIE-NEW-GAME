@@ -288,7 +288,13 @@ const syncModal = () => $('#app').classList.toggle('modal', !!document.querySele
 new MutationObserver(syncModal).observe($('#app'), { childList: true, subtree: true });
 const countUp = (el, to, ms) => { const t0 = performance.now(); const step = (t) => { const u = Math.min(1, (t - t0) / ms), v = Math.round(to * (1 - Math.pow(1 - u, 3))); if (el.textContent !== String(v)) { el.textContent = v; if (v) tone(note(2 + (v % 7)), .04, 'triangle', .025); } if (u < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); };
 const chapterOf = (i) => CHAPTERS[(i / 10 | 0) % CHAPTERS.length];
-const panel = (ribbon, body, cls = '') => `<div class="card ${cls}"><div class="ribbon ${cls.includes('fail') ? 'coral' : ''}">${ribbon}</div><div class="inner">${body}</div></div>`;
+const panel = (ribbon, body, cls = '') => `<div class="card ${cls}"><div class="ribbon ${cls.includes('fail') ? 'coral' : ''}">${ribbon}</div><button class="pclose" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" stroke="#fff" stroke-width="3.6" stroke-linecap="round"/></svg></button><div class="inner">${body}</div></div>`;
+/* every panel closes the same three ways: the X, a tap outside the card, or the back key. Each one runs the panel's own Back/Done button so its tidy-up still happens */
+const BACK_IDS = ['cc', 'gx', 'dc', 'sx', 'cq', 'pr', 'bc', 'sax', 'hx', 'lvx'];
+function closeTop(v) { if (!v || v.classList.contains('out')) return; const b = BACK_IDS.map((id) => v.querySelector('#' + id)).find(Boolean); au(); if (b) b.click(); else dismiss(v); }
+document.addEventListener('click', (e) => { const x = e.target.closest && e.target.closest('.pclose'); if (x) { e.stopPropagation(); closeTop(x.closest('.veil')); } }, true);
+document.addEventListener('pointerdown', (e) => { const v = e.target; if (v.classList && v.classList.contains('veil') && v.querySelector(':scope > .card > .pclose')) closeTop(v); });
+addEventListener('keydown', (e) => { if (e.key !== 'Escape') return; const vs = [...document.querySelectorAll('.veil')].filter((v) => v.querySelector(':scope > .card > .pclose') && !v.classList.contains('out')); if (vs.length) closeTop(vs[vs.length - 1]); });
 const fieldNote = (txt, head = 'Field note') => txt ? `<div class="note"><div class="badge">${ICON.leafB}</div><div><small>${head}</small><p>${txt}</p></div></div>` : '';
 
 /* ---------- end of level ---------- */
@@ -335,7 +341,7 @@ function endNight() {
        ${canBring ? `<button class="b-teal" id="bring">${ICON.ad}Bring back ${back} · video</button>` : ''}
        <div class="duo" style="grid-template-columns:1fr"><button class="b-navy" id="maps">${ICON.map}Level map</button></div>`;
   const v = document.createElement('div'); v.className = 'veil';
-  v.innerHTML = `<div class="card ${pass ? '' : 'fail'}"><div class="stars"><div class="glow"></div>${[0, 1, 2].map((i) => i < stars ? ICON.star : ICON.starOff).join('')}</div><div class="ribbon ${pass ? '' : 'coral'}">${head}</div><div class="inner">
+  v.innerHTML = `<div class="card wst ${pass ? '' : 'fail'}"><div class="stars"><div class="glow"></div>${[0, 1, 2].map((i) => i < stars ? ICON.star : ICON.starOff).join('')}</div><div class="ribbon ${pass ? '' : 'coral'}">${head}</div><div class="inner">
     <div class="res"><div class="tu">${ICON.turtle(skinNow)}</div><div><div class="big"><b>0</b><span> / ${total}</span></div><div class="lbl">made it to the sea</div></div></div>
     <div class="srow"><div class="stat">${ICON.bin}<span>${binnedN}</span><div class="bar"><i style="width:0%"></i></div><span>${tidyPct}%</span></div>${earn ? `<div class="stat sh">${ICON.shell}<span>+<b>0</b></span></div>` : ''}</div>
     ${goalRow}
@@ -372,10 +378,9 @@ function lvExtras(i, L, best) {
 function lvCard(i, play) {
   const L = levelSpec(i), best = PROG.best[i] || 0, hz = HAZ(i);
   const v = document.createElement('div'); v.className = 'veil lvc'; v.style.zIndex = 13;
-  v.innerHTML = `<div class="card"><div class="ribbon">Level ${i + 1}</div><div class="inner"><div class="lvn">${hz ? `<i>${hz}</i>` : ''}<b>${L.name || chapterOf(i).split(' · ')[0]}</b></div><div class="lvs">${[0, 1, 2].map((s) => (s < best ? ICON.star : ICON.starOff)).join('')}</div>${lvExtras(i, L, best)}<div class="btns"><button class="b-green hero" id="lvp">${ICON.play}Play</button><button class="b-navy" id="lvx">${ICON.map}Map</button></div></div></div>`;
+  v.innerHTML = `<div class="card"><div class="ribbon">Level ${i + 1}</div><button class="pclose" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" stroke="#fff" stroke-width="3.6" stroke-linecap="round"/></svg></button><div class="inner"><div class="lvn">${hz ? `<i>${hz}</i>` : ''}<b>${L.name || chapterOf(i).split(' · ')[0]}</b></div><div class="lvs">${[0, 1, 2].map((s) => (s < best ? ICON.star : ICON.starOff)).join('')}</div>${lvExtras(i, L, best)}<div class="btns"><button class="b-green hero" id="lvp">${ICON.play}Play</button><button class="b-navy" id="lvx">${ICON.map}Map</button></div></div></div>`;
   $('#app').appendChild(v); tone(note(6), .07, 'triangle', .05);
   v.querySelector('#lvx').onclick = () => { au(); dismiss(v); };
-  v.addEventListener('pointerdown', (e) => { if (e.target === v) dismiss(v); });
   v.querySelector('#lvp').onclick = () => { dismiss(v); play(i); };
 }
 // a wave sweeps across the screen; the next screen is swapped in while it covers everything
@@ -525,7 +530,7 @@ function showMap(opts) {
     ${nodes}<div class="tease" style="top:${f1(topY - 150)}px"><div class="tc">${showCh < 9 ? `<small>Next beach</small><b>${nextName}</b><span>${lockI}Finish chapter ${showCh + 1} to reveal</span>` : `<small>The whole coast</small><b>More beaches coming soon</b><span>${ICON.turtle()}You reached the last beach</span>`}</div></div>
     <i class="meT">${ICON.turtle(skinNow)}</i></div></div>
     <div class="mfront"><i class="fl"></i><i class="fr"></i></div>
-    <div class="mapbot"><div class="dkm"><button class="b-gold sq" id="mshop" aria-label="Shop">${ICON.shop}</button><span>Shop</span></div><button class="b-green hero" id="mplay">${ICON.play}${done100 ? 'Replay' : 'Level ' + (cur + 1)}</button><div class="dkm"><button class="b-purple sq" id="msanct" aria-label="Sanctuary">${sanctIcon()}${sanctNext() ? '<em class="nb">NEW</em>' : ''}</button><span>Sanctuary</span></div></div>`;
+    <div class="mapbot"><div class="dkm"><button class="b-gold sq" id="mshop" aria-label="Shop">${ICON.shop}</button><span>Shop</span></div><button class="b-green hero" id="mplay">${ICON.play}${done100 ? 'Replay' : 'Level ' + (cur + 1)}</button><div class="dkm ${sanctNext() && !PROG.sanctIntro ? 'nudge' : ''}"><button class="b-purple sq" id="msanct" aria-label="Sanctuary">${sanctIcon()}${sanctNext() ? '<em class="nb">NEW</em>' : ''}</button><span>Sanctuary</span></div></div>`;
   $('#app').appendChild(v);
   const sc = v.querySelector('.scroller'), me = v.querySelector('.meT'), bar = v.querySelector('#chapbar'), clouds = v.querySelector('.mclouds'), front = v.querySelector('.mfront');
   const placeMe = (i) => { me.style.left = (px(i) - 26) + 'px'; me.style.top = (py(i) - 84) + 'px'; };
@@ -604,7 +609,7 @@ function showCrew() {
     const k = SKINS[sel], own = !!PROG.owned[sel], on = PROG.skin === sel, need = k.price - (PROG.shells || 0);
     v.innerHTML = panel('Crew', `<div class="crewtop"><div class="cprev">${ICON.turtle(sel)}</div><div><b>${k.name}</b><span>${own ? (on ? 'Your hatchlings wear this' : 'Owned') : `${ICON.shell}${k.price} shells`}</span></div><div class="pill shp sm">${ICON.shell}<span>${PROG.shells || 0}</span></div></div>
       <div class="crewgrid">${SKIN_ORDER.map((id) => `<button class="ct ${id === sel ? 'sel' : ''} ${PROG.owned[id] ? 'own' : ''}" data-id="${id}">${ICON.turtle(id)}${PROG.skin === id ? `<i class="eq">${ICON.check}</i>` : PROG.owned[id] ? '' : `<em>${ICON.shell}${SKINS[id].price}</em>`}</button>`).join('')}</div>
-      <div class="goal">Earn shells: new stars, bonus goals, golden hatchlings, daily beach</div>
+      <div class="goal">Earn shells: new stars, bonus goals, golden hatchlings, Swim Frenzy and the daily beach</div>
       <div class="btns">${own ? `<button class="b-green hero" id="cx" ${on ? 'disabled' : ''}>${on ? 'Equipped' : 'Wear it'}</button>` : need <= 0 ? `<button class="b-gold hero" id="cb">${ICON.shell}Unlock · ${k.price}</button>` : `<button class="b-navy" id="cs">${ICON.shell}${need} more shells · Shop</button>`}<button class="b-navy" id="cc">Back</button></div>`);
     v.querySelectorAll('.ct').forEach((b) => { b.onclick = () => { sel = b.dataset.id; tone(note(3 + SKIN_ORDER.indexOf(sel)), .08, 'triangle', .06); buzz(8); draw(); }; });
     const x = v.querySelector('#cx'); if (x) x.onclick = () => { PROG.skin = sel; setSkin(sel); saveProg(); sfx.ready(); buzz([12, 30, 12]); track('skin_equip', { skin: sel }); draw(); refreshHome(); };
@@ -617,13 +622,30 @@ function showCrew() {
 function burstUI(el) { if (!el) return; el.classList.remove('boom'); void el.offsetWidth; el.classList.add('boom'); }
 /* ---------- field guide: every fact you've met, collected ---------- */
 const GUIDE = [['litter', 'bottle', 'Beach trash'], ['castle', 'castle', 'Sandcastles'], ['crab', 'crab', 'Ghost crabs'], ['tangle', 'wind', 'Bags and lines'], ['hole', 'target', 'Holes'], ['wave', 'wave', 'The swim frenzy'], ['gull', 'gull', 'Seabirds'], ['light', 'lamp', 'Torches'], ['rain', 'rain', 'Storms'], ['chair', 'chair', 'Beach chairs'], ['lamp', 'lamp', 'Lights out'], ['gear', 'ball', 'Beach toys'], ['heat', 'sun', 'Hot sand'], ['net', 'net', 'Ghost nets'], ['dog', 'dog', 'Dogs'], ['tide', 'wave', 'King tides'], ['rut', 'rut', 'Tyre ruts'], ['moon', 'moon', 'Moonlight'], ['sea', 'wave', 'Out at sea'], ['hands', 'heart', 'Hands off']];
-function showGuide() {
-  const v = document.createElement('div'); v.className = 'veil'; v.style.zIndex = 14; const got = GUIDE.filter(([k]) => PROG.facts[k]).length;
-  v.innerHTML = panel('Field guide', `<div class="lbl">${got} of ${GUIDE.length} found</div><div class="gbar"><i style="width:${Math.round(got / GUIDE.length * 100)}%"></i></div>
-    <div class="gsec">Boosts<small>Help turtles to fill the boost ring, then tap it. Each level has one boost.</small></div><div class="glist gboost">${POWERS.map((k) => `<div class="gi"><div class="gic">${powerIcon(k)}</div><div><b>${BOOST_INFO[k][0]}</b><p>${BOOST_INFO[k][1]}.</p></div></div>`).join('')}</div>
-    <div class="gsec">Field notes</div><div class="glist">${GUIDE.map(([k, ic, t]) => PROG.facts[k] ? `<div class="gi"><div class="gic">${ICON[ic] || ICON.leaf}</div><div><b>${t}</b><p>${FACTCARD[k]}</p></div></div>` : `<div class="gi lock"><div class="gic">${ICON[ic] || ICON.leaf}</div><div><b>???</b><p>Meet it on the beach to unlock</p></div></div>`).join('')}</div>
-    <div class="btns"><button class="b-green hero" id="gx">Done</button></div>`);
-  $('#app').appendChild(v); v.querySelector('#gx').onclick = () => { au(); dismiss(v); }; PROG.guideSeen = got; saveProg(); refreshHome();
+function showGuide(tab) {
+  const v = document.createElement('div'); v.className = 'veil guide'; v.style.zIndex = 14; const got = GUIDE.filter(([k]) => PROG.facts[k]).length;
+  const row = (ic, t, p, cls = '') => `<div class="gi ${cls}"><div class="gic">${ic}</div><div><b>${t}</b><p>${p}</p></div></div>`;
+  const TABS = {
+    play: ['Basics', () => `<div class="gsec">Get every hatchling to the sea<small>You can't steer them. Clear what people left behind.</small></div><div class="glist">
+      ${row(ICON.bottle, 'Tap the trash', 'Bottles, cans and bags block the way or tangle turtles. Tap to bin them.')}
+      ${row(ICON.castle, 'Knock down obstacles', 'Sandcastles, chairs, holes and tyre ruts: tap them before a turtle walks in.')}
+      ${row(ICON.turtle(), 'Flip turtles back', 'A flipped or tangled hatchling waits a few seconds. Tap it to help.')}
+      ${row(ICON.crab, 'Shoo the hunters', 'Tap crabs, gulls, dogs and torch-waving tourists to send them away.')}
+      ${row(ICON.heart, 'Save 7 in 10 to pass', 'Save everyone for 3 stars. Stars and bonus goals earn shells.')}
+      ${row(ICON.wave, 'Swim Frenzy', 'After level 3 and every 5th level, swim out with your hatchlings. Tap plastic at sea to win boosts.')}</div>`],
+    boost: ['Boosts', () => `<div class="gsec">One boost per level<small>Help turtles to fill the ring at the bottom, then tap it. Saved boosts fire it any time.</small></div><div class="glist">${POWERS.map((k) => row(powerIcon(k), BOOST_INFO[k][0], BOOST_INFO[k][1] + '.')).join('')}</div>`],
+    sanct: ['Sanctuary', () => `<div class="gsec">Your home base<small>Spend shells to build places. Each one helps you on every level.</small></div><div class="glist">${SANCT.map((b) => row(`<svg viewBox="-56 -76 112 86">${SA[b.k](Math.max(1, sanctLv(b.k)))}</svg>`, b.name + (PROG.unlocked < b.at ? ` <em class="gl">after level ${b.at}</em>` : ''), b.perk(Math.max(1, sanctLv(b.k))) + '.', 'gs')).join('')}</div><button class="b-purple wide" id="gsa">${sanctIcon()}Open the Sanctuary</button>`],
+    notes: ['Notes', () => `<div class="gsec">Field notes · ${got} of ${GUIDE.length}<small>Real facts you unlock by meeting them on the beach.</small></div><div class="gbar"><i style="width:${Math.round(got / GUIDE.length * 100)}%"></i></div><div class="glist">${GUIDE.map(([k, ic, t]) => PROG.facts[k] ? row(ICON[ic] || ICON.leaf, t, FACTCARD[k]) : row(ICON[ic] || ICON.leaf, '???', 'Meet it on the beach to unlock', 'lock')).join('')}</div>`]
+  };
+  let cur = TABS[tab] ? tab : (PROG.unlocked < 2 ? 'play' : 'notes');
+  const draw = () => {
+    v.innerHTML = panel('Field guide', `<div class="gtabs">${Object.keys(TABS).map((k) => `<button class="gtab ${k === cur ? 'on' : ''}" data-t="${k}">${TABS[k][0]}</button>`).join('')}</div><div class="gbody">${TABS[cur][1]()}</div>
+      <div class="btns"><button class="b-green hero" id="gx">Done</button></div>`);
+    v.querySelectorAll('.gtab').forEach((b) => { b.onclick = () => { cur = b.dataset.t; tone(note(4 + Object.keys(TABS).indexOf(cur)), .06, 'triangle', .05); buzz(6); draw(); }; });
+    v.querySelector('#gx').onclick = () => { au(); dismiss(v); };
+    const gs = v.querySelector('#gsa'); if (gs) gs.onclick = () => { au(); dismiss(v); showSanct(); };
+  };
+  draw(); $('#app').appendChild(v); PROG.guideSeen = got; saveProg(); refreshHome();
 }
 /* ---------- daily beach ---------- */
 const dayNo = () => Math.floor((Date.now() - new Date().getTimezoneOffset() * 6e4) / 864e5);
@@ -641,12 +663,13 @@ function showSettings() {
   const draw = () => {
     v.innerHTML = panel('Settings', `<div class="tog"><button class="b-teal ${muted ? 'off' : ''}" id="st1">${muted ? ICON.sndOff : ICON.sndOn}${muted ? 'Sound off' : 'Sound on'}</button><button class="b-teal ${hapOn ? '' : 'off'}" id="st2">${ICON.vib}${hapOn ? 'Buzz on' : 'Buzz off'}</button></div>
       <div class="goal">${ICON.star}<b>${starTotal()}</b> stars · <b>${PROG.saved}</b> turtles guided home</div>
-      <button class="b-navy wide" id="st3">${ICON.save}Move my progress</button>
+      <div class="duo"><button class="b-navy" id="st4">How to play</button><button class="b-navy" id="st3">${ICON.save}Move progress</button></div>
       ${fieldNote('Facts in Shell Run come from sea turtle conservation groups such as Leave No Trace and the State of the World\'s Sea Turtles. <a href="privacy.html" target="_blank" rel="noopener">Privacy</a>', 'About')}
       <div class="btns"><button class="b-green hero" id="sx">Done</button></div>`);
     v.querySelector('#st1').onclick = () => { au(); setMuted(!muted); $('#snd').innerHTML = muted ? ICON.sndOff : ICON.sndOn; draw(); };
     v.querySelector('#st2').onclick = () => { setHaptics(!hapOn); if (hapOn) buzz(30); draw(); };
     v.querySelector('#st3').onclick = () => { au(); showSaveCode(); };
+    v.querySelector('#st4').onclick = () => { au(); dismiss(v); showGuide('play'); };
     v.querySelector('#sx').onclick = () => { au(); dismiss(v); };
   };
   draw(); $('#app').appendChild(v);

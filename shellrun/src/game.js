@@ -110,7 +110,7 @@ let night = 0, crew = 0, carry = 0, spec = INTRO[0], attract = false, paused = f
 const season = { met: 0, saved: 0, spawned: 0, binned: 0 };
 let T = [], litter = [], rocks = [], crabs = [], gulls = [], tourists = [], logs = [], nests = [], balls = [], lamps = [], dogs = [], pickups = [];
 const wave = { st: 'off', t: 0, front: SHORE_Z, crestZ: SHORE_Z - 7, reach: 2.6, k: 0, ck: 0, tideT: 0, at: [], done: [], big: false };
-let volT = 12, playHold = false, heatK = 0, flipGuardT = 0, goldIdx = -1, goldSaved = false, lvSp = 0, lvBin = 0, maxCombo = 0, bites = 0, grabs = 0, pickN = 0, pickCool = 0, shellsGot = 0, goal = null, lastHit = { x: 0, z: 0 };
+let surprise = null, volT = 12, playHold = false, heatK = 0, flipGuardT = 0, goldIdx = -1, goldSaved = false, lvSp = 0, lvBin = 0, maxCombo = 0, bites = 0, grabs = 0, pickN = 0, pickCool = 0, shellsGot = 0, goal = null, lastHit = { x: 0, z: 0 };
 let spawnLeft = 0, spawnT = 0, safeN = 0, lostN = 0, total = 0, binnedN = 0, running = false, ended = false, time = 0, nightT = 0, windLeft = 0, windT = 0;
 let evDone = [], lastTapT = 0, idleHeartT = 8, dangerOn = false, dangerT = 0, passed = false, taught = {}, hand = null, combo = 0, comboT = 0, comboKind = 'tidy', slow = 1, slowT = 0, freeze = 0, lastOne = false, tidyNow = 0;
 const surfLog = [];
@@ -151,7 +151,7 @@ function freeSpot(minD, zmin, zmax, L) {
 }
 function startNight(i) {
   clearNight(); night = i; const L = spec = levelSpec(i); ended = false; applyLook(L.mood, L.terrain); powerKind = i >= 2 ? POWERS[i % 4] : null; charge = powerKind ? .25 + perk('hatch') * .12 : 0; volT = 12; powerReady = false; surgeT = rangerT = 0; paused = false; if (vol.st === 'patrol') { vol.st = 'idle'; vol.g.visible = false; }
-  introMax = introT = attract ? 0 : (i === 0 ? 1.5 : 1.1); evDone = []; lastTapT = 0; idleHeartT = 8; dangerOn = false; passed = false; ui.danger(false); rainT = 4; boltT = rnd(5, 9);
+  introMax = introT = attract ? 0 : (i === 0 ? 1.5 : 1.1); evDone = []; surprise = pickSurprise(i, L); lastTapT = 0; idleHeartT = 8; dangerOn = false; passed = false; ui.danger(false); rainT = 4; boltT = rnd(5, 9);
   total = L.fresh; season.met += L.fresh; spawnLeft = total; spawnT = attract ? .9 : (i === 0 ? 1.6 : 1.1); safeN = 0; lostN = 0; binnedN = 0; running = true; nightT = 0; lastOne = false; combo = 0; slow = 1; hand = null;
   windLeft = L.wind || 0; windT = 4; streamG.visible = !!L.stream;
   heatK = 0; sunRise(0); flipGuardT = 0; goldSaved = false; lvSp = lvBin = 0; maxCombo = 0; bites = grabs = 0; pickN = 0; pickCool = 0; shellsGot = 0;
@@ -401,6 +401,7 @@ function update(dt) {
   // wind blows bags in from the side
   if (windLeft > 0 && (windT -= dt) <= 0) { windLeft--; windT = rnd(5, 8); const left = Math.random() < .5; addLitter('bag', left ? -6.5 : 6.5, rnd(SHORE_Z + 2, NEST_Z - 2.5), true); if (!taught.wind) { taught.wind = 1; ui.cap('The wind brings bags…', 2.2); } }
   // surprises that fire as the night goes on
+  if (surprise && running && !attract && (total - spawnLeft) / total >= surprise.at) { const k = surprise.kind; surprise = null; if (k === 'lucky') { dropPickup(rnd(-2.6, 2.6), rnd(SHORE_Z + 3, NEST_Z - 3)); if (!hand) ui.cap('Lucky find! Grab the boost', 1.8); } else doEvent(k); }
   if (running && !attract && L.events) { const fr = (total - spawnLeft) / total; L.events.forEach((ev, k) => { if (!evDone[k] && fr >= ev.at) { evDone[k] = 1; doEvent(ev.kind); } }); }
   // last heart: the screen pulses red
   const al = allowedLoss(), dg = running && !attract && al > 0 && lostN === al;
@@ -471,6 +472,15 @@ function update(dt) {
   if (L.stream && !taught.log && logs.some((l) => l.st === 'float' && T.some((t) => t.st === 'walk' && Math.abs(t.z - l.z) < .45 && Math.abs(t.x - l.x) < l.w / 2))) { taught.log = 1; const l = logs.find((l) => l.st === 'float'); hand = { o: l, y: .2, kind: 'log' }; ui.cap('Push the logs away!', 2.6); }
   if (hand) { const o = hand.o; const done = (hand.kind === 'pick' && (o.got || !pickups.includes(o))) || (hand.kind === 'dog' && o.st !== 'run' && o.st !== 'bounce') || (hand.kind === 'lamp' && !o.on) || (hand.kind === 'flip' && o.st !== 'flip') || (hand.kind === 'tangle' && o.st !== 'tangle') || (hand.kind === 'tourist' && o.st !== 'enter' && o.st !== 'stand') || (hand.kind === 'crab' && o.st !== 'walk' && o.st !== 'emerge') || ((hand.kind === 'litter' || hand.kind === 'drift') && o.st !== 'lie' && o.st !== 'drift') || (hand.kind === 'rock' && o.st !== 'idle') || (hand.kind === 'ball' && o.st !== 'roll') || (hand.kind === 'log' && o.st !== 'float'); if (done) { hand = null; ui.capOff(); } }
   if (running && !ended && !playHold && spawnLeft === 0 && T.every((t) => ['swim', 'gone', 'lost'].includes(t.st))) { ended = true; running = false; musicMood = 0; if (attract) setTimeout(() => { if (attract) { begin(-1); running = true; } }, 1800); else setTimeout(endNight, 1200); }
+}
+/* a surprise every time you play (not seeded): the same level never plays out exactly the same twice.
+   Drawn only from things this level already has, so it never springs something you haven't been taught. */
+function pickSurprise(i, L) {
+  if (attract || PLAY || i < 3 || i >= 100000 || L.teach || Math.random() > .8) return null;
+  const pool = [['lucky', 3], ['gust', 2], ['trash', 2], ['trip', 1.5]];
+  if (L.crabs) pool.push(['crabs', 2]); if (L.gulls) pool.push(['gull', 1.5]); if (L.balls) pool.push(['balls', 1.2]); if (L.tourists) pool.push(['tourist', 1]); if (i >= 9) pool.push(['hole', 1]);
+  let r = Math.random() * pool.reduce((a, p) => a + p[1], 0); for (const [k, w] of pool) if ((r -= w) <= 0) return { kind: k, at: rnd(.3, .78) };
+  return null;
 }
 function doEvent(kind) {
   const cap = (s) => { if (!hand) ui.cap(s, 1.7); };

@@ -82,6 +82,7 @@ function sanctScene(sel) {
 }
 function showSanct(onClose) {
   const v = document.createElement('div'); v.className = 'veil sanct'; v.style.zIndex = 14;
+  let how = !PROG.sanctIntro; PROG.sanctIntro = 1; saveProg();
   let sel = (sanctNext() || SANCT.find((b) => PROG.unlocked >= b.at && sanctLv(b.k) < 3) || SANCT[0]).k;
   const draw = (built) => {
     const b = SANCT.find((q) => q.k === sel), n = sanctLv(b.k), open = PROG.unlocked >= b.at, cost = SANCT_COST[n], have = PROG.shells || 0;
@@ -89,11 +90,13 @@ function showSanct(onClose) {
       : n >= 3 ? `<button class="b-navy" disabled>${ICON.check}Fully built</button>`
       : have >= cost ? `<button class="b-gold hero" id="sab">${ICON.shell}${n ? 'Upgrade' : 'Build'} · ${cost}</button>`
       : `<button class="b-navy" id="sas">${ICON.shell}${cost - have} more shells</button>`;
-    v.innerHTML = panel('Sanctuary', `<div class="sa-top"><div class="lbl">Build it with shells from the beach</div><div class="pill shp sm">${ICON.shell}<span>${have}</span></div></div>
+    v.innerHTML = panel('Sanctuary', `<div class="sa-top"><button class="sa-q ${how ? 'on' : ''}" aria-label="How it works">?</button><div class="lbl">Your turtle sanctuary</div><div class="pill shp sm">${ICON.shell}<span>${have}</span></div></div>
+      ${how ? `<div class="sa-how"><div><i>1</i><span>Earn shells on the beach</span></div><div><i>2</i><span>Build or upgrade a place</span></div><div><i>3</i><span>It helps you on every level</span></div></div>` : ''}
       <div class="sa-map">${sanctScene(sel)}</div>
       <div class="sa-info ${built ? 'boom' : ''}"><div class="sa-ic"><svg viewBox="-56 -76 112 86">${SA[b.k](Math.max(1, n))}</svg></div><div class="sa-tx"><b>${b.name}</b><div class="sa-lv">${[0, 1, 2].map((i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</div>
         <span class="sa-now">${n ? b.perk(n) : 'Not built yet'}</span>${n < 3 && open ? `<span class="sa-nx">${ICON.play}Next: ${b.perk(n + 1)}</span>` : ''}<span class="sa-why">${b.why}</span></div></div>
       <div class="btns">${btn}<div class="duo"><button class="b-coral" id="sac">${ICON.turtle(skinNow)}Crew</button><button class="b-navy" id="sax">Back</button></div></div>`);
+    v.querySelector('.sa-q').onclick = () => { how = !how; tone(note(5), .06, 'triangle', .05); draw(); };
     v.querySelectorAll('.sa-p').forEach((g) => { g.onclick = () => { sel = g.dataset.k; tone(note(3 + SANCT.findIndex((q) => q.k === sel)), .08, 'triangle', .06); buzz(8); draw(); }; });
     const bb = v.querySelector('#sab'); if (bb) bb.onclick = () => {
       if ((PROG.shells || 0) < cost || n >= 3) return;
